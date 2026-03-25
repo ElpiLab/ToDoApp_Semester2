@@ -81,8 +81,8 @@ Outputs: task with deadline
 
 ### 8. Filter Tasks
 As a student, I want to filter tasks by status or priority so that I can focus on specific tasks.
-Description: The user filters tasks based on criteria.  
-Inputs: filter criteria  
+**Description**: The user filters tasks based on criteria.  
+**Inputs**: filter criteria  
 Outputs: filtered list of tasks  
 
 ---
