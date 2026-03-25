@@ -81,7 +81,7 @@ Outputs: task with deadline
 
 ### 8. Filter Tasks
 As a student, I want to filter tasks by status or priority so that I can focus on specific tasks.
-Description:** The user filters tasks based on criteria.  
+Description: The user filters tasks based on criteria.  
 Inputs: filter criteria  
 Outputs: filtered list of tasks  
 
@@ -97,9 +97,9 @@ Outputs: stored tasks
 
 ### 10. Input Validation
 As a student, I want the app to validate my input so that I avoid errors.  
-Description:** The system checks user input for correctness.  
-Inputs:** user input  
-Outputs:** validation messages or accepted input  
+Description: The system checks user input for correctness.  
+Inputs: user input  
+Outputs: validation messages or accepted input  
 
 ---
 
@@ -107,7 +107,7 @@ Outputs:** validation messages or accepted input
 As a student, I want to view completed tasks so that I can review my progress.
 Description: The system shows completed tasks separately.  
 Inputs: none  
-Outputs:** completed tasks list  
+Outputs: completed tasks list  
 
 ---
 
