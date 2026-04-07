@@ -1,0 +1,38 @@
+{
+  "date": "2026-04-08",
+  "author": "OpenAI Codex",
+  "pr_commit": "N/A",
+  "files_changed": [
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".github/copilot-instructions.md",
+    ".github/instructions/docs.instructions.md",
+    ".github/instructions/python.instructions.md",
+    "README.md",
+    ".gitignore",
+    "pyproject.toml",
+    "docs/Roadmap.md",
+    "docs/Status.md",
+    "docs/Changelog.md",
+    "prompts/templates/ARCHIVE.md",
+    "prompts/templates/changes.json.example",
+    "src/student_task_manager/__init__.py",
+    "src/student_task_manager/app.py",
+    "tests/conftest.py",
+    "tests/test_smoke.py"
+  ],
+  "tests_added": [
+    "tests/test_smoke.py"
+  ],
+  "tests_updated": [
+    "tests/conftest.py"
+  ],
+  "commands_run": [
+    "python -m pytest tests/ --tb=short",
+    "python -m ruff format --check src tests",
+    "python -m ruff check src tests",
+    "python -m mypy src"
+  ],
+  "known_risks": "The scaffold establishes process and starter structure only; domain model, persistence, services, and UI still need dedicated prompts.",
+  "followups": "Create and activate 010-domain-model-and-persistence before further implementation work."
+}
