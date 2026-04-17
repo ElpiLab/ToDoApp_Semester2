@@ -138,6 +138,7 @@ Outputs: counts of total, completed, and pending tasks
 ---
 
 ## 🏛️ Architecture
+<img width="651" height="331" alt="TodoApp_Architecture" src="https://github.com/user-attachments/assets/bcd5546e-ae06-487f-a8e6-cf908a8c2059" />
 
 ### Software Architecture
 
