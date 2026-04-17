@@ -120,6 +120,7 @@ Outputs: counts of total, completed, and pending tasks
 ---
 
 ## Use cases
+![ToDo_App_UseCase_Diagram](https://github.com/user-attachments/assets/e73cbe26-af08-450d-9b93-09f38290a0e7)
 
 **Main Use Cases**
 
