@@ -162,9 +162,8 @@ Outputs: counts of total, completed, and pending tasks
 ---
 
 ## 🗄️ Database and ORM
-<img width="201" height="134" alt="Task_ERD_ToDo" src="https://github.com/user-attachments/assets/e86b0acd-45e0-437b-8c80-7945e013bc4e" />
-C:\Users\doelp\OneDrive\Documents\GitHub\ToDoApp_Semester2\erd.png
-erd.drawio
+<img width="1480" height="248" alt="image" src="https://github.com/user-attachments/assets/a2aff7bb-68f8-4f6c-aba0-a95a6fb588bf" />
+
 
 
 **Entities:**
