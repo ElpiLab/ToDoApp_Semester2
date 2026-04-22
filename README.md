@@ -185,4 +185,6 @@ The application runs in the browser using NiceGUI. Users can create, view, updat
 - Valid priority values (Low, Medium, High)  
 - Valid date format for due dates  
 
+### 3. Data Validation
+All relevant data is managed via an ORM (e.g. SQLModel or SQLAlchemy)
 ---
