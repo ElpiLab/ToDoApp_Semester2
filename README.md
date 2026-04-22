@@ -174,6 +174,15 @@ Task:
 - due_date (`date`)
 - completed (`bool`)
 
+
+Student:
+- id (`int`)
+- department (`str`)
+
+Priority:
+- id (`int`)
+- status (`str`)
+
 ---
 
 ## ✅ Project Requirements
@@ -191,3 +200,7 @@ The application runs in the browser using NiceGUI. Users can create, view, updat
 - Valid date format for due dates  
 
 ---
+
+### 2. Data Validation
+
+All relevant data is managed via an ORM(e.g. SQLModel or SQLAlchemy).
