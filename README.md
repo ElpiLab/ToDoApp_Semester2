@@ -118,6 +118,11 @@ Inputs: none
 Outputs: counts of total, completed, and pending tasks  
 
 ---
+### 12. Analytics
+As a student, I want to see a summary of my tasks so that I can quickly understand my workload.
+Description: The system displays task statistics.  
+Inputs: none  
+Outputs: counts of total, completed, and pending tasks 
 
 ## Use cases
 ![ToDo_App_UseCase_Diagram](https://github.com/user-attachments/assets/e73cbe26-af08-450d-9b93-09f38290a0e7)
@@ -157,7 +162,7 @@ Outputs: counts of total, completed, and pending tasks
 ---
 
 ## 🗄️ Database and ORM
-<img width="201" height="134" alt="Task_ERD_ToDo" src="https://github.com/user-attachments/assets/e86b0acd-45e0-437b-8c80-7945e013bc4e" />
+C:\Users\doelp\OneDrive\Documents\GitHub\ToDoApp_Semester2\erd.png
 
 **Entities:**
 
