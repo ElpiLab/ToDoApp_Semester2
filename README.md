@@ -186,3 +186,5 @@ The application runs in the browser using NiceGUI. Users can create, view, updat
 - Valid date format for due dates  
 
 ---
+### 2. Data Validation
+All relevant data is managed via ORM.
