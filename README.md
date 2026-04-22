@@ -162,7 +162,7 @@ Outputs: counts of total, completed, and pending tasks
 ---
 
 ## 🗄️ Database and ORM
-C:\Users\doelp\OneDrive\Documents\GitHub\ToDoApp_Semester2\erd.png
+<img width="201" height="134" alt="Task_ERD_ToDo" src="https://github.com/user-attachments/assets/e86b0acd-45e0-437b-8c80-7945e013bc4e" />
 
 **Entities:**
 
@@ -200,6 +200,8 @@ The application runs in the browser using NiceGUI. Users can create, view, updat
 - Valid date format for due dates  
 
 ---
+### 2. Data Validation
+All relevant data is managed via ORM.
 
 ### 2. Data Validation
 
