@@ -1,0 +1,42 @@
+Table student {
+  id integer [pk]
+  name varchar
+  email varchar [unique, not null]
+}
+
+Table semester {
+  id integer [pk]
+  name varchar
+  start_date date
+  end_date date
+  is_active boolean
+}
+
+Table module {
+  id integer [pk]
+  name varchar
+  semester_id integer [ref: > semester.id]
+
+  indexes {
+    (name, semester_id) [unique]
+  }
+}
+
+Table priority {
+  id integer [pk]
+  name varchar [unique, not null]
+  order_index integer
+}
+
+Table task {
+  id integer [pk]
+  title varchar [not null]
+  description text
+  due_date date
+  status varchar
+  created_at timestamp
+
+  student_id integer [ref: > student.id]
+  module_id integer [ref: > module.id]
+  priority_id integer [ref: > priority.id]
+}
