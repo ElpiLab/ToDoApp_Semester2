@@ -150,25 +150,17 @@ The following wireframes show the planned **Bizzy** UI (working name for the To-
 
 ### Dashboard
 
-Landing page after login. Shows pending/completed/overdue counts, a weekly completion-activity chart, today's tasks, and upcoming deadlines.
-
 ![Dashboard](docs/wireframes/dashboard.png)
 
 ### Modules
-
-Overview of all active modules in the current semester with per-module task counts (pending / done / overdue) and the next upcoming task.
 
 ![Modules](docs/wireframes/modules.png)
 
 ### Task Management (Board view)
 
-Kanban-style board grouping tasks by status (*To do*, *In progress*, *Done*) with filters for status, type, priority, and module.
-
 ![Task Management](docs/wireframes/tasks-board.png)
 
 ### New Task
-
-Modal dialog for creating a new task. Captures title, module, priority (Low / Med / High), due date, and an optional description.
 
 ![New Task](docs/wireframes/new-task.png)
 
