@@ -142,6 +142,38 @@ Outputs: counts of total, completed, and pending tasks
 
 ---
 
+## 🖼️ Wireframes / Mockups
+
+🔗 [View the interactive prototype on Figma](https://www.figma.com/design/iKEgafTYKCCSQv2dSyIWLF/Prototype?node-id=0-1&t=g92BfXm8z582fAA4-1)
+
+The following wireframes show the planned **Bizzy** UI (working name for the To-Do App).
+
+### Dashboard
+
+Landing page after login. Shows pending/completed/overdue counts, a weekly completion-activity chart, today's tasks, and upcoming deadlines.
+
+![Dashboard](docs/wireframes/dashboard.png)
+
+### Modules
+
+Overview of all active modules in the current semester with per-module task counts (pending / done / overdue) and the next upcoming task.
+
+![Modules](docs/wireframes/modules.png)
+
+### Task Management (Board view)
+
+Kanban-style board grouping tasks by status (*To do*, *In progress*, *Done*) with filters for status, type, priority, and module.
+
+![Task Management](docs/wireframes/tasks-board.png)
+
+### New Task
+
+Modal dialog for creating a new task. Captures title, module, priority (Low / Med / High), due date, and an optional description.
+
+![New Task](docs/wireframes/new-task.png)
+
+---
+
 ## 🏛️ Architecture
 <img width="651" height="331" alt="TodoApp_Architecture" src="https://github.com/user-attachments/assets/bcd5546e-ae06-487f-a8e6-cf908a8c2059" />
 
