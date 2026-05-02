@@ -1,7 +1,22 @@
+Table study_field {
+  id integer [pk]
+  name varchar [unique, not null]
+}
+
+Table status {
+  id integer [pk]
+  name varchar [unique, not null]
+}
+
+Table category {
+  id integer [pk]
+  name varchar [unique, not null]
+}
 Table student {
   id integer [pk]
   name varchar
   email varchar [unique, not null]
+  study_field_id integer [ref: > study_field.id]
 }
 
 Table semester {
@@ -33,10 +48,12 @@ Table task {
   title varchar [not null]
   description text
   due_date date
-  status varchar
   created_at timestamp
 
-  student_id integer [ref: > student.id]
-  module_id integer [ref: > module.id]
-  priority_id integer [ref: > priority.id]
+  student_id integer [not null, ref: > student.id]
+  module_id integer [not null, ref: > module.id]
+  priority_id integer [not null, ref: > priority.id]
+  category_id integer [not null, ref: > category.id]
+  status_id integer [not null, ref: > status.id]
+
 }
