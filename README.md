@@ -142,6 +142,30 @@ Outputs: counts of total, completed, and pending tasks
 
 ---
 
+## 🖼️ Wireframes / Mockups
+
+🔗 [View the interactive prototype on Figma](https://www.figma.com/design/iKEgafTYKCCSQv2dSyIWLF/Prototype?node-id=0-1&t=g92BfXm8z582fAA4-1)
+
+The following wireframes show the planned **Bizzy** UI (working name for the To-Do App).
+
+### Dashboard
+
+![Dashboard](docs/wireframes/dashboard.png)
+
+### Modules
+
+![Modules](docs/wireframes/modules.png)
+
+### Task Management (Board view)
+
+![Task Management](docs/wireframes/tasks-board.png)
+
+### New Task
+
+![New Task](docs/wireframes/new-task.png)
+
+---
+
 ## 🏛️ Architecture
 <img width="651" height="331" alt="TodoApp_Architecture" src="https://github.com/user-attachments/assets/bcd5546e-ae06-487f-a8e6-cf908a8c2059" />
 
