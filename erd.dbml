@@ -12,6 +12,7 @@ Table category {
   id integer [pk]
   name varchar [unique, not null]
 }
+
 Table student {
   id integer [pk]
   name varchar
