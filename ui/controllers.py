@@ -39,6 +39,11 @@ def complete_task(task_id: int):
     except Exception as e:
         ui.notify(str(e), type='negative')
 
+def update_task(task):
+    """Update an existing task"""
+    from data_access.dao import TaskDAO
+    dao = TaskDAO()
+    return dao.update(task)
 
 def get_tasks():
     return service.get_all_tasks()
