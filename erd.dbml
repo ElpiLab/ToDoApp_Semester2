@@ -1,7 +1,3 @@
-Table study_field {
-  id integer [pk]
-  name varchar [unique, not null]
-}
 
 Table status {
   id integer [pk]
@@ -13,48 +9,41 @@ Table category {
   name varchar [unique, not null]
 }
 
-Table student {
-  id integer [pk]
-  name varchar
-  email varchar [unique, not null]
-  study_field_id integer [ref: > study_field.id]
-}
-
-Table semester {
-  id integer [pk]
-  name varchar
-  start_date date
-  end_date date
-  is_active boolean
-}
-
-Table module {
-  id integer [pk]
-  name varchar
-  semester_id integer [ref: > semester.id]
-
-  indexes {
-    (name, semester_id) [unique]
-  }
-}
-
 Table priority {
   id integer [pk]
   name varchar [unique, not null]
   order_index integer
 }
 
+//// -------------------------------------
+//// CORE ENTITIES
+//// -------------------------------------
+
+Table student {
+  id integer [pk]
+  name varchar [not null]
+  email varchar [unique, not null]
+}
+
+Table module {
+  id integer [pk]
+  name varchar [not null]
+}
+
+//// -------------------------------------
+//// TASK TABLE
+//// -------------------------------------
+
 Table task {
   id integer [pk]
   title varchar [not null]
   description text
   due_date date
-  created_at timestamp
+  created_at timestamp [not null, default: `now()`]
 
   student_id integer [not null, ref: > student.id]
-  module_id integer [not null, ref: > module.id]
+  module_id integer [ref: > module.id]
   priority_id integer [not null, ref: > priority.id]
   category_id integer [not null, ref: > category.id]
   status_id integer [not null, ref: > status.id]
-
 }
