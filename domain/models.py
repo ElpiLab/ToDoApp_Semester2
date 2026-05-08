@@ -1,13 +1,9 @@
-import sqlalchemy
-import sqlite3
-
-from sqlmodel import SQLModel, Field
-from enum import Enum
 from datetime import date
+from enum import Enum
 from typing import Optional
 
+from sqlmodel import Field, SQLModel
 
-# 🔹 ENUMS (controlled values)
 
 class Priority(str, Enum):
     low = "low"
@@ -22,15 +18,12 @@ class Status(str, Enum):
     done = "done"
 
 
-# 🔹 MAIN ENTITY
-
 class Task(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
 
     title: str
-    description: str
-
-    priority: Priority
+    description: str = ""
+    priority: Priority = Priority.medium
     status: Status = Status.created
 
     due_date: Optional[date] = None

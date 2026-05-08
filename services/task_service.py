@@ -1,78 +1,94 @@
-from domain.models import Task, Priority, Status
-from data.dao import TaskDAO
 from datetime import date
+
+from data_access.dao import TaskDAO
+from domain.models import Priority, Status, Task
 
 
 class TaskService:
-
     def __init__(self):
         self.dao = TaskDAO()
 
-    # 🔹 CREATE TASK (User Story 1 + Validation)
-    def create_task(self, title: str, description: str,
-                    priority: Priority, due_date: date | None) -> Task:
+    def create_task(
+        self,
+        title: str,
+        description: str,
+        priority: Priority,
+        due_date: date | None = None,
+    ) -> Task:
+        title = title.strip()
+        description = description.strip()
 
-        # ✅ Validation (from requirements)
         if len(title) < 3:
             raise ValueError("Title must be at least 3 characters long")
 
         if len(description) < 5:
             raise ValueError("Description must be at least 5 characters long")
 
-        if priority not in Priority:
-            raise ValueError("Invalid priority value")
+        if priority is None:
+            raise ValueError("Priority is required")
 
-        # Create task object
         task = Task(
             title=title,
             description=description,
             priority=priority,
             status=Status.created,
             due_date=due_date,
-            completed=False
+            completed=False,
         )
 
         return self.dao.create(task)
 
-    # 🔹 VIEW ALL TASKS (User Story 2)
-    def get_all_tasks(self):
+    def get_all_tasks(self) -> list[Task]:
         return self.dao.get_all()
 
-    # 🔹 MARK AS COMPLETE (User Story 3)
-    def mark_complete(self, task_id: int):
+    def get_task_by_id(self, task_id: int) -> Task:
         task = self.dao.get_by_id(task_id)
         if not task:
             raise ValueError("Task not found")
+        return task
 
+    def mark_complete(self, task_id: int) -> Task:
+        task = self.get_task_by_id(task_id)
         task.completed = True
         task.status = Status.done
         return self.dao.update(task)
 
-    # 🔹 DELETE TASK (User Story 4)
-    def delete_task(self, task_id: int):
-        self.dao.delete(task_id)
+    def delete_task(self, task_id: int) -> None:
+        task = self.get_task_by_id(task_id)
+        self.dao.delete(task.id)
 
-    # 🔹 EDIT TASK (User Story 5)
-    def update_task(self, task_id: int, **updates):
-        task = self.dao.get_by_id(task_id)
-        if not task:
-            raise ValueError("Task not found")
+    def update_task(self, task_id: int, **updates) -> Task:
+        task = self.get_task_by_id(task_id)
+
+        allowed_fields = {"title", "description", "priority", "status", "due_date", "completed"}
 
         for key, value in updates.items():
+            if key not in allowed_fields:
+                raise ValueError(f"Invalid field: {key}")
             setattr(task, key, value)
+
+        if "title" in updates and len(task.title.strip()) < 3:
+            raise ValueError("Title must be at least 3 characters long")
+
+        if "description" in updates and len(task.description.strip()) < 5:
+            raise ValueError("Description must be at least 5 characters long")
+
+        if task.status == Status.done:
+            task.completed = True
 
         return self.dao.update(task)
 
-    # 🔹 FILTER TASKS (User Story 8)
-    def filter_tasks(self, status: Status | None = None,
-                     priority: Priority | None = None):
-
+    def filter_tasks(
+        self,
+        status: Status | None = None,
+        priority: Priority | None = None,
+    ) -> list[Task]:
         tasks = self.dao.get_all()
 
-        if status:
-            tasks = [t for t in tasks if t.status == status]
+        if status is not None:
+            tasks = [task for task in tasks if task.status == status]
 
-        if priority:
-            tasks = [t for t in tasks if t.priority == priority]
+        if priority is not None:
+            tasks = [task for task in tasks if task.priority == priority]
 
         return tasks
