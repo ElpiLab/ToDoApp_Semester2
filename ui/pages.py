@@ -185,7 +185,7 @@ def index_page():
         button_label = "Save changes" if is_edit else "Save task"
 
         with ui.dialog() as dialog, ui.card().classes(
-            "w-[540px] max-w-full rounded-2xl p-6 gap-4"
+            "w-[480px] max-w-full rounded-2xl p-6 gap-3"
         ):
             ui.label("EDIT TASK" if is_edit else "NEW TASK").classes(
                 "text-xs uppercase tracking-widest text-slate-400"
@@ -195,52 +195,56 @@ def index_page():
                     placeholder="What needs to be done?",
                     value=task.title if is_edit else "",
                 )
-                .props('borderless autofocus input-class="text-2xl"')
-                .classes("w-full border-l-4 border-blue-500 pl-3")
+                .props('borderless autofocus input-class="text-xl"')
+                .classes("w-full")
             )
 
-            ui.separator()
+            with ui.row().classes("w-full items-center gap-2 flex-wrap"):
+                priority_input = (
+                    ui.select(
+                        {"low": "Low", "medium": "Medium", "high": "High"},
+                        value=task.priority.value if is_edit else "medium",
+                    )
+                    .props("dense outlined options-dense")
+                    .classes("w-32")
+                )
 
-            with ui.row().classes("w-full items-center gap-4"):
-                priority_input = ui.toggle(
-                    {"low": "LOW", "medium": "MED", "high": "HIGH"},
-                    value=task.priority.value if is_edit else "medium",
-                ).props("unelevated toggle-color=orange-7")
                 due_date_input = (
                     ui.input(
-                        "Due date",
                         value=task.due_date.isoformat() if is_edit and task.due_date else "",
                     )
-                    .props("outlined type=date")
-                    .classes("w-44")
+                    .props("dense outlined type=date")
+                    .classes("w-40")
                 )
 
-            status_input = None
-            if is_edit:
-                status_input = (
-                    ui.select(
-                        {
-                            "created": "Created",
-                            "pending": "Pending",
-                            "in_progress": "In Progress",
-                            "done": "Done",
-                        },
-                        value=task.status.value,
-                        label="Status",
+                status_input = None
+                if is_edit:
+                    status_input = (
+                        ui.select(
+                            {
+                                "created": "Created",
+                                "pending": "Pending",
+                                "in_progress": "In progress",
+                                "done": "Done",
+                            },
+                            value=task.status.value,
+                        )
+                        .props("dense outlined options-dense")
+                        .classes("w-36")
                     )
-                    .props("outlined")
-                    .classes("w-full")
-                )
 
             description_section = ui.expansion(
-                "Add description (optional)",
-                icon="add",
+                "Add description",
+                icon="notes",
                 value=is_edit and bool(task.description),
             ).classes("w-full")
             with description_section:
                 description_input = (
-                    ui.textarea(value=task.description if is_edit else "")
-                    .props("outlined autogrow")
+                    ui.textarea(
+                        placeholder="Add notes, context, or links...",
+                        value=task.description if is_edit else "",
+                    )
+                    .props("outlined autogrow borderless")
                     .classes("w-full")
                 )
 
