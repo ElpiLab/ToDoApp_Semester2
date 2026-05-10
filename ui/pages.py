@@ -284,17 +284,38 @@ def index_page():
                 else:
                     dialog.close()
 
-            def delete_current_task() -> None:
-                assert task is not None
-                assert task.id is not None
-                if delete_task(task.id):
-                    refresh_tasks()
-                    dialog.close()
+            def confirm_delete() -> None:
+                with ui.dialog() as confirm_dialog, ui.card().classes(
+                    "w-[400px] max-w-full rounded-2xl p-6 gap-3"
+                ):
+                    ui.label("Delete this task?").classes(
+                        "text-lg font-semibold text-slate-900"
+                    )
+                    ui.label(
+                        "This action cannot be undone."
+                    ).classes("text-sm text-slate-500")
+
+                    def do_delete() -> None:
+                        assert task is not None
+                        assert task.id is not None
+                        confirm_dialog.close()
+                        if delete_task(task.id):
+                            refresh_tasks()
+                            dialog.close()
+
+                    with ui.row().classes("w-full justify-end gap-2 pt-2"):
+                        ui.button("Cancel", on_click=confirm_dialog.close).props(
+                            "flat color=grey-7 no-caps"
+                        )
+                        ui.button("Delete", on_click=do_delete).props(
+                            "color=negative unelevated no-caps"
+                        )
+                confirm_dialog.open()
 
             with ui.row().classes("w-full items-center justify-between pt-2"):
                 if is_edit:
                     ui.button(
-                        "Delete", icon="delete", on_click=delete_current_task
+                        "Delete", icon="delete", on_click=confirm_delete
                     ).props("flat color=negative no-caps")
                 else:
                     add_another_checkbox = ui.checkbox("Add another")
