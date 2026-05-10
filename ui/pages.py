@@ -3,6 +3,7 @@ from datetime import date
 from nicegui import ui
 
 from ui.controllers import (
+    change_task_status,
     complete_task,
     create_task,
     delete_task,
@@ -34,6 +35,21 @@ def format_due_date(due_date: date | None) -> str:
     return due_date.isoformat() if due_date else "No due date"
 
 
+def relative_due_text(due_date: date, today: date, is_done: bool) -> str:
+    formatted = due_date.strftime("%d %b")
+    if is_done:
+        return f"Due {formatted}"
+    delta = (due_date - today).days
+    if delta == 0:
+        return f"Due {formatted} · today"
+    if delta > 0:
+        plural = "s" if delta != 1 else ""
+        return f"Due {formatted} · in {delta} day{plural}"
+    days_late = -delta
+    plural = "s" if days_late != 1 else ""
+    return f"Due {formatted} · {days_late} day{plural} late"
+
+
 def normalize_query(value: str | None) -> str:
     return (value or "").strip().lower()
 
@@ -43,7 +59,14 @@ def index_page():
     ui.query("body").classes("bg-slate-100")
     ui.query(".q-layout").props('view="LHh LpR fFf"')
 
-    state = {"filter": "all", "search": ""}
+    state = {
+        "status": "all",
+        "priority": "all",
+        "sort": "due_date",
+        "search": "",
+        "view": "board",
+        "dragging": None,
+    }
 
     with ui.left_drawer(
         value=True, top_corner=True, bottom_corner=True
@@ -96,9 +119,9 @@ def index_page():
     with ui.header().classes(
         "bg-white items-center justify-end px-6 py-3 shadow-sm gap-3"
     ):
-        ui.input(placeholder="Search assignments, courses...").props(
-            "outlined dense"
-        ).classes("w-80")
+        global_search_input = ui.input(
+            placeholder="Search assignments, courses..."
+        ).props("outlined dense clearable").classes("w-80")
         create_button = ui.button("New Task", icon="add").props(
             "color=teal-7 unelevated"
         )
@@ -106,49 +129,56 @@ def index_page():
         ui.button(icon="notifications").props("flat round color=grey-7")
         ui.button(icon="settings").props("flat round color=grey-7")
 
-    with ui.column().classes("w-full gap-6 p-6").style("max-width: 1280px; margin: 0 auto;"):
+    with ui.column().classes("w-full gap-4 p-6").style("max-width: 1280px; margin: 0 auto;"):
         with ui.column().classes("gap-1"):
-            ui.label("Task List View").classes("text-2xl font-semibold text-slate-900")
-            ui.label("Manage coursework, deadlines, and study tasks in one place.").classes(
-                "text-sm text-slate-500"
-            )
+            ui.label("Task management").classes("text-2xl font-semibold text-slate-900")
+            subtitle_label = ui.label("0 tasks").classes("text-sm text-slate-500")
 
-        with ui.row().classes("w-full items-stretch gap-4"):
-            summary_value_labels: list = []
-            summary_cards = (
-                ("Total tasks", "Track your full workload"),
-                ("Open tasks", "Focus on what still needs action"),
-                ("Completed", "Measure finished work"),
-            )
-            for title, subtitle in summary_cards:
-                with ui.card().classes("col flex-1 min-w-[220px] rounded-2xl shadow-sm"):
-                    ui.label(title).classes("text-sm uppercase tracking-wide text-slate-500")
-                    summary_value_labels.append(
-                        ui.label("0").classes("text-3xl font-semibold text-slate-900")
+        with ui.row().classes("w-full items-center justify-between gap-4"):
+            with ui.row().classes("items-center gap-2"):
+                status_select = (
+                    ui.select(
+                        {"all": "All", "pending": "Pending", "completed": "Completed"},
+                        value=state["status"],
+                        label="Status",
                     )
-                    ui.label(subtitle).classes("text-sm text-slate-500")
-
-        with ui.card().classes("w-full rounded-2xl shadow-sm"):
-            with ui.row().classes("w-full items-center justify-between gap-4 p-6"):
-                with ui.column().classes("gap-1"):
-                    ui.label("Tasks").classes("text-xl font-semibold text-slate-900")
-                    ui.label("Filter, search, and manage your study tasks.").classes(
-                        "text-sm text-slate-500"
+                    .props("outlined dense options-dense")
+                    .classes("w-36")
+                )
+                priority_select = (
+                    ui.select(
+                        {
+                            "all": "All",
+                            "low": "Low",
+                            "medium": "Medium",
+                            "high": "High",
+                        },
+                        value=state["priority"],
+                        label="Priority",
                     )
+                    .props("outlined dense options-dense")
+                    .classes("w-32")
+                )
+                sort_select = (
+                    ui.select(
+                        {
+                            "due_date": "Due date",
+                            "title": "Title",
+                            "priority": "Priority",
+                            "status": "Status",
+                        },
+                        value=state["sort"],
+                        label="Sort by",
+                    )
+                    .props("outlined dense options-dense")
+                    .classes("w-36")
+                )
+            view_toggle = ui.toggle(
+                {"board": "Board", "list": "List"},
+                value=state["view"],
+            ).props("unelevated no-caps toggle-color=teal-7")
 
-                with ui.row().classes("items-center gap-3"):
-                    filter_toggle = ui.toggle(
-                        {"all": "All", "pending": "Open", "completed": "Completed"},
-                        value=state["filter"],
-                    ).props("unelevated toggle-color=teal-7")
-                    search_input = ui.input(
-                        placeholder="Search tasks by title...",
-                    ).props("clearable outlined")
-                    search_input.classes("w-72")
-
-            ui.separator()
-
-            task_list_container = ui.column().classes("w-full gap-0")
+        tasks_container = ui.column().classes("w-full")
 
     def open_task_dialog(task=None) -> None:
         is_edit = task is not None
@@ -254,126 +284,271 @@ def index_page():
                 else:
                     dialog.close()
 
+            def delete_current_task() -> None:
+                assert task is not None
+                assert task.id is not None
+                if delete_task(task.id):
+                    refresh_tasks()
+                    dialog.close()
+
             with ui.row().classes("w-full items-center justify-between pt-2"):
-                if not is_edit:
-                    add_another_checkbox = ui.checkbox("Add another")
+                if is_edit:
+                    ui.button(
+                        "Delete", icon="delete", on_click=delete_current_task
+                    ).props("flat color=negative no-caps")
                 else:
-                    ui.element("div")
+                    add_another_checkbox = ui.checkbox("Add another")
                 with ui.row().classes("gap-2"):
-                    ui.button("Cancel", on_click=dialog.close).props("flat color=grey-7")
-                    ui.button(button_label, on_click=save).props("color=teal-7 unelevated")
+                    ui.button("Cancel", on_click=dialog.close).props(
+                        "flat color=grey-7 no-caps"
+                    )
+                    ui.button(button_label, on_click=save).props(
+                        "color=teal-7 unelevated no-caps"
+                    )
 
         dialog.open()
 
+    def render_empty_state() -> None:
+        with ui.column().classes("w-full items-center gap-3 px-6 py-12 text-center"):
+            ui.icon("inbox", size="3rem").classes("text-slate-300")
+            ui.label("No matching tasks").classes("text-lg font-medium text-slate-700")
+            ui.label(
+                "Create a new task or adjust your filters to see more results."
+            ).classes("text-sm text-slate-500")
+
+    def render_list(tasks, on_complete, on_reopen, on_delete) -> None:
+        with ui.row().classes(
+            "w-full items-center gap-4 px-6 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500"
+        ):
+            ui.label("Task").classes("w-64")
+            ui.label("Priority").classes("w-24")
+            ui.label("Status").classes("w-28")
+            ui.label("Due date").classes("w-32")
+            ui.label("Actions").classes("grow")
+
+        ui.separator()
+
+        for task in tasks:
+            assert task.id is not None
+            with ui.column().classes("w-full gap-0"):
+                with ui.row().classes("w-full items-center gap-4 px-6 py-4"):
+                    with ui.column().classes("w-64 gap-1"):
+                        ui.label(task.title).classes("font-medium text-slate-900")
+                        ui.label(task.description or "No description").classes(
+                            "text-sm text-slate-500"
+                        )
+
+                    ui.badge(
+                        task.priority.value.title(),
+                        color=get_priority_color(task.priority.value),
+                    )
+                    ui.badge(
+                        task.status.value.replace("_", " ").title(),
+                        color=get_status_color(task.status.value),
+                    )
+                    ui.label(format_due_date(task.due_date)).classes(
+                        "w-32 text-sm text-slate-600"
+                    )
+
+                    with ui.row().classes("grow justify-end gap-2"):
+                        if task.completed:
+                            ui.button(
+                                "Reopen",
+                                icon="undo",
+                                on_click=lambda task_id=task.id: on_reopen(task_id),
+                            ).props("flat no-caps color=grey-8")
+                        else:
+                            ui.button(
+                                "Complete",
+                                icon="check_circle",
+                                on_click=lambda task_id=task.id: on_complete(task_id),
+                            ).props("flat no-caps color=positive")
+                        ui.button(
+                            "Edit",
+                            icon="edit",
+                            on_click=lambda current_task=task: open_task_dialog(current_task),
+                        ).props("flat no-caps color=primary")
+                        ui.button(
+                            "Delete",
+                            icon="delete",
+                            on_click=lambda task_id=task.id: on_delete(task_id),
+                        ).props("flat no-caps color=negative")
+
+                ui.separator()
+
+    def render_board(tasks, on_complete, on_reopen, on_delete) -> None:
+        todo_tasks = [t for t in tasks if t.status.value in ("created", "pending")]
+        in_progress_tasks = [t for t in tasks if t.status.value == "in_progress"]
+        done_tasks = [t for t in tasks if t.status.value == "done"]
+
+        columns = [
+            ("To do", todo_tasks, "bg-slate-400", "text-slate-700", "pending"),
+            ("In progress", in_progress_tasks, "bg-blue-500", "text-blue-700", "in_progress"),
+            ("Done", done_tasks, "bg-emerald-500", "text-emerald-700", "done"),
+        ]
+
+        today = date.today()
+
+        def handle_drop(target_status: str) -> None:
+            dragging_id = state.get("dragging")
+            if dragging_id is None:
+                return
+            state["dragging"] = None
+            if change_task_status(dragging_id, target_status) is not None:
+                refresh_tasks()
+
+        with ui.row().classes("w-full items-start gap-4"):
+            for column_title, column_tasks, dot_class, text_class, target_status in columns:
+                column_card = ui.card().classes(
+                    "flex flex-col flex-1 min-w-[280px] rounded-2xl shadow-none p-4 gap-3 !bg-slate-200"
+                )
+                column_card.on("dragover.prevent", lambda: None)
+                column_card.on(
+                    "drop.prevent",
+                    lambda e=None, status=target_status: handle_drop(status),
+                )
+                with column_card:
+                    with ui.row().classes("w-full items-center gap-2"):
+                        ui.element("div").classes(f"w-2 h-2 rounded-full {dot_class}")
+                        ui.label(column_title).classes(
+                            f"text-sm font-semibold {text_class}"
+                        )
+                        ui.element("div").classes("grow")
+                        ui.label(str(len(column_tasks))).classes(
+                            "text-xs font-semibold text-slate-500 bg-slate-100 rounded-full px-2 py-0.5"
+                        )
+
+                    for task in column_tasks:
+                        assert task.id is not None
+                        is_done = task.completed
+                        is_late = (
+                            task.due_date is not None
+                            and not is_done
+                            and task.due_date < today
+                        )
+
+                        card = ui.card().classes(
+                            "w-full rounded-xl shadow-sm p-3 gap-2 cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow"
+                        ).props("draggable=true")
+                        card.on(
+                            "click",
+                            lambda current_task=task: open_task_dialog(current_task),
+                        )
+                        card.on(
+                            "dragstart",
+                            lambda e=None, task_id=task.id: state.__setitem__(
+                                "dragging", task_id
+                            ),
+                        )
+                        with card:
+                            title_classes = "font-medium text-slate-900"
+                            if is_done:
+                                title_classes += " line-through text-slate-400"
+                            ui.label(task.title).classes(title_classes)
+
+                            with ui.row().classes("items-center gap-2"):
+                                ui.badge(
+                                    task.priority.value.title(),
+                                    color=get_priority_color(task.priority.value),
+                                )
+                                if task.due_date:
+                                    due_text = relative_due_text(
+                                        task.due_date, today, is_done
+                                    )
+                                    due_classes = (
+                                        "text-xs text-red-600 font-medium"
+                                        if is_late
+                                        else "text-xs text-slate-500"
+                                    )
+                                    ui.label(due_text).classes(due_classes)
+
+                    if column_title == "To do":
+                        add_btn = ui.element("div").classes(
+                            "w-full rounded-xl border border-dashed border-slate-300 "
+                            "hover:border-slate-400 hover:bg-slate-50 p-3 cursor-pointer "
+                            "transition-colors"
+                        )
+                        with add_btn:
+                            with ui.row().classes(
+                                "items-center justify-center gap-1 text-slate-500"
+                            ):
+                                ui.icon("add").classes("text-base")
+                                ui.label("Add task").classes("text-sm")
+                        add_btn.on("click", lambda: open_task_dialog())
+
     def refresh_tasks() -> None:
-        task_list_container.clear()
+        tasks_container.clear()
 
         all_tasks = get_tasks()
-        all_tasks.sort(key=lambda task: task.due_date or date.max)
+        open_count = sum(1 for t in all_tasks if not t.completed)
+        completed_count = sum(1 for t in all_tasks if t.completed)
 
-        open_tasks = [task for task in all_tasks if not task.completed]
-        completed_tasks = [task for task in all_tasks if task.completed]
+        subtitle_label.set_text(
+            f"{len(all_tasks)} tasks · {open_count} open · {completed_count} done"
+        )
 
-        summary_numbers = [len(all_tasks), len(open_tasks), len(completed_tasks)]
-        for label, count in zip(summary_value_labels, summary_numbers):
-            label.set_text(str(count))
-
-        visible_tasks = all_tasks
-        if state["filter"] == "pending":
-            visible_tasks = open_tasks
-        elif state["filter"] == "completed":
-            visible_tasks = completed_tasks
+        visible_tasks = list(all_tasks)
+        if state["status"] == "pending":
+            visible_tasks = [t for t in visible_tasks if not t.completed]
+        elif state["status"] == "completed":
+            visible_tasks = [t for t in visible_tasks if t.completed]
+        if state["priority"] != "all":
+            visible_tasks = [t for t in visible_tasks if t.priority.value == state["priority"]]
 
         query = state["search"]
         if query:
-            visible_tasks = [task for task in visible_tasks if query in task.title.lower()]
+            visible_tasks = [t for t in visible_tasks if query in t.title.lower()]
 
-        with task_list_container:
-            with ui.row().classes(
-                "w-full items-center gap-4 px-6 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500"
-            ):
-                ui.label("Task").classes("w-64")
-                ui.label("Priority").classes("w-24")
-                ui.label("Status").classes("w-28")
-                ui.label("Due date").classes("w-32")
-                ui.label("Actions").classes("grow")
+        priority_order = {"high": 0, "medium": 1, "low": 2}
+        status_order = {"created": 0, "pending": 1, "in_progress": 2, "done": 3}
+        sort_key = state["sort"]
+        if sort_key == "due_date":
+            visible_tasks.sort(key=lambda t: t.due_date or date.max)
+        elif sort_key == "title":
+            visible_tasks.sort(key=lambda t: t.title.lower())
+        elif sort_key == "priority":
+            visible_tasks.sort(key=lambda t: priority_order.get(t.priority.value, 99))
+        elif sort_key == "status":
+            visible_tasks.sort(key=lambda t: status_order.get(t.status.value, 99))
 
-            ui.separator()
+        def handle_reopen(task_id: int) -> None:
+            if mark_task_pending(task_id):
+                refresh_tasks()
 
+        def handle_complete(task_id: int) -> None:
+            if complete_task(task_id):
+                refresh_tasks()
+
+        def handle_delete(task_id: int) -> None:
+            if delete_task(task_id):
+                refresh_tasks()
+
+        with tasks_container:
             if not visible_tasks:
-                with ui.column().classes("w-full items-center gap-3 px-6 py-12 text-center"):
-                    ui.icon("inbox", size="3rem").classes("text-slate-300")
-                    ui.label("No matching tasks").classes("text-lg font-medium text-slate-700")
-                    ui.label(
-                        "Create a new task or adjust your filters to see more results."
-                    ).classes("text-sm text-slate-500")
+                render_empty_state()
                 return
 
-            def handle_reopen(task_id: int) -> None:
-                if mark_task_pending(task_id):
-                    refresh_tasks()
-
-            def handle_complete(task_id: int) -> None:
-                if complete_task(task_id):
-                    refresh_tasks()
-
-            def handle_delete(task_id: int) -> None:
-                if delete_task(task_id):
-                    refresh_tasks()
-
-            for task in visible_tasks:
-                assert task.id is not None
-                with ui.column().classes("w-full gap-0"):
-                    with ui.row().classes("w-full items-center gap-4 px-6 py-4"):
-                        with ui.column().classes("w-64 gap-1"):
-                            ui.label(task.title).classes("font-medium text-slate-900")
-                            ui.label(task.description or "No description").classes(
-                                "text-sm text-slate-500"
-                            )
-
-                        ui.badge(
-                            task.priority.value.title(),
-                            color=get_priority_color(task.priority.value),
-                        )
-                        ui.badge(
-                            task.status.value.replace("_", " ").title(),
-                            color=get_status_color(task.status.value),
-                        )
-                        ui.label(format_due_date(task.due_date)).classes(
-                            "w-32 text-sm text-slate-600"
-                        )
-
-                        with ui.row().classes("grow justify-end gap-2"):
-                            if task.completed:
-                                ui.button(
-                                    "Reopen",
-                                    icon="undo",
-                                    on_click=lambda task_id=task.id: handle_reopen(task_id),
-                                ).props("flat color=grey-8")
-                            else:
-                                ui.button(
-                                    "Complete",
-                                    icon="check_circle",
-                                    on_click=lambda task_id=task.id: handle_complete(task_id),
-                                ).props("flat color=positive")
-
-                            ui.button(
-                                "Edit",
-                                icon="edit",
-                                on_click=lambda current_task=task: open_task_dialog(current_task),
-                            ).props("flat color=primary")
-                            ui.button(
-                                "Delete",
-                                icon="delete",
-                                on_click=lambda task_id=task.id: handle_delete(task_id),
-                            ).props("flat color=negative")
-
-                    ui.separator()
+            if state["view"] == "board":
+                render_board(visible_tasks, handle_complete, handle_reopen, handle_delete)
+            else:
+                with ui.card().classes("w-full rounded-2xl shadow-sm"):
+                    render_list(visible_tasks, handle_complete, handle_reopen, handle_delete)
 
     create_button.on("click", lambda: open_task_dialog())
-    filter_toggle.on_value_change(lambda e: (state.__setitem__("filter", e.value), refresh_tasks()))
-    search_input.on_value_change(
+    status_select.on_value_change(
+        lambda e: (state.__setitem__("status", e.value), refresh_tasks())
+    )
+    priority_select.on_value_change(
+        lambda e: (state.__setitem__("priority", e.value), refresh_tasks())
+    )
+    sort_select.on_value_change(
+        lambda e: (state.__setitem__("sort", e.value), refresh_tasks())
+    )
+    global_search_input.on_value_change(
         lambda e: (state.__setitem__("search", normalize_query(e.value)), refresh_tasks())
+    )
+    view_toggle.on_value_change(
+        lambda e: (state.__setitem__("view", e.value), refresh_tasks())
     )
 
     refresh_tasks()

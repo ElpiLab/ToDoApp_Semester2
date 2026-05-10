@@ -61,6 +61,15 @@ def mark_task_pending(task_id: int):
         return False
 
 
+def change_task_status(task_id: int, target_status: str):
+    try:
+        updated_task = service.update_task(task_id, status=Status(target_status))
+        return updated_task
+    except Exception as e:
+        ui.notify(str(e), type="negative")
+        return None
+
+
 def update_task(
     task_id: int,
     title: str,
