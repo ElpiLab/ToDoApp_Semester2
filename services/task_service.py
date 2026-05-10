@@ -5,8 +5,20 @@ from domain.models import Priority, Status, Task
 
 
 class TaskService:
-    def __init__(self):
-        self.dao = TaskDAO()
+    def __init__(self, dao: TaskDAO | None = None):
+        self.dao = dao or TaskDAO()
+
+    def _normalize_title(self, title: str) -> str:
+        normalized_title = title.strip()
+        if len(normalized_title) < 3:
+            raise ValueError("Title must be at least 3 characters long")
+        return normalized_title
+
+    def _normalize_description(self, description: str) -> str:
+        normalized_description = description.strip()
+        if len(normalized_description) < 5:
+            raise ValueError("Description must be at least 5 characters long")
+        return normalized_description
 
     def create_task(
         self,
@@ -15,21 +27,12 @@ class TaskService:
         priority: Priority,
         due_date: date | None = None,
     ) -> Task:
-        title = title.strip()
-        description = description.strip()
-
-        if len(title) < 3:
-            raise ValueError("Title must be at least 3 characters long")
-
-        if len(description) < 5:
-            raise ValueError("Description must be at least 5 characters long")
-
         if priority is None:
             raise ValueError("Priority is required")
 
         task = Task(
-            title=title,
-            description=description,
+            title=self._normalize_title(title),
+            description=self._normalize_description(description),
             priority=priority,
             status=Status.created,
             due_date=due_date,
@@ -49,12 +52,19 @@ class TaskService:
 
     def mark_complete(self, task_id: int) -> Task:
         task = self.get_task_by_id(task_id)
-        task.completed = True
         task.status = Status.done
+        task.completed = True
+        return self.dao.update(task)
+
+    def mark_pending(self, task_id: int) -> Task:
+        task = self.get_task_by_id(task_id)
+        task.status = Status.pending
+        task.completed = False
         return self.dao.update(task)
 
     def delete_task(self, task_id: int) -> None:
         task = self.get_task_by_id(task_id)
+        assert task.id is not None
         self.dao.delete(task.id)
 
     def update_task(self, task_id: int, **updates) -> Task:
@@ -67,14 +77,12 @@ class TaskService:
                 raise ValueError(f"Invalid field: {key}")
             setattr(task, key, value)
 
-        if "title" in updates and len(task.title.strip()) < 3:
-            raise ValueError("Title must be at least 3 characters long")
-
-        if "description" in updates and len(task.description.strip()) < 5:
-            raise ValueError("Description must be at least 5 characters long")
-
-        if task.status == Status.done:
-            task.completed = True
+        task.title = self._normalize_title(task.title)
+        task.description = self._normalize_description(task.description)
+        if "status" in updates:
+            task.completed = task.status == Status.done
+        elif "completed" in updates:
+            task.status = Status.done if task.completed else Status.pending
 
         return self.dao.update(task)
 

@@ -8,7 +8,10 @@ version = "0.1.0"
 description = "Browser-based student task manager for the Advanced Programming course."
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+  "nicegui>=3.11",
+  "sqlmodel>=0.0.38",
+]
 
 [project.optional-dependencies]
 dev = [

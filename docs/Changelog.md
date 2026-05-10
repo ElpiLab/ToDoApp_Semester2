@@ -2,6 +2,14 @@
 
 This file records landed repository changes.
 
+## 2026-05-09
+
+- Added active prompt `010-task-list-view-foundation` and aligned planning docs with the actual implementation state.
+- Reworked the NiceGUI home page into a structured task-list shell with sidebar navigation, summary cards, toolbar controls, and dialog-based task creation/editing.
+- Removed the UI-to-DAO update shortcut by routing task updates through `TaskService`.
+- Added regression tests covering task-service state transitions and controller update/create flows.
+- Declared the missing runtime dependencies in `pyproject.toml` for `nicegui` and `sqlmodel`.
+
 ## 2026-04-08
 
 - Archived `000-bootstrap-project-scaffold` under `prompts/archive/000-bootstrap-project-scaffold/` and cleared the active prompt queue.

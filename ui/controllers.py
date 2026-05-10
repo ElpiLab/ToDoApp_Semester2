@@ -2,48 +2,88 @@ from datetime import date
 
 from nicegui import ui
 
-from domain.models import Priority
+from domain.models import Priority, Status
 from services.task_service import TaskService
 
 
 service = TaskService()
 
 
+def _parse_due_date(due_date: str | None) -> date | None:
+    if not due_date:
+        return None
+    normalized = due_date.strip().replace(".", "-").replace("/", "-")
+    return date.fromisoformat(normalized)
+
+
 def create_task(title: str, description: str, priority: str, due_date: str | None):
     try:
-        parsed_due_date = date.fromisoformat(due_date) if due_date else None
-
         task = service.create_task(
             title=title,
             description=description,
             priority=Priority(priority),
-            due_date=parsed_due_date,
+            due_date=_parse_due_date(due_date),
         )
-        ui.notify(f'Task "{task.title}" created successfully', type='positive')
+        ui.notify(f'Task "{task.title}" created successfully', type="positive")
+        return task
     except Exception as e:
-        ui.notify(str(e), type='negative')
+        ui.notify(str(e), type="negative")
+        return None
 
 
 def delete_task(task_id: int):
     try:
         service.delete_task(task_id)
-        ui.notify("Task deleted", type='positive')
+        ui.notify("Task deleted", type="positive")
+        return True
     except Exception as e:
-        ui.notify(str(e), type='negative')
+        ui.notify(str(e), type="negative")
+        return False
 
 
 def complete_task(task_id: int):
     try:
         service.mark_complete(task_id)
-        ui.notify("Task marked as complete", type='positive')
+        ui.notify("Task marked as complete", type="positive")
+        return True
     except Exception as e:
-        ui.notify(str(e), type='negative')
+        ui.notify(str(e), type="negative")
+        return False
 
-def update_task(task):
-    """Update an existing task"""
-    from data_access.dao import TaskDAO
-    dao = TaskDAO()
-    return dao.update(task)
+
+def mark_task_pending(task_id: int):
+    try:
+        service.mark_pending(task_id)
+        ui.notify("Task moved back to pending", type="positive")
+        return True
+    except Exception as e:
+        ui.notify(str(e), type="negative")
+        return False
+
+
+def update_task(
+    task_id: int,
+    title: str,
+    description: str,
+    priority: str,
+    status: str,
+    due_date: str | None,
+):
+    try:
+        updated_task = service.update_task(
+            task_id,
+            title=title,
+            description=description,
+            priority=Priority(priority),
+            status=Status(status),
+            due_date=_parse_due_date(due_date),
+        )
+        ui.notify(f'Task "{updated_task.title}" updated successfully', type="positive")
+        return updated_task
+    except Exception as e:
+        ui.notify(str(e), type="negative")
+        return None
+
 
 def get_tasks():
     return service.get_all_tasks()

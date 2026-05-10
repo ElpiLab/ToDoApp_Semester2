@@ -4,19 +4,19 @@ This file tracks planned work and execution order.
 
 ## Active sequence
 
-1. `010-domain-model-and-persistence`
-   Define the initial task model, SQLAlchemy setup, and SQLite bootstrap flow.
-2. `020-task-services-and-validation`
-   Implement task creation, editing, deletion, completion, and validation rules in services.
-3. `030-nicegui-ui`
-   Add the browser UI and connect it to the service layer.
-4. `040-filters-dashboard-and-polish`
-   Add filtering, completed-task views, dashboard summary, and cleanup work.
+1. `020-dashboard-and-summary-queries`
+   Add a dashboard backed by real task data and summary queries rather than placeholder cards.
+2. `030-board-and-calendar-views`
+   Extend the task experience into board and calendar views after the core task-list flow is stable.
+3. `040-settings-preferences-and-polish`
+   Add lower-priority settings, preferences, cleanup, and interface polish after the core flows are landed.
 
 ## Archived prompts
 
 - `000-bootstrap-project-scaffold`
   Bootstrap scaffold, planning docs, shared agent instructions, package skeleton, and default verification setup.
+- `010-task-list-view-foundation`
+  Replaced the raw NiceGUI scaffold with the first structured task-list screen and improved task-flow verification.
 
 ## Notes
 

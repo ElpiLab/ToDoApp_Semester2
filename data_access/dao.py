@@ -1,9 +1,10 @@
 from sqlmodel import Session, select
-from domain.models import Task
+
 from data_access.db import engine
+from domain.models import Task
+
 
 class TaskDAO:
-
     def create(self, task: Task) -> Task:
         with Session(engine) as session:
             session.add(task)
@@ -13,7 +14,7 @@ class TaskDAO:
 
     def get_all(self) -> list[Task]:
         with Session(engine) as session:
-            return session.exec(select(Task)).all()
+            return list(session.exec(select(Task)).all())
 
     def get_by_id(self, task_id: int) -> Task | None:
         with Session(engine) as session:

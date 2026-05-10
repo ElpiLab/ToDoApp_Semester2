@@ -1,177 +1,298 @@
-from nicegui import ui
-from nicegui import ui, app
 from datetime import date
 
-from ui.controllers import create_task, delete_task, complete_task, get_tasks, update_task
+from nicegui import ui
 
-# State for current filter
-current_filter = 'all'
-search_text = ''  # NEW: Store search text
+from ui.controllers import (
+    complete_task,
+    create_task,
+    delete_task,
+    get_tasks,
+    mark_task_pending,
+    update_task,
+)
 
-def get_priority_color(priority):
-    """Return color for priority level"""
-    if priority == 'high':
-        return 'red'
-    elif priority == 'medium':
-        return 'orange'
-    else:
-        return 'green'
 
-@ui.page('/')
+def get_priority_color(priority: str) -> str:
+    if priority == "high":
+        return "negative"
+    if priority == "medium":
+        return "warning"
+    return "positive"
+
+
+def get_status_color(status: str) -> str:
+    if status == "done":
+        return "positive"
+    if status == "in_progress":
+        return "primary"
+    if status == "pending":
+        return "warning"
+    return "secondary"
+
+
+def format_due_date(due_date: date | None) -> str:
+    return due_date.isoformat() if due_date else "No due date"
+
+
+def normalize_query(value: str | None) -> str:
+    return (value or "").strip().lower()
+
+
+@ui.page("/")
 def index_page():
-    ui.label('Student Task Manager').classes('text-2xl font-bold')
+    ui.query("body").classes("bg-slate-100")
 
-    title_input = ui.input('Title')
-    description_input = ui.input('Description')
-    priority_select = ui.select(
-        ['low', 'medium', 'high'],
-        value='medium',
-        label='Priority',
-    )
-    due_date_input = ui.input('Due Date (YYYY-MM-DD)')
+    state = {"filter": "all", "search": ""}
 
-    # NEW: Search input
-    with ui.row().classes('w-full items-center gap-4 my-2'):
-        ui.label('Filter:').classes('font-bold')
-        
-        # Filter buttons
-        ui.button('All', on_click=lambda: set_filter('all')).props('flat')
-        ui.button('Pending', on_click=lambda: set_filter('pending')).props('flat')
-        ui.button('Completed', on_click=lambda: set_filter('completed')).props('flat')
-        
-        # Spacer to push search to the right
-        ui.space()
-        
-        # NEW: Search box
-        search_input = ui.input(placeholder='🔍 Search by title...').props('clearable')
-        search_input.classes('w-64')
-        
-        def on_search():
-            global search_text
-            search_text = search_input.value if search_input.value else ''
-            refresh_tasks()
-        
-        search_input.on('change', on_search)
+    with ui.left_drawer(value=True).classes("bg-slate-900 text-white"):
+        with ui.column().classes("w-full gap-6 p-5"):
+            ui.label("Bizzy").classes("text-2xl font-bold tracking-wide")
+            ui.label("Student productivity app").classes("text-sm text-slate-300")
+            ui.separator().classes("bg-slate-700")
 
-    def handle_create():
-        create_task(
-            title_input.value,
-            description_input.value,
-            priority_select.value,
-            due_date_input.value if due_date_input.value else None,
-        )
-        refresh_tasks()
-        # Clear form
-        title_input.value = ''
-        description_input.value = ''
-        due_date_input.value = ''
+            nav_items = [
+                ("Task List", True),
+                ("Dashboard", False),
+                ("Board View", False),
+                ("Calendar", False),
+                ("Settings", False),
+            ]
+            for label, active in nav_items:
+                item_classes = "w-full justify-start px-4 py-3 rounded-xl"
+                if active:
+                    ui.button(label, icon="task_alt").props("flat color=white").classes(
+                        f"{item_classes} bg-teal-600"
+                    )
+                else:
+                    ui.button(label, icon="chevron_right").props("flat color=grey-4").classes(
+                        item_classes
+                    )
 
-    ui.button('Create Task', on_click=handle_create, icon='add')
-
-    task_list_container = ui.column()
-
-    def set_filter(filter_value):
-        global current_filter
-        current_filter = filter_value
-        refresh_tasks()
-
-    def edit_task(task_id):
-        """Open edit dialog for a task"""
-        task = next((t for t in get_tasks() if t.id == task_id), None)
-        if not task:
-            return
-        
-        with ui.dialog() as dialog, ui.card().classes('w-full min-w-[400px]'):
-            ui.label('Edit Task').classes('text-h5 mb-4')
-            
-            edit_title = ui.input('Title', value=task.title)
-            edit_description = ui.input('Description', value=task.description)
-            edit_priority = ui.select(
-                ['low', 'medium', 'high'],
-                value=task.priority,
-                label='Priority'
+    with ui.header().classes("bg-white items-center justify-between px-6 py-4 shadow-sm"):
+        with ui.column().classes("gap-0"):
+            ui.label("Task List View").classes("text-2xl font-semibold text-slate-900")
+            ui.label("Manage coursework, deadlines, and study tasks in one place.").classes(
+                "text-sm text-slate-500"
             )
-            edit_due_date = ui.input('Due Date', value=task.due_date if task.due_date else '')
-            
-            def save_changes():
-                updated_task = task
-                updated_task.title = edit_title.value
-                updated_task.description = edit_description.value
-                updated_task.priority = edit_priority.value
-                updated_task.due_date = edit_due_date.value if edit_due_date.value else None
-                update_task(updated_task)
-                refresh_tasks()
-                dialog.close()
-                ui.notify('Task updated!', type='positive')
-            
-            with ui.row().classes('justify-end w-full mt-4 gap-2'):
-                ui.button('Cancel', on_click=dialog.close).props('flat')
-                ui.button('Save', on_click=save_changes).props('color=primary')
-        
+        create_button = ui.button("New Task", icon="add").props("color=teal-7 unelevated")
+        create_button.classes("rounded-lg px-4")
+
+    with ui.column().classes("w-full gap-6 p-6").style("max-width: 1280px; margin: 0 auto;"):
+        with ui.row().classes("w-full items-stretch gap-4"):
+            summary_value_labels: list = []
+            summary_cards = (
+                ("Total tasks", "Track your full workload"),
+                ("Open tasks", "Focus on what still needs action"),
+                ("Completed", "Measure finished work"),
+            )
+            for title, subtitle in summary_cards:
+                with ui.card().classes("col flex-1 min-w-[220px] rounded-2xl shadow-sm"):
+                    ui.label(title).classes("text-sm uppercase tracking-wide text-slate-500")
+                    summary_value_labels.append(
+                        ui.label("0").classes("text-3xl font-semibold text-slate-900")
+                    )
+                    ui.label(subtitle).classes("text-sm text-slate-500")
+
+        with ui.card().classes("w-full rounded-2xl shadow-sm"):
+            with ui.row().classes("w-full items-center justify-between gap-4 p-6"):
+                with ui.column().classes("gap-1"):
+                    ui.label("Tasks").classes("text-xl font-semibold text-slate-900")
+                    ui.label("Filter, search, and manage your study tasks.").classes(
+                        "text-sm text-slate-500"
+                    )
+
+                with ui.row().classes("items-center gap-3"):
+                    filter_toggle = ui.toggle(
+                        {"all": "All", "pending": "Open", "completed": "Completed"},
+                        value=state["filter"],
+                    ).props("unelevated toggle-color=teal-7")
+                    search_input = ui.input(
+                        placeholder="Search tasks by title...",
+                    ).props("clearable outlined")
+                    search_input.classes("w-72")
+
+            ui.separator()
+
+            task_list_container = ui.column().classes("w-full gap-0")
+
+    def open_task_dialog(task=None) -> None:
+        is_edit = task is not None
+        dialog_title = "Edit Task" if is_edit else "Create Task"
+        button_label = "Save Changes" if is_edit else "Create Task"
+
+        with ui.dialog() as dialog, ui.card().classes("w-[540px] max-w-full rounded-2xl"):
+            ui.label(dialog_title).classes("text-xl font-semibold text-slate-900")
+            ui.label("Keep task details explicit and actionable.").classes("text-sm text-slate-500")
+
+            title_input = ui.input("Title", value=task.title if is_edit else "").props("outlined")
+            description_input = ui.textarea(
+                "Description",
+                value=task.description if is_edit else "",
+            ).props("outlined autogrow")
+            with ui.row().classes("w-full gap-3"):
+                priority_input = ui.select(
+                    ["low", "medium", "high"],
+                    value=task.priority.value if is_edit else "medium",
+                    label="Priority",
+                ).props("outlined")
+                due_date_input = ui.input(
+                    "Due date",
+                    value=task.due_date.isoformat() if is_edit and task.due_date else "",
+                ).props("outlined type=date")
+
+            status_input = None
+            if is_edit:
+                status_input = ui.select(
+                    {
+                        "created": "Created",
+                        "pending": "Pending",
+                        "in_progress": "In Progress",
+                        "done": "Done",
+                    },
+                    value=task.status.value,
+                    label="Status",
+                ).props("outlined")
+
+            def save() -> None:
+                if is_edit:
+                    assert task is not None
+                    assert task.id is not None
+                    assert status_input is not None
+                    saved_task = update_task(
+                        task.id,
+                        title_input.value or "",
+                        description_input.value or "",
+                        priority_input.value,
+                        status_input.value,
+                        due_date_input.value or None,
+                    )
+                else:
+                    saved_task = create_task(
+                        title_input.value or "",
+                        description_input.value or "",
+                        priority_input.value,
+                        due_date_input.value or None,
+                    )
+
+                if saved_task is not None:
+                    refresh_tasks()
+                    dialog.close()
+
+            with ui.row().classes("w-full justify-end gap-2 pt-4"):
+                ui.button("Cancel", on_click=dialog.close).props("flat color=grey-7")
+                ui.button(button_label, on_click=save).props("color=teal-7 unelevated")
+
         dialog.open()
 
-    def refresh_tasks():
+    def refresh_tasks() -> None:
         task_list_container.clear()
 
-        with task_list_container:
-            all_tasks = get_tasks()
-            
-            # Sort by due date
-            all_tasks.sort(key=lambda x: x.due_date if x.due_date else date(9999, 12, 31))
-            
-            # Apply status filter
-            if current_filter == 'pending':
-                tasks = [t for t in all_tasks if not t.completed]
-            elif current_filter == 'completed':
-                tasks = [t for t in all_tasks if t.completed]
-            else:
-                tasks = all_tasks
-            
-            # NEW: Apply search filter by title
-            if search_text:
-                tasks = [t for t in tasks if search_text.lower() in t.title.lower()]
-                if tasks:
-                    ui.label(f'🔍 Found {len(tasks)} task(s) matching "{search_text}"').classes('text-caption mb-2')
+        all_tasks = get_tasks()
+        all_tasks.sort(key=lambda task: task.due_date or date.max)
 
-            if not tasks:
-                if search_text:
-                    ui.label(f'No tasks found matching "{search_text}"').classes('text-center p-4')
-                else:
-                    ui.label('No tasks yet.')
+        open_tasks = [task for task in all_tasks if not task.completed]
+        completed_tasks = [task for task in all_tasks if task.completed]
+
+        summary_numbers = [len(all_tasks), len(open_tasks), len(completed_tasks)]
+        for label, count in zip(summary_value_labels, summary_numbers):
+            label.set_text(str(count))
+
+        visible_tasks = all_tasks
+        if state["filter"] == "pending":
+            visible_tasks = open_tasks
+        elif state["filter"] == "completed":
+            visible_tasks = completed_tasks
+
+        query = state["search"]
+        if query:
+            visible_tasks = [task for task in visible_tasks if query in task.title.lower()]
+
+        with task_list_container:
+            with ui.row().classes(
+                "w-full items-center gap-4 px-6 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500"
+            ):
+                ui.label("Task").classes("w-64")
+                ui.label("Priority").classes("w-24")
+                ui.label("Status").classes("w-28")
+                ui.label("Due date").classes("w-32")
+                ui.label("Actions").classes("grow")
+
+            ui.separator()
+
+            if not visible_tasks:
+                with ui.column().classes("w-full items-center gap-3 px-6 py-12 text-center"):
+                    ui.icon("inbox", size="3rem").classes("text-slate-300")
+                    ui.label("No matching tasks").classes("text-lg font-medium text-slate-700")
+                    ui.label(
+                        "Create a new task or adjust your filters to see more results."
+                    ).classes("text-sm text-slate-500")
                 return
 
-            for task in tasks:
-                with ui.card().classes('w-full'):
-                    # Title with color-coded priority badge
-                    with ui.row().classes('items-center justify-between w-full'):
-                        with ui.row().classes('items-center gap-2'):
-                            ui.label(f'{task.title}').classes('text-h6')
-                            priority_color = get_priority_color(task.priority)
-                            ui.badge(task.priority, color=priority_color).classes('text-white')
-                        status_color = 'green' if task.completed else 'blue'
-                        ui.badge(task.status, color=status_color).classes('text-white')
-                    
-                    if task.description:
-                        ui.label(task.description).classes('text-grey-7 mt-2')
-                    
-                    ui.label(f'📅 Due: {task.due_date if task.due_date else "Not set"}').classes('text-caption mt-1')
+            def handle_reopen(task_id: int) -> None:
+                if mark_task_pending(task_id):
+                    refresh_tasks()
 
-                    with ui.row().classes('mt-2 gap-2'):
-                        if not task.completed:
+            def handle_complete(task_id: int) -> None:
+                if complete_task(task_id):
+                    refresh_tasks()
+
+            def handle_delete(task_id: int) -> None:
+                if delete_task(task_id):
+                    refresh_tasks()
+
+            for task in visible_tasks:
+                assert task.id is not None
+                with ui.column().classes("w-full gap-0"):
+                    with ui.row().classes("w-full items-center gap-4 px-6 py-4"):
+                        with ui.column().classes("w-64 gap-1"):
+                            ui.label(task.title).classes("font-medium text-slate-900")
+                            ui.label(task.description or "No description").classes(
+                                "text-sm text-slate-500"
+                            )
+
+                        ui.badge(
+                            task.priority.value.title(),
+                            color=get_priority_color(task.priority.value),
+                        )
+                        ui.badge(
+                            task.status.value.replace("_", " ").title(),
+                            color=get_status_color(task.status.value),
+                        )
+                        ui.label(format_due_date(task.due_date)).classes(
+                            "w-32 text-sm text-slate-600"
+                        )
+
+                        with ui.row().classes("grow justify-end gap-2"):
+                            if task.completed:
+                                ui.button(
+                                    "Reopen",
+                                    icon="undo",
+                                    on_click=lambda task_id=task.id: handle_reopen(task_id),
+                                ).props("flat color=grey-8")
+                            else:
+                                ui.button(
+                                    "Complete",
+                                    icon="check_circle",
+                                    on_click=lambda task_id=task.id: handle_complete(task_id),
+                                ).props("flat color=positive")
+
                             ui.button(
-                                'Complete',
-                                on_click=lambda tid=task.id: [complete_task(tid), refresh_tasks()],
-                                icon='check_circle',
-                            ).props('flat color=green')
-                        ui.button(
-                            'Edit',
-                            on_click=lambda tid=task.id: edit_task(tid),
-                            icon='edit',
-                        ).props('flat color=orange')
-                        ui.button(
-                            'Delete',
-                            on_click=lambda tid=task.id: [delete_task(tid), refresh_tasks()],
-                            icon='delete',
-                        ).props('flat color=red')
+                                "Edit",
+                                icon="edit",
+                                on_click=lambda current_task=task: open_task_dialog(current_task),
+                            ).props("flat color=primary")
+                            ui.button(
+                                "Delete",
+                                icon="delete",
+                                on_click=lambda task_id=task.id: handle_delete(task_id),
+                            ).props("flat color=negative")
+
+                    ui.separator()
+
+    create_button.on("click", lambda: open_task_dialog())
+    filter_toggle.on_value_change(lambda e: (state.__setitem__("filter", e.value), refresh_tasks()))
+    search_input.on_value_change(
+        lambda e: (state.__setitem__("search", normalize_query(e.value)), refresh_tasks())
+    )
 
     refresh_tasks()
