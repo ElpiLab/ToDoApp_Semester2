@@ -489,6 +489,19 @@ def index_page():
                                     )
                                     ui.label(due_text).classes(due_classes)
 
+                    if not column_tasks and column_title != "To do":
+                        empty_messages = {
+                            "In progress": "Nothing in progress",
+                            "Done": "No completed tasks yet",
+                        }
+                        with ui.column().classes(
+                            "w-full items-center justify-center py-8 gap-2"
+                        ):
+                            ui.icon("inbox", size="1.5rem").classes("text-slate-400")
+                            ui.label(
+                                empty_messages.get(column_title, "No tasks")
+                            ).classes("text-xs text-slate-500")
+
                     if column_title == "To do":
                         add_btn = ui.element("div").classes(
                             "w-full rounded-xl border border-dashed border-slate-300 "
