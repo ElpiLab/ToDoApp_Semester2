@@ -98,10 +98,11 @@ def test_mark_pending_reopens_task(service: TaskService) -> None:
     assert reopened_task.completed is False
 
 
-def test_create_task_rejects_short_description(service: TaskService) -> None:
-    with pytest.raises(ValueError, match="Description must be at least 5 characters long"):
-        service.create_task(
-            title="Valid title",
-            description="bad",
-            priority=Priority.low,
-        )
+def test_create_task_accepts_empty_description(service: TaskService) -> None:
+    task = service.create_task(
+        title="Read chapter six",
+        description="",
+        priority=Priority.medium,
+    )
+
+    assert task.description == ""

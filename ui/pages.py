@@ -117,41 +117,69 @@ def index_page():
 
     def open_task_dialog(task=None) -> None:
         is_edit = task is not None
-        dialog_title = "Edit Task" if is_edit else "Create Task"
-        button_label = "Save Changes" if is_edit else "Create Task"
+        button_label = "Save changes" if is_edit else "Save task"
 
-        with ui.dialog() as dialog, ui.card().classes("w-[540px] max-w-full rounded-2xl"):
-            ui.label(dialog_title).classes("text-xl font-semibold text-slate-900")
-            ui.label("Keep task details explicit and actionable.").classes("text-sm text-slate-500")
+        with ui.dialog() as dialog, ui.card().classes(
+            "w-[540px] max-w-full rounded-2xl p-6 gap-4"
+        ):
+            ui.label("EDIT TASK" if is_edit else "NEW TASK").classes(
+                "text-xs uppercase tracking-widest text-slate-400"
+            )
+            title_input = (
+                ui.input(
+                    placeholder="What needs to be done?",
+                    value=task.title if is_edit else "",
+                )
+                .props('borderless input-class="text-2xl"')
+                .classes("w-full border-l-4 border-blue-500 pl-3")
+            )
 
-            title_input = ui.input("Title", value=task.title if is_edit else "").props("outlined")
-            description_input = ui.textarea(
-                "Description",
-                value=task.description if is_edit else "",
-            ).props("outlined autogrow")
-            with ui.row().classes("w-full gap-3"):
-                priority_input = ui.select(
-                    ["low", "medium", "high"],
+            ui.separator()
+
+            with ui.row().classes("w-full items-center gap-4"):
+                priority_input = ui.toggle(
+                    {"low": "LOW", "medium": "MED", "high": "HIGH"},
                     value=task.priority.value if is_edit else "medium",
-                    label="Priority",
-                ).props("outlined")
-                due_date_input = ui.input(
-                    "Due date",
-                    value=task.due_date.isoformat() if is_edit and task.due_date else "",
-                ).props("outlined type=date")
+                ).props("unelevated toggle-color=orange-7")
+                due_date_input = (
+                    ui.input(
+                        "Due date",
+                        value=task.due_date.isoformat() if is_edit and task.due_date else "",
+                    )
+                    .props("outlined type=date")
+                    .classes("w-44")
+                )
 
             status_input = None
             if is_edit:
-                status_input = ui.select(
-                    {
-                        "created": "Created",
-                        "pending": "Pending",
-                        "in_progress": "In Progress",
-                        "done": "Done",
-                    },
-                    value=task.status.value,
-                    label="Status",
-                ).props("outlined")
+                status_input = (
+                    ui.select(
+                        {
+                            "created": "Created",
+                            "pending": "Pending",
+                            "in_progress": "In Progress",
+                            "done": "Done",
+                        },
+                        value=task.status.value,
+                        label="Status",
+                    )
+                    .props("outlined")
+                    .classes("w-full")
+                )
+
+            description_section = ui.expansion(
+                "Add description (optional)",
+                icon="add",
+                value=is_edit and bool(task.description),
+            ).classes("w-full")
+            with description_section:
+                description_input = (
+                    ui.textarea(value=task.description if is_edit else "")
+                    .props("outlined autogrow")
+                    .classes("w-full")
+                )
+
+            add_another_checkbox = None
 
             def save() -> None:
                 if is_edit:
@@ -174,13 +202,31 @@ def index_page():
                         due_date_input.value or None,
                     )
 
-                if saved_task is not None:
-                    refresh_tasks()
+                if saved_task is None:
+                    return
+
+                refresh_tasks()
+                if (
+                    not is_edit
+                    and add_another_checkbox is not None
+                    and add_another_checkbox.value
+                ):
+                    title_input.value = ""
+                    description_input.value = ""
+                    priority_input.value = "medium"
+                    due_date_input.value = ""
+                    description_section.value = False
+                else:
                     dialog.close()
 
-            with ui.row().classes("w-full justify-end gap-2 pt-4"):
-                ui.button("Cancel", on_click=dialog.close).props("flat color=grey-7")
-                ui.button(button_label, on_click=save).props("color=teal-7 unelevated")
+            with ui.row().classes("w-full items-center justify-between pt-2"):
+                if not is_edit:
+                    add_another_checkbox = ui.checkbox("Add another")
+                else:
+                    ui.element("div")
+                with ui.row().classes("gap-2"):
+                    ui.button("Cancel", on_click=dialog.close).props("flat color=grey-7")
+                    ui.button(button_label, on_click=save).props("color=teal-7 unelevated")
 
         dialog.open()
 

@@ -15,10 +15,7 @@ class TaskService:
         return normalized_title
 
     def _normalize_description(self, description: str) -> str:
-        normalized_description = description.strip()
-        if len(normalized_description) < 5:
-            raise ValueError("Description must be at least 5 characters long")
-        return normalized_description
+        return description.strip()
 
     def create_task(
         self,
