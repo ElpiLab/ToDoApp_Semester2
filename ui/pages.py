@@ -397,15 +397,42 @@ def index_page():
             if change_task_status(dragging_id, target_status) is not None:
                 refresh_tasks()
 
+        highlight_classes = "!ring-2 !ring-teal-500 !bg-slate-300"
+
+        def enter_column(card, depth) -> None:
+            depth["d"] += 1
+            if depth["d"] == 1:
+                card.classes(add=highlight_classes)
+
+        def leave_column(card, depth) -> None:
+            depth["d"] -= 1
+            if depth["d"] <= 0:
+                depth["d"] = 0
+                card.classes(remove=highlight_classes)
+
+        def drop_on_column(card, depth, status) -> None:
+            depth["d"] = 0
+            card.classes(remove=highlight_classes)
+            handle_drop(status)
+
         with ui.row().classes("w-full items-start gap-4"):
             for column_title, column_tasks, dot_class, text_class, target_status in columns:
                 column_card = ui.card().classes(
                     "flex flex-col flex-1 min-w-[280px] rounded-2xl shadow-none p-4 gap-3 !bg-slate-200"
                 )
+                column_depth = {"d": 0}
                 column_card.on("dragover.prevent", lambda: None)
                 column_card.on(
+                    "dragenter",
+                    lambda e=None, c=column_card, d=column_depth: enter_column(c, d),
+                )
+                column_card.on(
+                    "dragleave",
+                    lambda e=None, c=column_card, d=column_depth: leave_column(c, d),
+                )
+                column_card.on(
                     "drop.prevent",
-                    lambda e=None, status=target_status: handle_drop(status),
+                    lambda e=None, c=column_card, d=column_depth, s=target_status: drop_on_column(c, d, s),
                 )
                 with column_card:
                     with ui.row().classes("w-full items-center gap-2"):
