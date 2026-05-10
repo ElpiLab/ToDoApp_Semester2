@@ -26,9 +26,15 @@ def get_status_color(status: str) -> str:
         return "positive"
     if status == "in_progress":
         return "primary"
-    if status == "pending":
+    if status in ("pending", "created"):
         return "warning"
     return "secondary"
+
+
+def status_display_label(status_value: str) -> str:
+    if status_value in ("created", "pending"):
+        return "To do"
+    return status_value.replace("_", " ").title()
 
 
 def format_due_date(due_date: date | None) -> str:
@@ -394,7 +400,7 @@ def index_page():
                         )
                     with ui.element("div").classes("w-28"):
                         ui.badge(
-                            task.status.value.replace("_", " ").title(),
+                            status_display_label(task.status.value),
                             color=get_status_color(task.status.value),
                         )
 
