@@ -219,15 +219,19 @@ def index_page():
 
                 status_input = None
                 if is_edit:
+                    current_status = (
+                        "pending"
+                        if task.status.value == "created"
+                        else task.status.value
+                    )
                     status_input = (
                         ui.select(
                             {
-                                "created": "Created",
-                                "pending": "Pending",
+                                "pending": "To do",
                                 "in_progress": "In progress",
                                 "done": "Done",
                             },
-                            value=task.status.value,
+                            value=current_status,
                         )
                         .props("dense outlined options-dense")
                         .classes("w-36")
