@@ -195,7 +195,7 @@ def index_page():
                     placeholder="What needs to be done?",
                     value=task.title if is_edit else "",
                 )
-                .props('borderless input-class="text-2xl"')
+                .props('borderless autofocus input-class="text-2xl"')
                 .classes("w-full border-l-4 border-blue-500 pl-3")
             )
 
@@ -370,7 +370,7 @@ def index_page():
                 )
                 with row:
                     with ui.column().classes("flex-1 min-w-0 gap-0"):
-                        title_classes = "font-medium text-slate-900"
+                        title_classes = "font-medium text-slate-900 truncate w-full"
                         if is_done:
                             title_classes += " line-through text-slate-400"
                         ui.label(task.title).classes(title_classes)
@@ -524,7 +524,7 @@ def index_page():
                             ),
                         )
                         with card:
-                            title_classes = "font-medium text-slate-900"
+                            title_classes = "font-medium text-slate-900 truncate w-full"
                             if is_done:
                                 title_classes += " line-through text-slate-400"
                             ui.label(task.title).classes(title_classes)
@@ -620,6 +620,21 @@ def index_page():
                 refresh_tasks()
 
         with tasks_container:
+            if not all_tasks:
+                with ui.column().classes("w-full items-center gap-3 py-16"):
+                    ui.icon("celebration", size="3rem").classes("text-teal-500")
+                    ui.label("Welcome to Bizzy").classes(
+                        "text-xl font-semibold text-slate-900"
+                    )
+                    ui.label("Create your first task to get started.").classes(
+                        "text-sm text-slate-500"
+                    )
+                    welcome_btn = ui.button("New task", icon="add").props(
+                        "color=teal-7 unelevated no-caps"
+                    )
+                    welcome_btn.on("click", lambda: open_task_dialog())
+                return
+
             if not visible_tasks:
                 render_empty_state()
                 return

@@ -7,7 +7,7 @@ import ui.pages as pages_module  # noqa: F401
 def run() -> None:
     create_db_and_tables()
     ui.run(
-        title="Student Task Manager",
+        title="Bizzy",
         port=8081,  # Changed from default 8080 to 8081
         host="127.0.0.1",
         reload=False,  # Disable auto-reload to avoid conflicts
