@@ -338,62 +338,97 @@ def index_page():
             ).classes("text-sm text-slate-500")
 
     def render_list(tasks, on_complete, on_reopen, on_delete) -> None:
+        today = date.today()
+
         with ui.row().classes(
             "w-full items-center gap-4 px-6 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500"
         ):
-            ui.label("Task").classes("w-64")
+            ui.label("Task").classes("flex-1 min-w-0")
             ui.label("Priority").classes("w-24")
             ui.label("Status").classes("w-28")
-            ui.label("Due date").classes("w-32")
-            ui.label("Actions").classes("grow")
+            ui.label("Due").classes("w-44")
+            ui.element("div").classes("w-32")
 
         ui.separator()
 
         for task in tasks:
             assert task.id is not None
+            is_done = task.completed
+            is_late = (
+                task.due_date is not None
+                and not is_done
+                and task.due_date < today
+            )
+
             with ui.column().classes("w-full gap-0"):
-                with ui.row().classes("w-full items-center gap-4 px-6 py-4"):
-                    with ui.column().classes("w-64 gap-1"):
-                        ui.label(task.title).classes("font-medium text-slate-900")
-                        ui.label(task.description or "No description").classes(
-                            "text-sm text-slate-500"
+                row = ui.row().classes(
+                    "w-full items-center gap-4 px-6 py-3 cursor-pointer hover:bg-slate-50 transition-colors"
+                )
+                row.on(
+                    "click",
+                    lambda current_task=task: open_task_dialog(current_task),
+                )
+                with row:
+                    with ui.column().classes("flex-1 min-w-0 gap-0"):
+                        title_classes = "font-medium text-slate-900"
+                        if is_done:
+                            title_classes += " line-through text-slate-400"
+                        ui.label(task.title).classes(title_classes)
+                        if task.description:
+                            ui.label(task.description).classes(
+                                "text-xs text-slate-500 truncate"
+                            )
+
+                    with ui.element("div").classes("w-24"):
+                        ui.badge(
+                            task.priority.value.title(),
+                            color=get_priority_color(task.priority.value),
+                        )
+                    with ui.element("div").classes("w-28"):
+                        ui.badge(
+                            task.status.value.replace("_", " ").title(),
+                            color=get_status_color(task.status.value),
                         )
 
-                    ui.badge(
-                        task.priority.value.title(),
-                        color=get_priority_color(task.priority.value),
-                    )
-                    ui.badge(
-                        task.status.value.replace("_", " ").title(),
-                        color=get_status_color(task.status.value),
-                    )
-                    ui.label(format_due_date(task.due_date)).classes(
-                        "w-32 text-sm text-slate-600"
-                    )
+                    if task.due_date:
+                        due_text = relative_due_text(task.due_date, today, is_done)
+                        due_classes = (
+                            "w-44 text-sm text-red-600 font-medium"
+                            if is_late
+                            else "w-44 text-sm text-slate-600"
+                        )
+                    else:
+                        due_text = "No due date"
+                        due_classes = "w-44 text-sm text-slate-400"
+                    ui.label(due_text).classes(due_classes)
 
-                    with ui.row().classes("grow justify-end gap-2"):
-                        if task.completed:
-                            ui.button(
-                                "Reopen",
-                                icon="undo",
-                                on_click=lambda task_id=task.id: on_reopen(task_id),
-                            ).props("flat no-caps color=grey-8")
+                    with ui.row().classes("w-32 justify-end gap-1"):
+                        if is_done:
+                            reopen_btn = ui.button(icon="undo").props(
+                                "flat round dense color=grey-7"
+                            )
+                            reopen_btn.tooltip("Reopen task")
+                            reopen_btn.on(
+                                "click.stop",
+                                lambda task_id=task.id: on_reopen(task_id),
+                            )
                         else:
-                            ui.button(
-                                "Complete",
-                                icon="check_circle",
-                                on_click=lambda task_id=task.id: on_complete(task_id),
-                            ).props("flat no-caps color=positive")
-                        ui.button(
-                            "Edit",
-                            icon="edit",
-                            on_click=lambda current_task=task: open_task_dialog(current_task),
-                        ).props("flat no-caps color=primary")
-                        ui.button(
-                            "Delete",
-                            icon="delete",
-                            on_click=lambda task_id=task.id: on_delete(task_id),
-                        ).props("flat no-caps color=negative")
+                            complete_btn = ui.button(icon="check_circle").props(
+                                "flat round dense color=positive"
+                            )
+                            complete_btn.tooltip("Mark complete")
+                            complete_btn.on(
+                                "click.stop",
+                                lambda task_id=task.id: on_complete(task_id),
+                            )
+                        delete_btn = ui.button(icon="delete").props(
+                            "flat round dense color=negative"
+                        )
+                        delete_btn.tooltip("Delete task")
+                        delete_btn.on(
+                            "click.stop",
+                            lambda task_id=task.id: on_delete(task_id),
+                        )
 
                 ui.separator()
 
