@@ -41,43 +41,78 @@ def normalize_query(value: str | None) -> str:
 @ui.page("/")
 def index_page():
     ui.query("body").classes("bg-slate-100")
+    ui.query(".q-layout").props('view="LHh LpR fFf"')
 
     state = {"filter": "all", "search": ""}
 
-    with ui.left_drawer(value=True).classes("bg-slate-900 text-white"):
-        with ui.column().classes("w-full gap-6 p-5"):
-            ui.label("Bizzy").classes("text-2xl font-bold tracking-wide")
-            ui.label("Student productivity app").classes("text-sm text-slate-300")
-            ui.separator().classes("bg-slate-700")
+    with ui.left_drawer(
+        value=True, top_corner=True, bottom_corner=True
+    ).classes("bg-slate-900 text-white").props("width=260"):
+        with ui.column().classes("w-full h-full p-4 gap-0"):
+            with ui.row().classes("items-center gap-2 px-2 py-2"):
+                ui.icon("bolt").classes("text-2xl text-teal-400")
+                ui.label("Bizzy").classes("text-2xl font-bold tracking-wide")
+            ui.separator().classes("bg-slate-700 -mx-4")
 
-            nav_items = [
-                ("Task List", True),
-                ("Dashboard", False),
-                ("Board View", False),
-                ("Calendar", False),
-                ("Settings", False),
-            ]
-            for label, active in nav_items:
-                item_classes = "w-full justify-start px-4 py-3 rounded-xl"
-                if active:
-                    ui.button(label, icon="task_alt").props("flat color=white").classes(
-                        f"{item_classes} bg-teal-600"
-                    )
-                else:
-                    ui.button(label, icon="chevron_right").props("flat color=grey-4").classes(
-                        item_classes
-                    )
+            ui.label("WORKSPACE").classes(
+                "text-xs uppercase tracking-widest text-slate-500 px-3 mt-5 mb-2"
+            )
+            with ui.column().classes("w-full gap-1"):
+                workspace_items = [
+                    ("Dashboard", "dashboard", False),
+                    ("Tasks", "task_alt", True),
+                    ("Calendar", "calendar_month", False),
+                    ("Modules", "library_books", False),
+                    ("Analytics", "analytics", False),
+                ]
+                for label, icon, active in workspace_items:
+                    item_classes = "w-full justify-start px-3 py-2 rounded-lg"
+                    if active:
+                        ui.button(label, icon=icon).props(
+                            "flat no-caps color=white"
+                        ).classes(f"{item_classes} bg-teal-600")
+                    else:
+                        ui.button(label, icon=icon).props(
+                            "flat no-caps color=grey-4"
+                        ).classes(item_classes)
 
-    with ui.header().classes("bg-white items-center justify-between px-6 py-4 shadow-sm"):
-        with ui.column().classes("gap-0"):
+            ui.label("SYSTEM").classes(
+                "text-xs uppercase tracking-widest text-slate-500 px-3 mt-6 mb-2"
+            )
+            with ui.column().classes("w-full gap-1"):
+                ui.button("Settings", icon="settings").props(
+                    "flat no-caps color=grey-4"
+                ).classes("w-full justify-start px-3 py-2 rounded-lg")
+
+            with ui.row().classes(
+                "items-center gap-3 px-2 pt-4 mt-auto border-t border-slate-700"
+            ):
+                with ui.element("div").classes(
+                    "w-9 h-9 rounded-full bg-teal-600 flex items-center justify-center shrink-0"
+                ):
+                    ui.label("A").classes("text-white font-semibold text-sm")
+                ui.label("Alex C.").classes("text-sm font-medium text-white")
+
+    with ui.header().classes(
+        "bg-white items-center justify-end px-6 py-3 shadow-sm gap-3"
+    ):
+        ui.input(placeholder="Search assignments, courses...").props(
+            "outlined dense"
+        ).classes("w-80")
+        create_button = ui.button("New Task", icon="add").props(
+            "color=teal-7 unelevated"
+        )
+        create_button.classes("rounded-lg px-4")
+        ui.button(icon="notifications").props("flat round color=grey-7")
+        ui.button(icon="settings").props("flat round color=grey-7")
+
+    with ui.column().classes("w-full gap-6 p-6").style("max-width: 1280px; margin: 0 auto;"):
+        with ui.column().classes("gap-1"):
             ui.label("Task List View").classes("text-2xl font-semibold text-slate-900")
             ui.label("Manage coursework, deadlines, and study tasks in one place.").classes(
                 "text-sm text-slate-500"
             )
-        create_button = ui.button("New Task", icon="add").props("color=teal-7 unelevated")
-        create_button.classes("rounded-lg px-4")
 
-    with ui.column().classes("w-full gap-6 p-6").style("max-width: 1280px; margin: 0 auto;"):
         with ui.row().classes("w-full items-stretch gap-4"):
             summary_value_labels: list = []
             summary_cards = (
