@@ -1,5 +1,5 @@
 import calendar as cal_module
-from datetime import date
+from datetime import date, timedelta
 
 from nicegui import ui
 
@@ -73,7 +73,7 @@ def index_page():
         "search": "",
         "view": "board",
         "dragging": None,
-        "page": "tasks",
+        "page": "dashboard",
         "view_month": date.today().replace(day=1),
         "selected_date": date.today(),
     }
@@ -117,7 +117,7 @@ def index_page():
                                 .props("flat no-caps align=left color=grey-4")
                                 .classes(item_classes)
                             )
-                        if key in ("tasks", "calendar"):
+                        if key in ("dashboard", "tasks", "calendar"):
                             btn.on(
                                 "click", lambda k=key: switch_to_page(k)
                             )
@@ -125,8 +125,11 @@ def index_page():
 
             def switch_to_page(page_key: str) -> None:
                 state["page"] = page_key
+                dashboard_panel.set_visibility(page_key == "dashboard")
                 tasks_panel.set_visibility(page_key == "tasks")
                 calendar_panel.set_visibility(page_key == "calendar")
+                if page_key == "dashboard":
+                    render_dashboard()
                 if page_key == "calendar":
                     render_calendar()
                 render_workspace_nav()
@@ -173,7 +176,11 @@ def index_page():
         ui.button(icon="settings").props("flat round color=grey-7")
 
     with ui.column().classes("w-full gap-4 p-6").style("max-width: 1280px; margin: 0 auto;"):
+        dashboard_panel = ui.column().classes("w-full gap-6")
+        dashboard_panel.set_visibility(False)
+
         tasks_panel = ui.column().classes("w-full gap-4")
+        tasks_panel.set_visibility(False)
         with tasks_panel:
             with ui.column().classes("gap-1"):
                 ui.label("Task management").classes("text-2xl font-semibold text-slate-900")
@@ -336,6 +343,8 @@ def index_page():
                 refresh_tasks()
                 if state["page"] == "calendar":
                     render_calendar()
+                if state["page"] == "dashboard":
+                    render_dashboard()
                 if (
                     not is_edit
                     and add_another_checkbox is not None
@@ -663,6 +672,195 @@ def index_page():
             state["view_month"] = d.replace(day=1)
         render_calendar()
 
+    def render_dashboard() -> None:
+        dashboard_panel.clear()
+        with dashboard_panel:
+            all_tasks = get_tasks()
+            today = date.today()
+
+            open_tasks = [t for t in all_tasks if not t.completed]
+            completed_tasks = [t for t in all_tasks if t.completed]
+            overdue = [t for t in open_tasks if t.due_date and t.due_date < today]
+            due_today = [t for t in open_tasks if t.due_date == today]
+            week_end = today + timedelta(days=7)
+            upcoming = sorted(
+                [
+                    t
+                    for t in open_tasks
+                    if t.due_date and today < t.due_date <= week_end
+                ],
+                key=lambda t: t.due_date,
+            )
+            in_progress = [t for t in open_tasks if t.status.value == "in_progress"]
+            high_priority_open = [
+                t for t in open_tasks if t.priority.value == "high"
+            ]
+
+            with ui.row().classes("w-full items-center justify-between gap-4"):
+                with ui.column().classes("gap-1"):
+                    ui.label("Dashboard").classes(
+                        "text-2xl font-semibold text-slate-900"
+                    )
+                    open_word = "task" if len(open_tasks) == 1 else "tasks"
+                    overdue_text = (
+                        f" · {len(overdue)} overdue" if overdue else ""
+                    )
+                    ui.label(
+                        f"{len(open_tasks)} open {open_word}{overdue_text}"
+                    ).classes("text-sm text-slate-500")
+                new_task_btn = ui.button("New task", icon="add").props(
+                    "color=teal-7 unelevated no-caps"
+                )
+                new_task_btn.classes("rounded-lg px-4")
+                new_task_btn.on("click", lambda: open_task_dialog())
+
+            stat_cards = [
+                ("Total", len(all_tasks), "text-slate-900", "inbox"),
+                ("Open", len(open_tasks), "text-teal-600", "pending_actions"),
+                ("Completed", len(completed_tasks), "text-emerald-600", "task_alt"),
+                ("Overdue", len(overdue), "text-rose-600", "schedule"),
+            ]
+            with ui.row().classes("w-full gap-4 flex-nowrap"):
+                for label, value, accent, icon in stat_cards:
+                    with ui.card().classes(
+                        "flex-1 min-w-0 rounded-2xl shadow-sm !p-5 gap-2"
+                    ):
+                        with ui.row().classes(
+                            "w-full items-center justify-between"
+                        ):
+                            ui.label(label).classes(
+                                "text-xs uppercase tracking-widest text-slate-500"
+                            )
+                            ui.icon(icon).classes("text-slate-300")
+                        ui.label(str(value)).classes(
+                            f"text-3xl font-semibold {accent}"
+                        )
+
+            priority_pill_classes = {
+                "low": "bg-emerald-100 text-emerald-700",
+                "medium": "bg-amber-100 text-amber-700",
+                "high": "bg-rose-100 text-rose-700",
+            }
+
+            def render_task_row(t) -> None:
+                pill_color = priority_pill_classes.get(
+                    t.priority.value, "bg-slate-100 text-slate-700"
+                )
+                is_late = (
+                    t.due_date is not None
+                    and not t.completed
+                    and t.due_date < today
+                )
+                item = ui.element("div").classes(
+                    "w-full rounded-lg border border-slate-100 p-3 "
+                    "cursor-pointer hover:bg-slate-50 transition-colors"
+                )
+                with item:
+                    title_classes = "text-sm font-medium text-slate-900 truncate"
+                    if t.completed:
+                        title_classes += " line-through opacity-60"
+                    ui.label(t.title).classes(title_classes)
+                    with ui.row().classes("items-center gap-2 mt-1"):
+                        ui.label(t.priority.value.title()).classes(
+                            f"text-xs rounded px-1.5 py-0.5 {pill_color}"
+                        )
+                        if t.due_date:
+                            due_text = relative_due_text(
+                                t.due_date, today, t.completed
+                            )
+                            due_classes = (
+                                "text-xs text-red-600 font-medium"
+                                if is_late
+                                else "text-xs text-slate-500"
+                            )
+                            ui.label(due_text).classes(due_classes)
+                item.on(
+                    "click", lambda task=t: open_task_dialog(task)
+                )
+
+            with ui.row().classes("w-full items-stretch gap-4 flex-nowrap"):
+                with ui.card().classes(
+                    "flex-1 min-w-0 rounded-2xl shadow-sm !p-5 gap-3"
+                ):
+                    with ui.row().classes(
+                        "w-full items-center justify-between"
+                    ):
+                        ui.label("Due today").classes(
+                            "text-sm font-semibold text-slate-700"
+                        )
+                        ui.label(str(len(due_today))).classes(
+                            "text-xs font-semibold text-slate-500 "
+                            "bg-slate-100 rounded-full px-2 py-0.5"
+                        )
+                    if not due_today:
+                        with ui.column().classes(
+                            "w-full items-center gap-2 py-6"
+                        ):
+                            ui.icon("event_available", size="2rem").classes(
+                                "text-slate-300"
+                            )
+                            ui.label("Nothing due today").classes(
+                                "text-sm text-slate-500"
+                            )
+                    else:
+                        for t in due_today:
+                            render_task_row(t)
+
+                with ui.card().classes(
+                    "flex-1 min-w-0 rounded-2xl shadow-sm !p-5 gap-3"
+                ):
+                    with ui.row().classes(
+                        "w-full items-center justify-between"
+                    ):
+                        ui.label("Coming up").classes(
+                            "text-sm font-semibold text-slate-700"
+                        )
+                        ui.label("next 7 days").classes(
+                            "text-xs text-slate-400"
+                        )
+                    if not upcoming:
+                        with ui.column().classes(
+                            "w-full items-center gap-2 py-6"
+                        ):
+                            ui.icon("event", size="2rem").classes(
+                                "text-slate-300"
+                            )
+                            ui.label("No upcoming tasks").classes(
+                                "text-sm text-slate-500"
+                            )
+                    else:
+                        for t in upcoming[:6]:
+                            render_task_row(t)
+
+            with ui.row().classes("w-full items-stretch gap-4 flex-nowrap"):
+                with ui.card().classes(
+                    "flex-1 min-w-0 rounded-2xl shadow-sm !p-5 gap-3"
+                ):
+                    ui.label("In progress").classes(
+                        "text-sm font-semibold text-slate-700"
+                    )
+                    if not in_progress:
+                        ui.label("Nothing in progress").classes(
+                            "text-sm text-slate-500 py-2"
+                        )
+                    else:
+                        for t in in_progress[:5]:
+                            render_task_row(t)
+
+                with ui.card().classes(
+                    "flex-1 min-w-0 rounded-2xl shadow-sm !p-5 gap-3"
+                ):
+                    ui.label("High priority").classes(
+                        "text-sm font-semibold text-slate-700"
+                    )
+                    if not high_priority_open:
+                        ui.label("No high-priority tasks open").classes(
+                            "text-sm text-slate-500 py-2"
+                        )
+                    else:
+                        for t in high_priority_open[:5]:
+                            render_task_row(t)
+
     def render_calendar() -> None:
         calendar_panel.clear()
         with calendar_panel:
@@ -960,3 +1158,4 @@ def index_page():
 
     render_workspace_nav()
     refresh_tasks()
+    render_dashboard()
