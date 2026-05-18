@@ -2,6 +2,20 @@
 
 This file records landed repository changes.
 
+## 2026-05-18
+
+- Added a **Priority mix donut chart** to the Analytics page (ECharts) matching the Figma prototype: scoped to open ("pending") tasks, slices for High / Medium / Low with white gaps, total count + "PENDING" caption centered, and a dot-legend below. Replaces the prior horizontal-bar "By priority" card.
+- Added a **Dashboard page** as the new default landing screen: stat cards (Total / Open / Completed / Overdue), "Due today" and "Coming up (next 7 days)" lists, plus In progress and High priority lists. All task items click through to the existing edit dialog. Dashboard re-renders after task save.
+- Wired up the Dashboard sidebar nav item (previously a placeholder); page switching now toggles Dashboard / Tasks / Calendar panels and the workspace nav reflects the active page.
+- Removed the **Modules** sidebar entry, dropping the placeholder nav item entirely.
+- Updated planning docs to reflect the new state: dropped the `Module` domain entity and `020-dashboard-and-summary-queries` from the active sequence; **Analytics**, **Login**, and **Settings** are now the planned next work.
+- Marked `015-consolidate-source-under-src` as the current active prompt in `Status.md` (was incorrectly listed as N/A).
+
+## 2026-05-15
+
+- Added a **Calendar page** with a month grid: weekday header row, day cells colored by current month, today highlight, click-to-select day, side panel listing tasks for the selected day with a per-day add-task button. Tasks render as priority-colored pills; cells overflow to a `+N more` indicator past three.
+- Calendar respects task completion (strikethrough), supports prev/next month navigation, and a Today shortcut. Wired the Calendar sidebar nav item to switch panels and render on demand.
+
 ## 2026-05-10
 
 - Added a **Board view** (To do / In progress / Done) as the default Tasks layout, with a Board/List toggle for switching.
@@ -16,6 +30,10 @@ This file records landed repository changes.
 - Relaxed `TaskService._normalize_description` so descriptions are now optional (was min 5 chars).
 - Added `change_task_status(task_id, target_status)` controller used by drag-drop.
 - Made the date parser tolerant of `2026.05.14` and `2026/05/14` formats in addition to ISO `2026-05-14`.
+- Set the browser tab title to "Bizzy", autofocused the title input in the new-task dialog, repositioned `ui.notify` toasts to top-right, and added a first-run welcome empty state ("Welcome to Bizzy" + "Create your first task").
+- Redesigned the task dialog to a Linear/Asana-style minimal layout: small "NEW TASK"/"EDIT TASK" caption, borderless hero title input, inline priority/due-date/status controls, collapsible description expansion, and the Delete action moved into the dialog footer for edits.
+- Removed redundant `Status` enum/state plumbing left over from the earlier task-list shell so status handling collapses to a single source of truth.
+- Unified status labels in the UI so both `created` and `pending` display as **"To do"** (via a shared `status_display_label` helper); board column and list badges now read consistently across views.
 
 ## 2026-05-09
 

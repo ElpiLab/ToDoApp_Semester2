@@ -117,7 +117,7 @@ def index_page():
                                 .props("flat no-caps align=left color=grey-4")
                                 .classes(item_classes)
                             )
-                        if key in ("dashboard", "tasks", "calendar"):
+                        if key in ("dashboard", "tasks", "calendar", "analytics"):
                             btn.on(
                                 "click", lambda k=key: switch_to_page(k)
                             )
@@ -128,10 +128,13 @@ def index_page():
                 dashboard_panel.set_visibility(page_key == "dashboard")
                 tasks_panel.set_visibility(page_key == "tasks")
                 calendar_panel.set_visibility(page_key == "calendar")
+                analytics_panel.set_visibility(page_key == "analytics")
                 if page_key == "dashboard":
                     render_dashboard()
                 if page_key == "calendar":
                     render_calendar()
+                if page_key == "analytics":
+                    render_analytics()
                 render_workspace_nav()
 
             ui.label("SYSTEM").classes(
@@ -234,6 +237,9 @@ def index_page():
 
         calendar_panel = ui.column().classes("w-full gap-4")
         calendar_panel.set_visibility(False)
+
+        analytics_panel = ui.column().classes("w-full gap-6")
+        analytics_panel.set_visibility(False)
 
     def open_task_dialog(task=None, default_due_date: date | None = None) -> None:
         is_edit = task is not None
@@ -345,6 +351,8 @@ def index_page():
                     render_calendar()
                 if state["page"] == "dashboard":
                     render_dashboard()
+                if state["page"] == "analytics":
+                    render_analytics()
                 if (
                     not is_edit
                     and add_another_checkbox is not None
@@ -860,6 +868,294 @@ def index_page():
                     else:
                         for t in high_priority_open[:5]:
                             render_task_row(t)
+
+    def render_analytics() -> None:
+        analytics_panel.clear()
+        with analytics_panel:
+            all_tasks = get_tasks()
+            today = date.today()
+            total = len(all_tasks)
+
+            open_tasks = [t for t in all_tasks if not t.completed]
+            completed_tasks = [t for t in all_tasks if t.completed]
+            overdue = [t for t in open_tasks if t.due_date and t.due_date < today]
+            week_end = today + timedelta(days=7)
+            due_this_week = [
+                t
+                for t in open_tasks
+                if t.due_date and today <= t.due_date <= week_end
+            ]
+
+            completion_pct = (
+                round(len(completed_tasks) / total * 100) if total else 0
+            )
+            tasks_with_due = [t for t in completed_tasks if t.due_date]
+            on_time_done = [
+                t for t in tasks_with_due if t.due_date and t.due_date >= today
+            ]
+            on_time_pct = (
+                round(len(on_time_done) / len(tasks_with_due) * 100)
+                if tasks_with_due
+                else 0
+            )
+
+            high_open = sum(
+                1 for t in open_tasks if t.priority.value == "high"
+            )
+            medium_open = sum(
+                1 for t in open_tasks if t.priority.value == "medium"
+            )
+            low_open = sum(
+                1 for t in open_tasks if t.priority.value == "low"
+            )
+            pending_total = high_open + medium_open + low_open
+
+            with ui.row().classes("w-full items-center justify-between gap-4"):
+                with ui.column().classes("gap-1"):
+                    ui.label("Analytics").classes(
+                        "text-2xl font-semibold text-slate-900"
+                    )
+                    ui.label(
+                        f"Insights across {total} task"
+                        f"{'s' if total != 1 else ''}"
+                    ).classes("text-sm text-slate-500")
+
+            kpi_cards = [
+                (
+                    "Completion rate",
+                    f"{completion_pct}%",
+                    f"{len(completed_tasks)} of {total} done",
+                    "text-emerald-600",
+                ),
+                (
+                    "On-time rate",
+                    f"{on_time_pct}%",
+                    f"{len(on_time_done)} of {len(tasks_with_due)} on time"
+                    if tasks_with_due
+                    else "No dated completions yet",
+                    "text-teal-600",
+                ),
+                (
+                    "Active",
+                    str(len(open_tasks)),
+                    f"{len(overdue)} overdue",
+                    "text-slate-900",
+                ),
+                (
+                    "Due this week",
+                    str(len(due_this_week)),
+                    "Next 7 days",
+                    "text-amber-600",
+                ),
+            ]
+            with ui.row().classes("w-full gap-3 flex-nowrap"):
+                for label, value, sub, accent in kpi_cards:
+                    with ui.card().classes(
+                        "flex-1 min-w-0 rounded-xl shadow-sm !p-3 gap-0"
+                    ):
+                        ui.label(label).classes(
+                            "text-[10px] uppercase tracking-widest text-slate-500"
+                        )
+                        ui.label(value).classes(
+                            f"text-2xl font-semibold {accent} leading-tight"
+                        )
+                        ui.label(sub).classes("text-xs text-slate-500")
+
+            with ui.row().classes("w-full items-stretch gap-4 flex-nowrap"):
+                with ui.card().classes(
+                    "flex-1 min-w-0 rounded-2xl shadow-sm !p-5 gap-3"
+                ):
+                    ui.label("Due-date heatmap").classes(
+                        "text-lg font-bold text-slate-900"
+                    )
+                    ui.label("Next 12 weeks · darker = more tasks due").classes(
+                        "text-sm text-slate-400"
+                    )
+
+                    weeks_count = 12
+                    week_start = today - timedelta(days=today.weekday())
+                    horizon_end = week_start + timedelta(weeks=weeks_count) - timedelta(days=1)
+
+                    due_counts: dict[date, int] = {}
+                    for t in open_tasks:
+                        if t.due_date and week_start <= t.due_date <= horizon_end:
+                            due_counts[t.due_date] = due_counts.get(t.due_date, 0) + 1
+
+                    def color_for(count: int) -> str:
+                        if count == 0:
+                            return "bg-slate-100"
+                        if count == 1:
+                            return "bg-teal-200"
+                        if count == 2:
+                            return "bg-teal-400"
+                        if count == 3:
+                            return "bg-teal-600"
+                        return "bg-teal-800"
+
+                    if not due_counts:
+                        with ui.column().classes(
+                            "w-full items-center gap-2 py-8"
+                        ):
+                            ui.icon("event_busy", size="2rem").classes(
+                                "text-slate-300"
+                            )
+                            ui.label("No upcoming due dates").classes(
+                                "text-sm text-slate-500"
+                            )
+                    else:
+                        with ui.row().classes(
+                            "items-start gap-2 mt-3 w-full overflow-x-auto"
+                        ):
+                            with ui.column().classes("gap-1 pt-px shrink-0"):
+                                for d_label in [
+                                    "Mon",
+                                    "Tue",
+                                    "Wed",
+                                    "Thu",
+                                    "Fri",
+                                    "Sat",
+                                    "Sun",
+                                ]:
+                                    ui.label(d_label).classes(
+                                        "text-xs text-slate-400 h-5 leading-5"
+                                    )
+
+                            with ui.element("div").classes(
+                                "grid grid-flow-col grid-rows-7 gap-1 shrink-0"
+                            ):
+                                for w in range(weeks_count):
+                                    column_start = week_start + timedelta(weeks=w)
+                                    for day_offset in range(7):
+                                        d = column_start + timedelta(
+                                            days=day_offset
+                                        )
+                                        count = due_counts.get(d, 0)
+                                        cell = ui.element("div").classes(
+                                            f"w-5 h-5 rounded-sm "
+                                            f"{color_for(count)} "
+                                            "cursor-default"
+                                        )
+                                        plural = "s" if count != 1 else ""
+                                        cell.tooltip(
+                                            f"{d.strftime('%a %b %d')}: "
+                                            f"{count} task{plural}"
+                                            if count
+                                            else d.strftime("%a %b %d")
+                                        )
+
+                        with ui.row().classes(
+                            "w-full items-center gap-2 mt-3"
+                        ):
+                            ui.label("Less").classes("text-xs text-slate-400")
+                            for level_class in [
+                                "bg-slate-100",
+                                "bg-teal-200",
+                                "bg-teal-400",
+                                "bg-teal-600",
+                                "bg-teal-800",
+                            ]:
+                                ui.element("div").classes(
+                                    f"w-3 h-3 rounded-sm {level_class}"
+                                )
+                            ui.label("More").classes("text-xs text-slate-400")
+
+                with ui.card().classes(
+                    "flex-1 min-w-0 rounded-2xl shadow-sm !p-5 gap-1"
+                ):
+                    ui.label("Priority mix").classes(
+                        "text-lg font-bold text-slate-900"
+                    )
+                    ui.label("All pending tasks").classes(
+                        "text-sm text-slate-400"
+                    )
+
+                    if pending_total == 0:
+                        with ui.column().classes(
+                            "w-full items-center gap-2 py-10"
+                        ):
+                            ui.icon("celebration", size="2rem").classes(
+                                "text-emerald-400"
+                            )
+                            ui.label("No pending tasks").classes(
+                                "text-sm text-slate-500"
+                            )
+                    else:
+                        chart_wrapper = ui.element("div").classes(
+                            "relative w-full flex items-center justify-center mt-2"
+                        )
+                        with chart_wrapper:
+                            ui.echart(
+                                {
+                                    "tooltip": {"trigger": "item"},
+                                    "series": [
+                                        {
+                                            "name": "Priority",
+                                            "type": "pie",
+                                            "radius": ["62%", "85%"],
+                                            "avoidLabelOverlap": False,
+                                            "startAngle": 90,
+                                            "itemStyle": {
+                                                "borderColor": "#ffffff",
+                                                "borderWidth": 4,
+                                            },
+                                            "label": {"show": False},
+                                            "emphasis": {"scale": False},
+                                            "data": [
+                                                {
+                                                    "value": high_open,
+                                                    "name": "High",
+                                                    "itemStyle": {
+                                                        "color": "#EF4444"
+                                                    },
+                                                },
+                                                {
+                                                    "value": medium_open,
+                                                    "name": "Medium",
+                                                    "itemStyle": {
+                                                        "color": "#F59E0B"
+                                                    },
+                                                },
+                                                {
+                                                    "value": low_open,
+                                                    "name": "Low",
+                                                    "itemStyle": {
+                                                        "color": "#10B981"
+                                                    },
+                                                },
+                                            ],
+                                        }
+                                    ],
+                                }
+                            ).classes("w-64 h-64")
+
+                            with ui.element("div").classes(
+                                "absolute inset-0 flex flex-col "
+                                "items-center justify-center pointer-events-none"
+                            ):
+                                ui.label(str(pending_total)).classes(
+                                    "text-4xl font-bold text-slate-900"
+                                )
+                                ui.label("PENDING").classes(
+                                    "text-xs font-semibold "
+                                    "text-slate-500 tracking-widest mt-1"
+                                )
+
+                        with ui.row().classes(
+                            "w-full items-center justify-center "
+                            "gap-5 mt-3 flex-wrap"
+                        ):
+                            for label, count, color_class in [
+                                ("High", high_open, "bg-red-500"),
+                                ("Med", medium_open, "bg-amber-500"),
+                                ("Low", low_open, "bg-emerald-500"),
+                            ]:
+                                with ui.row().classes("items-center gap-2"):
+                                    ui.element("div").classes(
+                                        f"w-2.5 h-2.5 rounded-full {color_class}"
+                                    )
+                                    ui.label(f"{count} {label}").classes(
+                                        "text-sm font-medium text-slate-700"
+                                    )
 
     def render_calendar() -> None:
         calendar_panel.clear()

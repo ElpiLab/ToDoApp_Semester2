@@ -5,26 +5,29 @@ This file records the current repository state.
 ## Current state
 
 - Repository phase: active feature development
-- Implementation state: the Tasks page is feature-complete for the current scope. It has a working **Board view** (default) and **List view** with drag-and-drop, Status/Priority/Sort filter dropdowns, global-header search, click-to-edit, confirmation-before-delete, and styling matched to the Figma. CRUD round-trips end-to-end against SQLite.
-- Prompt workflow: templates and the archived `010-task-list-view-foundation` exist. Today's polish (2026-05-10) was iterative UI follow-up not driven by a numbered prompt.
-- Planning docs: this file and `Changelog.md` are up to date as of 2026-05-10.
-- Source layout: still inconsistent with the repo contract — code lives in top-level `domain/`, `services/`, `data_access/`, `ui/` rather than under `src/student_task_manager/`. Migration deferred until coordinated with the upcoming Module work.
+- Implementation state: three pages are functional against SQLite:
+  - **Tasks page** — Board view (default) and List view with drag-and-drop, Status/Priority/Sort filter dropdowns, global-header search, click-to-edit, confirmation-before-delete, styling matched to the Figma. CRUD round-trips end-to-end.
+  - **Calendar page** — month grid with task pills, day-cell selection, side panel for the selected day, add-task button per day.
+  - **Dashboard page** (default landing) — stat cards (Total/Open/Completed/Overdue), Due today, Coming up (next 7 days), In progress, and High priority lists; all items click through to the task dialog.
+- Prompt workflow: templates and the archived `010-task-list-view-foundation` exist. Recent UI work (Calendar page, Dashboard page, dialog redesign, sidebar cleanup) was iterative follow-up not driven by a numbered prompt.
+- Planning docs: this file and `Changelog.md` are up to date as of 2026-05-18.
+- Source layout: still inconsistent with the repo contract — code lives in top-level `domain/`, `services/`, `data_access/`, `ui/` rather than under `src/student_task_manager/`. The active `015-consolidate-source-under-src` prompt covers this migration.
 - Test layout: service and controller regression coverage exists; broader UI behavior is exercised by hand.
 
 ## Active prompt
 
-- N/A — pending coordination with the teammate driving the Module entity.
+- `015-consolidate-source-under-src` — move `domain/`, `services/`, `data_access/`, `ui/` from the repo root into `src/student_task_manager/` and update imports/tests accordingly. Not yet implemented.
 
 ## Next planned work
 
-- **`Module` domain entity** (owned by teammate, no numbered prompt yet) — adds `Module` with FK from `Task`. Required before the dashboard, modules page, and module-aware filters/tags can land.
-- After Module: revisit `020-dashboard-and-summary-queries` against real data.
-- Calendar view and `040-settings-preferences-and-polish` still queued.
+- **Analytics page** — replace the placeholder sidebar entry with a real view (charts/summary metrics over tasks). No numbered prompt yet.
+- **Login page** — introduce authentication and a user-scoped task model. No numbered prompt yet; will need a domain decision on User/Student before implementation.
+- **Settings page** (`040-settings-preferences-and-polish`) — user preferences, polish, and lower-priority cleanup after the core flows are landed.
 
 ## Support boundary
 
-- Tasks page is feature-complete for the current scope (no Module dependency).
-- Other sidebar nav items (`Dashboard`, `Calendar`, `Modules`, `Analytics`, `Settings`) are visual placeholders; clicking them does nothing yet.
+- Tasks page is feature-complete for the current scope.
+- `Dashboard` and `Calendar` sidebar nav items are functional. `Modules` has been removed from the sidebar. `Analytics` and `Settings` are still visual placeholders; clicking them does nothing yet.
 - Notification bell + settings gear in the global header are visual placeholders.
 - The user chip in the sidebar shows a hardcoded "Alex C." — pending a Student/Profile decision.
 
