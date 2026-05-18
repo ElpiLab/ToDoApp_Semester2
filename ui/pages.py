@@ -100,7 +100,6 @@ def index_page():
                         ("Dashboard", "dashboard", "dashboard"),
                         ("Tasks", "task_alt", "tasks"),
                         ("Calendar", "calendar_month", "calendar"),
-                        ("Modules", "library_books", "modules"),
                         ("Analytics", "analytics", "analytics"),
                     ]
                     for label, icon, key in workspace_items:
