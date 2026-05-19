@@ -23,6 +23,13 @@ def _ensure_task_columns() -> None:
                     "ADD COLUMN category VARCHAR DEFAULT 'other'"
                 )
             )
+        if "user_id" not in existing:
+            conn.execute(
+                text(
+                    "ALTER TABLE task "
+                    "ADD COLUMN user_id INTEGER NOT NULL DEFAULT 1"
+                )
+            )
 
 
 def create_db_and_tables() -> None:

@@ -41,6 +41,7 @@ class TaskService:
             category=_normalize_category(category),
             due_date=due_date,
             completed=False,
+            user_id=1,
         )
 
         return self.dao.create(task)
