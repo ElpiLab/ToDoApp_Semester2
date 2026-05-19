@@ -87,11 +87,11 @@ def index_page():
             )
             with ui.column().classes("w-full gap-1"):
                 workspace_items = [
-                    ("Dashboard", "dashboard", False),
+                    # ("Dashboard", "dashboard", False),
                     ("Tasks", "task_alt", True),
-                    ("Calendar", "calendar_month", False),
-                    ("Modules", "library_books", False),
-                    ("Analytics", "analytics", False),
+                    # ("Calendar", "calendar_month", False),
+                    # ("Modules", "library_books", False),
+                    # ("Analytics", "analytics", False),
                 ]
                 for label, icon, active in workspace_items:
                     item_classes = "w-full justify-start px-3 py-2 rounded-lg"
@@ -678,10 +678,10 @@ def index_page():
                     ui.label("Create your first task to get started.").classes(
                         "text-sm text-slate-500"
                     )
-                    welcome_btn = ui.button("New task", icon="add").props(
-                        "color=teal-7 unelevated no-caps"
-                    )
-                    welcome_btn.on("click", lambda: open_task_dialog())
+                    # welcome_btn = ui.button("New task", icon="add").props( hide additional button on empty state for now
+                    #     "color=teal-7 unelevated no-caps"
+                    # )
+                    # welcome_btn.on("click", lambda: open_task_dialog())
                 return
 
             if not visible_tasks:
