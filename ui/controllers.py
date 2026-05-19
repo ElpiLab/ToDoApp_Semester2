@@ -1,24 +1,25 @@
 from datetime import date
-
-from nicegui import ui
-
+from nicegui import ui, app
 from domain.models import Priority, Status
 from services.task_service import TaskService
-
 
 service = TaskService()
 
 
-def _parse_due_date(due_date: str | None) -> date | None:
-    if not due_date:
-        return None
-    normalized = due_date.strip().replace(".", "-").replace("/", "-")
-    return date.fromisoformat(normalized)
+def get_current_user_id() -> int | None:
+    """Get the current logged-in user's ID"""
+    return app.storage.user.get('user_id')
 
 
 def create_task(title: str, description: str, priority: str, due_date: str | None):
+    user_id = get_current_user_id()
+    if not user_id:
+        ui.notify('Please login first', type='warning', position='top-right')
+        return None
+    
     try:
         task = service.create_task(
+            user_id=user_id,  # Pass user_id
             title=title,
             description=description,
             priority=Priority(priority),
@@ -32,8 +33,12 @@ def create_task(title: str, description: str, priority: str, due_date: str | Non
 
 
 def delete_task(task_id: int):
+    user_id = get_current_user_id()
+    if not user_id:
+        return False
+    
     try:
-        service.delete_task(task_id)
+        service.delete_task(task_id, user_id)  # Pass user_id
         ui.notify("Task deleted", type="positive", position="top-right")
         return True
     except Exception as e:
@@ -42,8 +47,12 @@ def delete_task(task_id: int):
 
 
 def complete_task(task_id: int):
+    user_id = get_current_user_id()
+    if not user_id:
+        return False
+    
     try:
-        service.mark_complete(task_id)
+        service.mark_complete(task_id, user_id)  # Pass user_id
         ui.notify("Task marked as complete", type="positive", position="top-right")
         return True
     except Exception as e:
@@ -52,8 +61,12 @@ def complete_task(task_id: int):
 
 
 def mark_task_pending(task_id: int):
+    user_id = get_current_user_id()
+    if not user_id:
+        return False
+    
     try:
-        service.mark_pending(task_id)
+        service.mark_pending(task_id, user_id)  # Pass user_id
         ui.notify("Task moved back to pending", type="positive", position="top-right")
         return True
     except Exception as e:
@@ -62,25 +75,31 @@ def mark_task_pending(task_id: int):
 
 
 def change_task_status(task_id: int, target_status: str):
+    user_id = get_current_user_id()
+    if not user_id:
+        return None
+    
     try:
-        updated_task = service.update_task(task_id, status=Status(target_status))
+        updated_task = service.update_task(
+            task_id, 
+            user_id,  # Pass user_id
+            status=Status(target_status)
+        )
         return updated_task
     except Exception as e:
         ui.notify(str(e), type="negative", position="top-right")
         return None
 
 
-def update_task(
-    task_id: int,
-    title: str,
-    description: str,
-    priority: str,
-    status: str,
-    due_date: str | None,
-):
+def update_task(task_id: int, title: str, description: str, priority: str, status: str, due_date: str | None):
+    user_id = get_current_user_id()
+    if not user_id:
+        return None
+    
     try:
         updated_task = service.update_task(
             task_id,
+            user_id,  # Pass user_id
             title=title,
             description=description,
             priority=Priority(priority),
@@ -95,4 +114,16 @@ def update_task(
 
 
 def get_tasks():
-    return service.get_all_tasks()
+    """Get tasks for current user only"""
+    user_id = get_current_user_id()
+    if not user_id:
+        return []
+    
+    return service.get_user_tasks(user_id)  # Only get user's tasks
+
+
+def _parse_due_date(due_date: str | None) -> date | None:
+    if not due_date:
+        return None
+    normalized = due_date.strip().replace(".", "-").replace("/", "-")
+    return date.fromisoformat(normalized)

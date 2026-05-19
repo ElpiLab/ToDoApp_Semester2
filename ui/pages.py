@@ -1,6 +1,5 @@
 from datetime import date
-
-from nicegui import ui
+from nicegui import ui, app
 
 from ui.controllers import (
     change_task_status,
@@ -56,6 +55,12 @@ def normalize_query(value: str | None) -> str:
 
 @ui.page("/")
 def index_page():
+
+    # protect page
+    if not app.storage.user.get('authenticated', False):
+        ui.navigate.to('/login')
+        return
+
     ui.query("body").classes("bg-slate-100")
     ui.query(".q-layout").props('view="LHh LpR fFf"')
 
@@ -107,14 +112,31 @@ def index_page():
                     "flat no-caps color=grey-4"
                 ).classes("w-full justify-start px-3 py-2 rounded-lg")
 
+            # CORRECTED USER SECTION - properly indented inside the drawer
             with ui.row().classes(
                 "items-center gap-3 px-2 pt-4 mt-auto border-t border-slate-700"
             ):
                 with ui.element("div").classes(
                     "w-9 h-9 rounded-full bg-teal-600 flex items-center justify-center shrink-0"
                 ):
-                    ui.label("A").classes("text-white font-semibold text-sm")
-                ui.label("Alex C.").classes("text-sm font-medium text-white")
+                    ui.icon("shield").classes("text-white text-sm")
+                
+                with ui.column().classes("gap-0 flex-1"):
+                    user_id = app.storage.user.get('user_id', '')
+                    user_email = app.storage.user.get('email', '')
+                    
+                    # Show User ID - proves multi-user isolation
+                    ui.label(f"User #{user_id}").classes("text-xs font-mono text-slate-300")
+                    ui.label(user_email).classes("text-xs text-slate-400 truncate")
+                
+                # Optional logout button in drawer
+                # ui.button(
+                #     icon="logout",
+                #     on_click=lambda: (
+                #         app.storage.user.clear(),
+                #         ui.navigate.to('/login')
+                #     )
+                # ).props("flat round color=grey-4 size=sm")
 
     with ui.header().classes(
         "bg-white items-center justify-end px-6 py-3 shadow-sm gap-3"
@@ -122,63 +144,82 @@ def index_page():
         global_search_input = ui.input(
             placeholder="Search assignments, courses..."
         ).props("outlined dense clearable").classes("w-80")
-        create_button = ui.button("New Task", icon="add").props(
-            "color=teal-7 unelevated"
-        )
+
+        create_button = ui.button(
+            "New Task",
+            icon="add"
+        ).props("color=teal-7 unelevated")
         create_button.classes("rounded-lg px-4")
-        ui.button(icon="notifications").props("flat round color=grey-7")
-        ui.button(icon="settings").props("flat round color=grey-7")
 
-    with ui.column().classes("w-full gap-4 p-6").style("max-width: 1280px; margin: 0 auto;"):
-        with ui.column().classes("gap-1"):
-            ui.label("Task management").classes("text-2xl font-semibold text-slate-900")
-            subtitle_label = ui.label("0 tasks").classes("text-sm text-slate-500")
+        ui.button(
+            icon="notifications"
+        ).props("flat round color=grey-7")
 
-        with ui.row().classes("w-full items-center justify-between gap-4"):
-            with ui.row().classes("items-center gap-2"):
-                status_select = (
-                    ui.select(
-                        {"all": "All", "pending": "Pending", "completed": "Completed"},
-                        value=state["status"],
-                        label="Status",
-                    )
-                    .props("outlined dense options-dense")
-                    .classes("w-36")
-                )
-                priority_select = (
-                    ui.select(
-                        {
-                            "all": "All",
-                            "low": "Low",
-                            "medium": "Medium",
-                            "high": "High",
-                        },
-                        value=state["priority"],
-                        label="Priority",
-                    )
-                    .props("outlined dense options-dense")
-                    .classes("w-32")
-                )
-                sort_select = (
-                    ui.select(
-                        {
-                            "due_date": "Due date",
-                            "title": "Title",
-                            "priority": "Priority",
-                            "status": "Status",
-                        },
-                        value=state["sort"],
-                        label="Sort by",
-                    )
-                    .props("outlined dense options-dense")
-                    .classes("w-36")
-                )
-            view_toggle = ui.toggle(
-                {"board": "Board", "list": "List"},
-                value=state["view"],
-            ).props("unelevated no-caps toggle-color=teal-7")
+        ui.button(
+            icon="settings"
+        ).props("flat round color=grey-7")
 
-        tasks_container = ui.column().classes("w-full")
+        ui.button(
+            icon="logout",
+            on_click=lambda: (
+                app.storage.user.clear(),
+                ui.navigate.to('/login')
+            )
+        ).props("flat round color=negative")
+
+    with ui.column().classes(
+        "w-full gap-4 p-6"
+    ).style("max-width: 1280px; margin: 0 auto;"):
+        with ui.column().classes("w-full gap-4 p-6").style("max-width: 1280px; margin: 0 auto;"):
+            with ui.column().classes("gap-1"):
+                ui.label("Task management").classes("text-2xl font-semibold text-slate-900")
+                subtitle_label = ui.label("0 tasks").classes("text-sm text-slate-500")
+
+            with ui.row().classes("w-full items-center justify-between gap-4"):
+                with ui.row().classes("items-center gap-2"):
+                    status_select = (
+                        ui.select(
+                            {"all": "All", "pending": "Pending", "completed": "Completed"},
+                            value=state["status"],
+                            label="Status",
+                        )
+                        .props("outlined dense options-dense")
+                        .classes("w-36")
+                    )
+                    priority_select = (
+                        ui.select(
+                            {
+                                "all": "All",
+                                "low": "Low",
+                                "medium": "Medium",
+                                "high": "High",
+                            },
+                            value=state["priority"],
+                            label="Priority",
+                        )
+                        .props("outlined dense options-dense")
+                        .classes("w-32")
+                    )
+                    sort_select = (
+                        ui.select(
+                            {
+                                "due_date": "Due date",
+                                "title": "Title",
+                                "priority": "Priority",
+                                "status": "Status",
+                            },
+                            value=state["sort"],
+                            label="Sort by",
+                        )
+                        .props("outlined dense options-dense")
+                        .classes("w-36")
+                    )
+                view_toggle = ui.toggle(
+                    {"board": "Board", "list": "List"},
+                    value=state["view"],
+                ).props("unelevated no-caps toggle-color=teal-7")
+
+            tasks_container = ui.column().classes("w-full")
 
     def open_task_dialog(task=None) -> None:
         is_edit = task is not None
