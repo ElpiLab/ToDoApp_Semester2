@@ -4,6 +4,11 @@ from data_access.dao import TaskDAO
 from domain.models import Priority, Status, Task
 
 
+def _normalize_category(value: str | None) -> str:
+    stripped = (value or "").strip()
+    return stripped or "Other"
+
+
 class TaskService:
     def __init__(self, dao: TaskDAO | None = None):
         self.dao = dao or TaskDAO()
@@ -23,6 +28,7 @@ class TaskService:
         description: str,
         priority: Priority,
         due_date: date | None = None,
+        category: str = "Other",
     ) -> Task:
         if priority is None:
             raise ValueError("Priority is required")
@@ -32,6 +38,7 @@ class TaskService:
             description=self._normalize_description(description),
             priority=priority,
             status=Status.created,
+            category=_normalize_category(category),
             due_date=due_date,
             completed=False,
         )
@@ -67,7 +74,15 @@ class TaskService:
     def update_task(self, task_id: int, **updates) -> Task:
         task = self.get_task_by_id(task_id)
 
-        allowed_fields = {"title", "description", "priority", "status", "due_date", "completed"}
+        allowed_fields = {
+            "title",
+            "description",
+            "priority",
+            "status",
+            "due_date",
+            "completed",
+            "category",
+        }
 
         for key, value in updates.items():
             if key not in allowed_fields:
@@ -76,6 +91,7 @@ class TaskService:
 
         task.title = self._normalize_title(task.title)
         task.description = self._normalize_description(task.description)
+        task.category = _normalize_category(task.category)
         if "status" in updates:
             task.completed = task.status == Status.done
         elif "completed" in updates:

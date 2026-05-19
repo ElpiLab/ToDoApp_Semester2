@@ -16,13 +16,20 @@ def _parse_due_date(due_date: str | None) -> date | None:
     return date.fromisoformat(normalized)
 
 
-def create_task(title: str, description: str, priority: str, due_date: str | None):
+def create_task(
+    title: str,
+    description: str,
+    priority: str,
+    due_date: str | None,
+    category: str = "Other",
+):
     try:
         task = service.create_task(
             title=title,
             description=description,
             priority=Priority(priority),
             due_date=_parse_due_date(due_date),
+            category=category,
         )
         ui.notify(f'Task "{task.title}" created successfully', type="positive", position="top-right")
         return task
@@ -77,6 +84,7 @@ def update_task(
     priority: str,
     status: str,
     due_date: str | None,
+    category: str = "Other",
 ):
     try:
         updated_task = service.update_task(
@@ -86,6 +94,7 @@ def update_task(
             priority=Priority(priority),
             status=Status(status),
             due_date=_parse_due_date(due_date),
+            category=category,
         )
         ui.notify(f'Task "{updated_task.title}" updated successfully', type="positive", position="top-right")
         return updated_task

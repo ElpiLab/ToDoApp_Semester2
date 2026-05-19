@@ -25,6 +25,7 @@ class Task(SQLModel, table=True):
     description: str = ""
     priority: Priority = Priority.medium
     status: Status = Status.created
+    category: str = "Other"
 
     due_date: Optional[date] = None
     completed: bool = False
