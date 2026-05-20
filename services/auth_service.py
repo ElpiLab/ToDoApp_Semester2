@@ -28,3 +28,28 @@ class AuthService:
             return user
 
         return None
+
+    def update_profile(
+        self,
+        session: Session,
+        user_id: int,
+        full_name: str,
+        email: str | None = None,
+    ):
+        user = session.get(Student, user_id)
+        if not user:
+            return None
+        user.full_name = full_name.strip()
+        if email is not None:
+            new_email = email.strip()
+            if new_email != user.email:
+                existing = session.exec(
+                    select(Student).where(Student.email == new_email)
+                ).first()
+                if existing and existing.id != user_id:
+                    raise ValueError("Email already in use")
+                user.email = new_email
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+        return user

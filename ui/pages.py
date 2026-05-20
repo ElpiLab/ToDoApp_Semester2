@@ -4,7 +4,7 @@ import io
 import json
 from datetime import date, datetime, timedelta
 
-from nicegui import ui
+from nicegui import app, ui
 
 from ui.controllers import (
     change_task_status,
@@ -98,8 +98,18 @@ def normalize_query(value: str | None) -> str:
     return (value or "").strip().lower()
 
 
+@ui.page("/logout")
+def logout_page():
+    app.storage.user.clear()
+    ui.navigate.to("/login")
+
+
 @ui.page("/")
 def index_page():
+    if not app.storage.user.get("authenticated", False):
+        ui.navigate.to("/login")
+        return
+
     ui.query("body").classes("bg-stone-100")
     ui.query(".q-layout").props('view="lHh LpR fFf"')
     ui.add_head_html(
@@ -214,37 +224,13 @@ def index_page():
                     render_settings()
                 render_workspace_nav()
 
-            ui.label("SYSTEM").classes(
-                "text-xs uppercase tracking-widest text-slate-400 "
-                "px-3 mt-7 mb-3 sidebar-hide"
-            )
-            with ui.column().classes("w-full gap-2"):
-                settings_btn = ui.button("Settings", icon="settings").props(
-                    "flat no-caps align=left color=grey-8"
-                )
-                settings_btn.classes("w-full px-3 py-2 rounded-lg nav-item")
-                settings_btn.on(
-                    "click", lambda: switch_to_page("settings")
-                )
-
-            with ui.row().classes(
-                "items-center gap-3 px-3 pt-4 pb-1 mt-auto "
-                "border-t border-slate-200"
-            ):
-                with ui.element("div").classes(
-                    "w-9 h-9 rounded-full bg-emerald-600 "
-                    "flex items-center justify-center shrink-0"
-                ):
-                    ui.label("A").classes(
-                        "text-white font-semibold text-sm"
-                    )
-                with ui.column().classes("gap-0 min-w-0 sidebar-hide"):
-                    ui.label("Alex C.").classes(
-                        "text-sm font-medium text-slate-900"
-                    )
-                    ui.label("Student").classes(
-                        "text-xs text-slate-500"
-                    )
+    display_name = (
+        app.storage.user.get("full_name")
+        or app.storage.user.get("email")
+        or "User"
+    )
+    avatar_initial = (display_name[0] if display_name else "?").upper()
+    display_email = app.storage.user.get("email") or ""
 
     expand_btn = ui.button(icon="chevron_right").props(
         "flat round dense color=grey-7"
@@ -295,7 +281,60 @@ def index_page():
                         notif_menu_container = ui.column().classes(
                             "p-0 gap-0 w-80 min-h-[300px]"
                         )
-                ui.button(icon="settings").props("flat round color=grey-7")
+                with ui.button().props(
+                    "flat round dense"
+                ).classes("w-9 h-9 p-0 ml-1"):
+                    with ui.element("div").classes(
+                        "w-9 h-9 rounded-full bg-emerald-600 "
+                        "flex items-center justify-center"
+                    ):
+                        ui.label(avatar_initial).classes(
+                            "text-white font-semibold text-sm"
+                        )
+                    user_menu = ui.menu().props(
+                        'anchor="bottom right" self="top right" '
+                        ':offset="[0, 12]"'
+                    )
+                    with user_menu:
+                        with ui.column().classes(
+                            "p-3 gap-1 min-w-[220px]"
+                        ):
+                            with ui.column().classes(
+                                "gap-0 pb-2 mb-1 border-b border-slate-200"
+                            ):
+                                ui.label(display_name).classes(
+                                    "text-sm font-medium text-slate-900"
+                                )
+                                ui.label(display_email).classes(
+                                    "text-xs text-slate-500"
+                                )
+                            settings_menu_btn = ui.button(
+                                "Settings", icon="settings"
+                            ).props(
+                                "flat no-caps align=left color=grey-8"
+                            )
+                            settings_menu_btn.classes(
+                                "w-full justify-start px-2 py-1 rounded-md"
+                            )
+                            settings_menu_btn.on(
+                                "click",
+                                lambda: (
+                                    user_menu.close(),
+                                    switch_to_page("settings"),
+                                ),
+                            )
+                            logout_menu_btn = ui.button(
+                                "Logout", icon="logout"
+                            ).props(
+                                "flat no-caps align=left color=grey-8"
+                            )
+                            logout_menu_btn.classes(
+                                "w-full justify-start px-2 py-1 rounded-md"
+                            )
+                            logout_menu_btn.on(
+                                "click",
+                                lambda: ui.navigate.to("/logout"),
+                            )
 
     with ui.column().classes("w-full gap-4 p-6 mx-auto").style("max-width: 1280px;"):
         dashboard_panel = ui.column().classes("w-full gap-6")
@@ -1121,7 +1160,12 @@ def index_page():
                     "col-span-2 rounded-2xl !p-6 gap-2 "
                     "!bg-emerald-900 !text-white shadow-none"
                 ):
-                    ui.label(f"{greeting_text}, Alex.").classes(
+                    first_name = (
+                        display_name.split("@")[0].split()[0]
+                        if display_name
+                        else "there"
+                    )
+                    ui.label(f"{greeting_text}, {first_name}").classes(
                         "text-2xl font-semibold leading-tight !text-white"
                     )
                     with ui.column().classes("gap-0 mt-2"):
@@ -1899,20 +1943,79 @@ def index_page():
 
             with section_card(
                 "Profile",
-                "Your display name",
+                "Your account details",
                 "person",
                 "bg-emerald-100",
                 "text-emerald-700",
             ):
-                ui.input(
-                    label="Display name", value="Alex C."
+                name_input = ui.input(
+                    label="Display name",
+                    value=app.storage.user.get("full_name") or "",
                 ).props(
                     "outlined dense hide-bottom-space"
                 ).classes("w-64")
-                ui.label(
-                    "Saved locally — accounts and persistence land "
-                    "with the planned Login page."
-                ).classes("text-xs text-slate-400")
+                email_input = ui.input(
+                    label="Email",
+                    value=app.storage.user.get("email") or "",
+                ).props(
+                    "outlined dense hide-bottom-space"
+                ).classes("w-64")
+
+                def save_profile() -> None:
+                    from sqlmodel import Session
+                    from data_access.db import engine
+                    from services.auth_service import AuthService
+
+                    user_id = app.storage.user.get("user_id")
+                    if not user_id:
+                        ui.notify(
+                            "Not logged in",
+                            type="negative",
+                            position="top-right",
+                        )
+                        return
+                    new_name = (name_input.value or "").strip()
+                    new_email = (email_input.value or "").strip()
+                    if not new_name:
+                        ui.notify(
+                            "Name cannot be empty",
+                            type="negative",
+                            position="top-right",
+                        )
+                        return
+                    if "@" not in new_email or "." not in new_email:
+                        ui.notify(
+                            "Enter a valid email address",
+                            type="negative",
+                            position="top-right",
+                        )
+                        return
+                    try:
+                        with Session(engine) as session:
+                            AuthService().update_profile(
+                                session, user_id, new_name, new_email
+                            )
+                    except ValueError as e:
+                        ui.notify(
+                            str(e),
+                            type="negative",
+                            position="top-right",
+                        )
+                        return
+                    app.storage.user.update(
+                        {"full_name": new_name, "email": new_email}
+                    )
+                    ui.notify(
+                        "Profile saved. Refresh to update the avatar.",
+                        type="positive",
+                        position="top-right",
+                    )
+
+                ui.button(
+                    "Save changes", icon="save", on_click=save_profile
+                ).props(
+                    "color=green-9 unelevated no-caps dense"
+                ).classes("rounded-lg mt-2")
 
             with section_card(
                 "Preferences",
