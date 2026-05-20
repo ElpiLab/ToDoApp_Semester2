@@ -128,6 +128,10 @@ def index_page():
         "calendar_filter_date": None,
     }
 
+    display_name = app.storage.user.get("full_name") or app.storage.user.get("email") or "User"
+    avatar_initial = (display_name[0] if display_name else "?").upper()
+    display_email = app.storage.user.get("email") or ""
+
     drawer_state = {"open": True}
     drawer = (
         ui.left_drawer(value=True, top_corner=False, bottom_corner=True)
@@ -197,9 +201,48 @@ def index_page():
                     render_settings()
                 render_workspace_nav()
 
-    display_name = app.storage.user.get("full_name") or app.storage.user.get("email") or "User"
-    avatar_initial = (display_name[0] if display_name else "?").upper()
-    display_email = app.storage.user.get("email") or ""
+            ui.element("div").classes("flex-1")
+            with ui.element("div").classes("w-full border-t border-slate-200 pt-3 mt-4"):
+                with (
+                    ui.button()
+                    .props("flat no-caps align=left color=grey-8")
+                    .classes("w-full rounded-lg p-2")
+                ):
+                    with ui.row().classes("w-full items-center gap-3 no-wrap"):
+                        with ui.element("div").classes(
+                            "w-9 h-9 rounded-full bg-emerald-600 "
+                            "flex items-center justify-center shrink-0"
+                        ):
+                            ui.label(avatar_initial).classes("text-white font-semibold text-sm")
+                        with ui.column().classes("gap-0 min-w-0 sidebar-hide"):
+                            ui.label(display_name).classes(
+                                "text-sm font-medium text-slate-900 truncate max-w-[160px]"
+                            )
+                    user_menu = ui.menu().props('anchor="top left" self="bottom left"')
+                    with user_menu:
+                        with ui.column().classes("p-3 gap-1 min-w-[220px]"):
+                            with ui.column().classes("gap-0 pb-2 mb-1 border-b border-slate-200"):
+                                ui.label(display_name).classes("text-sm font-medium text-slate-900")
+                                ui.label(display_email).classes("text-xs text-slate-500")
+                            settings_menu_btn = ui.button("Settings", icon="settings").props(
+                                "flat no-caps align=left color=grey-8"
+                            )
+                            settings_menu_btn.classes("w-full justify-start px-2 py-1 rounded-md")
+                            settings_menu_btn.on(
+                                "click",
+                                lambda: (
+                                    user_menu.close(),
+                                    switch_to_page("settings"),
+                                ),
+                            )
+                            logout_menu_btn = ui.button("Logout", icon="logout").props(
+                                "flat no-caps align=left color=grey-8"
+                            )
+                            logout_menu_btn.classes("w-full justify-start px-2 py-1 rounded-md")
+                            logout_menu_btn.on(
+                                "click",
+                                lambda: ui.navigate.to("/logout"),
+                            )
 
     expand_btn = (
         ui.button(icon="chevron_right")
@@ -244,38 +287,9 @@ def index_page():
                     )
                     with notif_menu:
                         notif_menu_container = ui.column().classes("p-0 gap-0 w-80 min-h-[300px]")
-                with ui.button().props("flat round dense").classes("w-9 h-9 p-0 ml-1"):
-                    with ui.element("div").classes(
-                        "w-9 h-9 rounded-full bg-emerald-600 flex items-center justify-center"
-                    ):
-                        ui.label(avatar_initial).classes("text-white font-semibold text-sm")
-                    user_menu = ui.menu().props(
-                        'anchor="bottom right" self="top right" :offset="[0, 12]"'
-                    )
-                    with user_menu:
-                        with ui.column().classes("p-3 gap-1 min-w-[220px]"):
-                            with ui.column().classes("gap-0 pb-2 mb-1 border-b border-slate-200"):
-                                ui.label(display_name).classes("text-sm font-medium text-slate-900")
-                                ui.label(display_email).classes("text-xs text-slate-500")
-                            settings_menu_btn = ui.button("Settings", icon="settings").props(
-                                "flat no-caps align=left color=grey-8"
-                            )
-                            settings_menu_btn.classes("w-full justify-start px-2 py-1 rounded-md")
-                            settings_menu_btn.on(
-                                "click",
-                                lambda: (
-                                    user_menu.close(),
-                                    switch_to_page("settings"),
-                                ),
-                            )
-                            logout_menu_btn = ui.button("Logout", icon="logout").props(
-                                "flat no-caps align=left color=grey-8"
-                            )
-                            logout_menu_btn.classes("w-full justify-start px-2 py-1 rounded-md")
-                            logout_menu_btn.on(
-                                "click",
-                                lambda: ui.navigate.to("/logout"),
-                            )
+                settings_header_btn = ui.button(icon="settings").props("flat round color=grey-7")
+                settings_header_btn.tooltip("Settings")
+                settings_header_btn.on("click", lambda: switch_to_page("settings"))
 
     with ui.column().classes("w-full gap-4 p-6 mx-auto").style("max-width: 1280px;"):
         dashboard_panel = ui.column().classes("w-full gap-6")
@@ -291,7 +305,7 @@ def index_page():
                 with ui.row().classes("items-center gap-2"):
                     status_select = (
                         ui.select(
-                            {"all": "All", "pending": "Pending", "completed": "Completed"},
+                            {"all": "All", "pending": "To do", "completed": "Completed"},
                             value=state["status"],
                             label="Status",
                         )
@@ -1611,7 +1625,7 @@ def index_page():
                         return
                     app.storage.user.update({"full_name": new_name, "email": new_email})
                     ui.notify(
-                        "Profile saved. Refresh to update the avatar.",
+                        "Profile saved. Reload the page to refresh your profile badge.",
                         type="positive",
                         position="top-right",
                     )
@@ -1652,9 +1666,7 @@ def index_page():
                         value="medium",
                         label="Default priority",
                     ).props("outlined dense options-dense hide-bottom-space").classes("w-44")
-                ui.label("Preference choices are session-only for now.").classes(
-                    "text-xs text-slate-400"
-                )
+                ui.label("Preference choices are not saved yet.").classes("text-xs text-slate-400")
 
             with section_card(
                 "Notifications",
@@ -1669,10 +1681,10 @@ def index_page():
                     ui.switch("Remind me about tasks due tomorrow", value=True).props(
                         "color=green-9"
                     )
-                    ui.switch("Email reminders (requires login)", value=False).props(
+                    ui.switch("Email reminders (not available yet)", value=False).props(
                         "color=green-9 disable"
                     )
-                ui.label("Notification choices are session-only for now.").classes(
+                ui.label("Notification choices are not saved yet.").classes(
                     "text-xs text-slate-400"
                 )
 
@@ -1691,9 +1703,7 @@ def index_page():
                     },
                     value="light",
                 ).props("unelevated no-caps toggle-color=green-9 spread").classes("self-start")
-                ui.label("Appearance choices are session-only for now.").classes(
-                    "text-xs text-slate-400"
-                )
+                ui.label("Appearance choices are not saved yet.").classes("text-xs text-slate-400")
 
             with section_card(
                 "Data",
@@ -2068,13 +2078,6 @@ def index_page():
                             "min-w-[20px] flex items-center justify-center"
                         ):
                             ui.label(str(unread_count)).classes("text-xs font-semibold text-white")
-                if total_count:
-                    mark_all = (
-                        ui.button("Mark all read")
-                        .props("flat dense no-caps color=green-9")
-                        .classes("text-xs")
-                    )
-                    mark_all.on("click", lambda: notif_menu.close())
 
             if not notifications:
                 with ui.column().classes("w-full items-center gap-2 py-8"):
@@ -2130,11 +2133,10 @@ def index_page():
                 "mt-auto"
             )
             with footer:
-                ui.label("Manage notification settings in").classes("text-xs text-slate-500")
                 settings_link = (
-                    ui.button("Settings")
+                    ui.button("Open notification settings")
                     .props("flat dense no-caps color=green-9")
-                    .classes("text-xs !p-0 !min-h-0")
+                    .classes("text-xs")
                 )
 
                 def open_settings_from_notifications() -> None:

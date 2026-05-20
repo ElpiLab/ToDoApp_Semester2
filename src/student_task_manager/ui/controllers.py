@@ -71,7 +71,7 @@ def complete_task(task_id: int):
 def mark_task_pending(task_id: int):
     try:
         service.mark_pending(task_id, user_id=_current_user_id())
-        ui.notify("Task moved back to pending", type="positive", position="top-right")
+        ui.notify("Task moved back to To do", type="positive", position="top-right")
         return True
     except ValueError as e:
         ui.notify(str(e), type="negative", position="top-right")
