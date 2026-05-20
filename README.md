@@ -209,7 +209,6 @@ src/student_task_manager/
   data_access/
     db.py                              # engine and schema bootstrap
     dao.py                             # task persistence methods
-    seed.py                            # optional seed helper
   ui/
     controllers.py                     # UI boundary to services
     login.py

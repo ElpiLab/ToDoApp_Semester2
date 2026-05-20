@@ -10,10 +10,11 @@ This repository contains a browser-based student task manager for the Advanced P
 
 Current repository status:
 
-- the repository is still in early setup
-- `README.md` defines the product scope and baseline architecture
-- prompt templates exist under `prompts/templates/`
-- planning docs live under `docs/`
+- the app runs end-to-end: authentication, dashboard, task board, calendar, analytics, and settings
+- application code lives under the installable `src/student_task_manager/` package; `application.py` at the repo root is the launcher
+- the automated suite covers the rubric mix documented in `docs/TestCases.md` (unit, database, and integration tests)
+- `README.md` defines product scope and the current architecture; `docs/Status.md` tracks the current repository state
+- prompt templates exist under `prompts/templates/`; archived prompts run through `060-fix-windows-app-startup`
 - implementation work should be driven by the prompt workflow, not ad-hoc coding
 
 Architecture constraints:
