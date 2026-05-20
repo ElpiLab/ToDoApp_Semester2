@@ -38,16 +38,16 @@ def create_default_user():
                 session.add(default_user)
                 session.commit()
                 print("=" * 50)
-                print("✅ Default user created successfully!")
-                print("📧 Email: admin@example.com")
-                print("🔑 Password: admin123")
+                print("Default user created successfully.")
+                print("Email: admin@example.com")
+                print("Password: admin123")
                 print("=" * 50)
                 return True
             else:
-                print("✅ Users already exist.")
+                print("Users already exist.")
                 return False
     except Exception as e:
-        print(f"❌ Error creating default user: {e}")
+        print(f"Error creating default user: {e}")
         return False
 
 
@@ -58,7 +58,7 @@ def run() -> None:
     secret_key = os.environ.get("STORAGE_SECRET")
     if not secret_key:
         secret_key = "dev-secret-key-do-not-use-in-production"
-        print("⚠️  WARNING: Using development storage secret.")
+        print("WARNING: Using development storage secret.")
 
     ui.run(title="Bizzy", port=8081, host="127.0.0.1", reload=False, storage_secret=secret_key)
 

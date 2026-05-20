@@ -27,6 +27,8 @@ This file tracks planned work and execution order.
   Rewrote the README to match the current app, architecture, ORM model, run commands, and testing rubric.
 - `050-readme-contributions-and-export-scope`
   Added README contribution and future-roadmap sections, and kept export/download out of the current UI scope.
+- `060-fix-windows-app-startup`
+  Fixed Windows console startup output and disabled noisy SQLAlchemy echo logging.
 
 ## Notes
 

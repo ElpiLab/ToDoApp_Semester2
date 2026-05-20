@@ -4,6 +4,7 @@ This file records landed repository changes.
 
 ## 2026-05-20
 
+- Fixed Windows app startup by replacing emoji console output with ASCII messages and disabling noisy SQLAlchemy echo logging.
 - Added blank Team Contributions rows and a concise Future Roadmap section to `README.md`.
 - Removed CSV/JSON task export controls from the Settings UI so analytics remains view-only in the current scope.
 - Rewrote `README.md` so it matches the current implementation, explains the `src/student_task_manager/` package layout, documents actual SQLModel entities, and links to the course test-case table.
