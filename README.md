@@ -155,25 +155,7 @@ Outputs: calendar task overview
 
 ## Wireframes / Mockups
 
-[View the interactive prototype on Figma](https://www.figma.com/design/iKEgafTYKCCSQv2dSyIWLF/Prototype?node-id=0-1&t=g92BfXm8z582fAA4-1)
-
-The following wireframes show the planned Bizzy UI.
-
-### Dashboard
-
-![Dashboard](docs/wireframes/dashboard.png)
-
-### Modules
-
-![Modules](docs/wireframes/modules.png)
-
-### Task Management (Board view)
-
-![Task Management](docs/wireframes/tasks-board.png)
-
-### New Task
-
-![New Task](docs/wireframes/new-task.png)
+Final wireframes will be added before submission.
 
 ## Architecture
 
