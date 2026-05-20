@@ -43,7 +43,7 @@ def create_task(
             f'Task "{task.title}" created successfully', type="positive", position="top-right"
         )
         return task
-    except Exception as e:
+    except ValueError as e:
         ui.notify(str(e), type="negative", position="top-right")
         return None
 
@@ -53,7 +53,7 @@ def delete_task(task_id: int):
         service.delete_task(task_id, user_id=_current_user_id())
         ui.notify("Task deleted", type="positive", position="top-right")
         return True
-    except Exception as e:
+    except ValueError as e:
         ui.notify(str(e), type="negative", position="top-right")
         return False
 
@@ -63,7 +63,7 @@ def complete_task(task_id: int):
         service.mark_complete(task_id, user_id=_current_user_id())
         ui.notify("Task marked as complete", type="positive", position="top-right")
         return True
-    except Exception as e:
+    except ValueError as e:
         ui.notify(str(e), type="negative", position="top-right")
         return False
 
@@ -73,7 +73,7 @@ def mark_task_pending(task_id: int):
         service.mark_pending(task_id, user_id=_current_user_id())
         ui.notify("Task moved back to pending", type="positive", position="top-right")
         return True
-    except Exception as e:
+    except ValueError as e:
         ui.notify(str(e), type="negative", position="top-right")
         return False
 
@@ -86,7 +86,7 @@ def change_task_status(task_id: int, target_status: str):
             status=Status(target_status),
         )
         return updated_task
-    except Exception as e:
+    except ValueError as e:
         ui.notify(str(e), type="negative", position="top-right")
         return None
 
@@ -117,7 +117,7 @@ def update_task(
             position="top-right",
         )
         return updated_task
-    except Exception as e:
+    except ValueError as e:
         ui.notify(str(e), type="negative", position="top-right")
         return None
 
@@ -125,6 +125,6 @@ def update_task(
 def get_tasks():
     try:
         return service.get_all_tasks(user_id=_current_user_id())
-    except Exception as e:
+    except ValueError as e:
         ui.notify(str(e), type="negative", position="top-right")
         return []
