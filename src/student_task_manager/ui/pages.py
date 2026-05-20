@@ -1,7 +1,4 @@
 import calendar as cal_module
-import csv
-import io
-import json
 from datetime import date, datetime, timedelta
 
 from nicegui import app, ui
@@ -1711,79 +1708,11 @@ def index_page():
 
             with section_card(
                 "Data",
-                "Export your tasks or reset the app",
+                "Reset task data",
                 "storage",
                 "bg-rose-100",
                 "text-rose-700",
             ):
-                stamp = date.today().isoformat()
-
-                def export_json() -> None:
-                    payload = [
-                        {
-                            "id": t.id,
-                            "title": t.title,
-                            "description": t.description,
-                            "priority": t.priority.value,
-                            "status": t.status.value,
-                            "category": t.category,
-                            "due_date": (t.due_date.isoformat() if t.due_date else None),
-                            "completed": t.completed,
-                        }
-                        for t in all_tasks
-                    ]
-                    body = json.dumps(payload, indent=2).encode("utf-8")
-                    ui.download(
-                        body,
-                        f"bizzy-tasks-{stamp}.json",
-                        "application/json",
-                    )
-                    ui.notify(
-                        f"Exported {len(payload)} task{'s' if len(payload) != 1 else ''}",
-                        type="positive",
-                        position="top-right",
-                    )
-
-                def export_csv() -> None:
-                    buf = io.StringIO()
-                    writer = csv.DictWriter(
-                        buf,
-                        fieldnames=[
-                            "id",
-                            "title",
-                            "description",
-                            "priority",
-                            "status",
-                            "category",
-                            "due_date",
-                            "completed",
-                        ],
-                    )
-                    writer.writeheader()
-                    for t in all_tasks:
-                        writer.writerow(
-                            {
-                                "id": t.id,
-                                "title": t.title,
-                                "description": t.description,
-                                "priority": t.priority.value,
-                                "status": t.status.value,
-                                "category": t.category,
-                                "due_date": (t.due_date.isoformat() if t.due_date else ""),
-                                "completed": t.completed,
-                            }
-                        )
-                    body = buf.getvalue().encode("utf-8")
-                    ui.download(
-                        body,
-                        f"bizzy-tasks-{stamp}.csv",
-                        "text/csv",
-                    )
-                    ui.notify(
-                        f"Exported {len(all_tasks)} task{'s' if len(all_tasks) != 1 else ''}",
-                        type="positive",
-                        position="top-right",
-                    )
 
                 def confirm_delete_all() -> None:
                     if not all_tasks:
@@ -1833,34 +1762,10 @@ def index_page():
                     return row
 
                 with data_row(
-                    "Export tasks",
-                    "Includes completed tasks",
-                    with_top_border=False,
-                ):
-                    with ui.row().classes("gap-2"):
-                        csv_btn = (
-                            ui.button("Download CSV")
-                            .props('flat no-caps color=grey-8 padding="6px 12px"')
-                            .classes("rounded-lg border border-slate-200")
-                        )
-                        csv_btn.on("click", export_csv)
-                        if not all_tasks:
-                            csv_btn.props("disable")
-
-                        json_btn = (
-                            ui.button("Download JSON")
-                            .props('flat no-caps color=grey-8 padding="6px 12px"')
-                            .classes("rounded-lg border border-slate-200")
-                        )
-                        json_btn.on("click", export_json)
-                        if not all_tasks:
-                            json_btn.props("disable")
-
-                with data_row(
                     "Permanently delete all data",
                     "This resets the app — every task is "
                     "permanently removed and cannot be recovered.",
-                    with_top_border=True,
+                    with_top_border=False,
                 ):
                     delete_all_btn = (
                         ui.button("Delete all")

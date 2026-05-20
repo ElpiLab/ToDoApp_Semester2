@@ -1,152 +1,163 @@
-# ToDoApp_Semester2
-## 📝 Application To Do
+# Bizzy Student Task Manager
 
----
+Bizzy is a browser-based student task manager for the Advanced Programming course.
 
-### Problem
+It helps students keep academic work in one place: tasks, priorities, due dates, completion state, dashboard summaries, and a calendar view. The app uses NiceGUI for the browser UI, Python services for business logic, and SQLite persistence through SQLModel/SQLAlchemy.
 
-First-year students often struggle to manage multiple assignments, deadlines, and study tasks across different modules. This leads to poor prioritization, procrastination, and last-minute stress.
+## Problem
 
-Without a centralized system, tasks are scattered and difficult to track, resulting in missed deadlines, inefficient study time, and reduced academic performance.
+First-year students often manage assignments, exams, readings, and project work across several modules. Without a central task manager, deadlines are easy to miss and priorities are hard to compare.
 
----
+Bizzy gives the student one place to track academic tasks, prioritize work, and review progress.
 
-### Scenario
+## Scenario
 
-A student opens the To-Do App in their browser to manage all academic tasks in one place.
+A student logs in to Bizzy in the browser. They create tasks with a title, optional description, priority, category, and due date. The app validates the input, stores the task in SQLite, and shows it in board, list, dashboard, and calendar views.
 
-They can create tasks with titles, descriptions, priorities, and due dates. The system validates inputs, stores tasks in a database, and allows the user to view, update, complete, or delete tasks.
-
-This helps the student stay organized, track progress, and improve productivity.
-
----
+The student can update, complete, reopen, or delete their own tasks. Other users cannot access those tasks.
 
 ## User Stories
 
 ### 1. Create Task
+
 As a student, I want to create a new task with details so that I can track my work.
-Description: The user creates a task with title, description, priority, and due date.  
-Inputs: title `str`, description `str`, priority `str`, due_date `date`  
-Outputs: task saved in database  
+
+Description: The user creates a task with title, description, priority, category, and due date.  
+Inputs: title `str`, description `str`, priority `Priority`, category `str`, due_date `date | None`  
+Outputs: task saved in database
 
 ---
 
 ### 2. View Tasks
-As a student, I want to view all my tasks so that I can see my workload.
-Description: The application displays all tasks.  
-Inputs: none  
-Outputs: list of tasks (`list[Task]`)  
+
+As a student, I want to view my tasks so that I can see my workload.
+
+Description: The application displays tasks belonging to the logged-in student.  
+Inputs: authenticated user  
+Outputs: list of tasks (`list[Task]`)
 
 ---
 
 ### 3. Mark Task as Complete
-As a student, I want to mark tasks as complete so that I can track progress.  
-Description: The user updates a task’s status to completed.  
-Inputs: task_id `int`  
-Outputs: updated task status  
+
+As a student, I want to mark tasks as complete so that I can track progress.
+
+Description: The user updates a task's status to completed.  
+Inputs: task_id `int`, authenticated user  
+Outputs: updated task status
 
 ---
 
 ### 4. Delete Task
-As a student, I want to delete tasks so that I can remove unnecessary items.  
-Description: The user deletes a task from the system.  
-Inputs: task_id `int`  
-Outputs: task removed  
+
+As a student, I want to delete tasks so that I can remove unnecessary items.
+
+Description: The user deletes one of their own tasks from the system.  
+Inputs: task_id `int`, authenticated user  
+Outputs: task removed
 
 ---
 
 ### 5. Edit Task
+
 As a student, I want to edit a task so that I can update its details.
+
 Description: The user modifies task attributes.  
-Inputs: task_id `int`, updated fields  
-Outputs: updated task  
+Inputs: task_id `int`, updated fields, authenticated user  
+Outputs: updated task
 
 ---
 
 ### 6. Set Priority
-As a student, I want to assign priority levels so that I can focus on important tasks. 
+
+As a student, I want to assign priority levels so that I can focus on important tasks.
+
 Description: Tasks can be categorized as Low, Medium, or High priority.  
-Inputs: priority (`Low | Medium | High`)  
-Outputs: prioritized tasks  
+Inputs: priority (`low | medium | high`)  
+Outputs: prioritized task
 
 ---
 
 ### 7. Add Due Date
+
 As a student, I want to assign due dates so that I can manage deadlines.
-Description: Each task includes a deadline.  
-Inputs: due_date `date`  
-Outputs: task with deadline  
+
+Description: Each task can include a deadline.  
+Inputs: due_date `date | None`  
+Outputs: task with deadline
 
 ---
 
 ### 8. Filter Tasks
+
 As a student, I want to filter tasks by status or priority so that I can focus on specific tasks.
-Description: The user filters tasks based on criteria.  
-Inputs: filter criteria  
-Outputs: filtered list of tasks  
+
+Description: The user filters their task list based on criteria.  
+Inputs: status, priority, category, search text, sort option  
+Outputs: filtered task list
 
 ---
 
 ### 9. Persistent Storage
-As a student, I want my tasks saved permanently so that I don’t lose my data.
-Description: Tasks are stored in a database.  
+
+As a student, I want my tasks saved permanently so that I do not lose my data.
+
+Description: Tasks are stored in SQLite through SQLModel/SQLAlchemy.  
 Inputs: task data  
-Outputs: stored tasks  
+Outputs: stored tasks
 
 ---
 
 ### 10. Input Validation
-As a student, I want the app to validate my input so that I avoid errors.  
-Description: The system checks user input for correctness.  
+
+As a student, I want the app to validate my input so that I avoid errors.
+
+Description: The service layer checks task input before persistence.  
 Inputs: user input  
-Outputs: validation messages or accepted input  
+Outputs: validation messages or accepted input
 
 ---
 
-### 11. View Completed Tasks
-As a student, I want to view completed tasks so that I can review my progress.
-Description: The system shows completed tasks separately.  
-Inputs: none  
-Outputs: completed tasks list  
+### 11. Dashboard Overview
 
----
-
-### 12. Dashboard Overview
 As a student, I want to see a summary of my tasks so that I can quickly understand my workload.
-Description: The system displays task statistics.  
-Inputs: none  
-Outputs: counts of total, completed, and pending tasks  
+
+Description: The system displays task statistics and urgent task lists.  
+Inputs: authenticated user tasks  
+Outputs: task summary
 
 ---
-### 12. Analytics
-As a student, I want to see a summary of my tasks so that I can quickly understand my workload.
-Description: The system displays task statistics.  
-Inputs: none  
-Outputs: counts of total, completed, and pending tasks 
 
-## Use cases
+### 12. Calendar View
+
+As a student, I want to view tasks by date so that I can plan around deadlines.
+
+Description: The system displays tasks in a monthly calendar view.  
+Inputs: task due dates  
+Outputs: calendar task overview
+
+## Use Cases
+
 ![ToDo_App_UseCase_Diagram](https://github.com/user-attachments/assets/e73cbe26-af08-450d-9b93-09f38290a0e7)
 
 **Main Use Cases**
 
-- Create Task (Student)  
-- View Tasks (Student)  
-- Edit Task (Student)  
-- Delete Task (Student)  
-- Mark Task as Complete (Student)  
-- Filter Tasks (Student)  
+- Create Task (Student)
+- View Tasks (Student)
+- Edit Task (Student)
+- Delete Task (Student)
+- Mark Task as Complete (Student)
+- Filter Tasks (Student)
 
 **Actors**
 
 - Student (main user)
 
----
+## Wireframes / Mockups
 
-## 🖼️ Wireframes / Mockups
+[View the interactive prototype on Figma](https://www.figma.com/design/iKEgafTYKCCSQv2dSyIWLF/Prototype?node-id=0-1&t=g92BfXm8z582fAA4-1)
 
-🔗 [View the interactive prototype on Figma](https://www.figma.com/design/iKEgafTYKCCSQv2dSyIWLF/Prototype?node-id=0-1&t=g92BfXm8z582fAA4-1)
-
-The following wireframes show the planned **Bizzy** UI (working name for the To-Do App).
+The following wireframes show the planned Bizzy UI.
 
 ### Dashboard
 
@@ -164,67 +175,179 @@ The following wireframes show the planned **Bizzy** UI (working name for the To-
 
 ![New Task](docs/wireframes/new-task.png)
 
----
+## Architecture
 
-## 🏛️ Architecture
 <img width="651" height="331" alt="TodoApp_Architecture" src="https://github.com/user-attachments/assets/bcd5546e-ae06-487f-a8e6-cf908a8c2059" />
 
 ### Software Architecture
 
 **Layers / components:**
 
-- UI (NiceGUI browser interface)  
-- Application logic (task management and validation)  
-- Persistence (SQLite database with ORM)  
+- UI (NiceGUI browser interface)
+- Application logic (task management and validation)
+- Persistence (SQLite database with ORM)
 
 **Design decisions:**
 
-- Use MVC (Model–View–Controller) pattern  
-- Separate UI from business logic and database  
-- Store tasks in a database instead of JSON  
+- Use MVC (Model-View-Controller) pattern
+- Separate UI from business logic and database
+- Store tasks in a database instead of JSON
+- Keep task ownership scoped to the authenticated user
 
----
+The code uses Python's standard `src/` layout: the app package is `student_task_manager`, stored at `src/student_task_manager/`.
 
-## 🗄️ Database and ORM
-<img width="1480" height="248" alt="image" src="https://github.com/user-attachments/assets/a2aff7bb-68f8-4f6c-aba0-a95a6fb588bf" />
+## Repository Structure
 
+```text
+application.py                         # NiceGUI launcher
+src/student_task_manager/
+  domain/
+    models.py                          # SQLModel entities and enums
+  services/
+    auth_service.py                    # login/profile service logic
+    task_service.py                    # task business rules
+  data_access/
+    db.py                              # engine and schema bootstrap
+    dao.py                             # task persistence methods
+    seed.py                            # optional seed helper
+  ui/
+    controllers.py                     # UI boundary to services
+    login.py
+    registration.py
+    pages.py                           # main NiceGUI views
+tests/                                 # automated pytest suite
+docs/
+  TestCases.md                         # rubric test-case table
+  Status.md
+  Roadmap.md
+  Changelog.md
+prompts/                               # prompt workflow artifacts
+```
 
+## Database and ORM
+
+<img width="1480" height="248" alt="Database and ORM diagram" src="https://github.com/user-attachments/assets/a2aff7bb-68f8-4f6c-aba0-a95a6fb588bf" />
+
+The database models are defined in `src/student_task_manager/domain/models.py`.
 
 **Entities:**
+
+Student:
+- id (`int`)
+- email (`str`)
+- password_hash (`str`)
+- full_name (`str`)
+- is_active (`bool`)
 
 Task:
 - id (`int`)
 - title (`str`)
 - description (`str`)
-- priority (`str`)
-- due_date (`date`)
+- priority (`Priority`)
+- status (`Status`)
+- category (`str`)
+- due_date (`date | None`)
 - completed (`bool`)
+- user_id (`int`, links the task to a student)
 
-
-Student:
-- id (`int`)
-- department (`str`)
+**Enums:**
 
 Priority:
-- id (`int`)
-- status (`str`)
+- low
+- medium
+- high
 
----
+Status:
+- created
+- pending
+- in_progress
+- done
 
-## ✅ Project Requirements
+Tasks are linked to a student through `user_id`, so each logged-in student only works with their own tasks.
 
-### 1. Browser-based App (NiceGUI)
+### Libraries Used
 
-The application runs in the browser using NiceGUI. Users can create, view, update, and delete tasks interactively.
+- NiceGUI for the browser interface
+- SQLModel and SQLAlchemy for ORM and SQLite persistence
+- passlib and bcrypt for password hashing
+- pytest for automated tests
+- Ruff for formatting and linting
+- mypy for type checking
 
----
+## Validation and Business Rules
 
-### 2. Data Validation
+Task validation and business rules are handled by `TaskService`:
 
-- Minimum title and description length  
-- Valid priority values (Low, Medium, High)  
-- Valid date format for due dates  
+- title is trimmed and must be at least 3 characters
+- description is trimmed and may be empty
+- priority is required
+- category is trimmed and defaults to `Other`
+- completing a task sets `status=done` and `completed=True`
+- reopening a task sets `status=pending` and `completed=False`
+- task reads and writes require an authenticated `user_id`
+- accessing another user's task raises a task-not-found error
 
----
-### 3. Data Validation
-All relevant data is managed via an ORM(e.g. SQLModel or SQLAlchemy).
+## Setup
+
+Install the app and development tools:
+
+```bash
+python -m pip install -e ".[dev]"
+```
+
+## Run the App
+
+```bash
+python application.py
+```
+
+## Testing
+
+The project includes the required test mix:
+
+- 6 unit tests
+- 3 database tests
+- 3 integration tests
+
+The documented test cases are in [docs/TestCases.md](docs/TestCases.md).
+
+Run the test suite:
+
+```bash
+pytest tests/ --tb=short
+```
+
+Run all checks:
+
+```bash
+pytest tests/ --tb=short
+ruff format --check src tests
+ruff check src tests
+python -m mypy src
+```
+
+## Documentation
+
+- [docs/TestCases.md](docs/TestCases.md) - required test-case table
+- [docs/Status.md](docs/Status.md) - current implementation status
+- [docs/Roadmap.md](docs/Roadmap.md) - planned work sequence
+- [docs/Changelog.md](docs/Changelog.md) - landed changes
+- [AGENTS.md](AGENTS.md) - contributor and prompt workflow contract
+
+## Team Contributions
+
+| Team member | Contribution |
+| --- | --- |
+|  |  |
+|  |  |
+
+## Future Roadmap
+
+- Optional CSV/JSON task export
+- More analytics views and filters
+- Further login and profile polish
+
+## Project Status
+
+- [docs/Status.md](docs/Status.md)
+- [docs/Roadmap.md](docs/Roadmap.md)

@@ -4,6 +4,9 @@ This file records landed repository changes.
 
 ## 2026-05-20
 
+- Added blank Team Contributions rows and a concise Future Roadmap section to `README.md`.
+- Removed CSV/JSON task export controls from the Settings UI so analytics remains view-only in the current scope.
+- Rewrote `README.md` so it matches the current implementation, explains the `src/student_task_manager/` package layout, documents actual SQLModel entities, and links to the course test-case table.
 - Scoped task creation, listing, updates, completion, reopening, and deletion to the authenticated user instead of the previous implicit default user.
 - Added DAO, service, controller, and integration regression tests proving one user cannot access or modify another user's tasks.
 - Added the required 12-test rubric mix for the course project: 6 unit tests, 3 SQLite DAO/database tests, and 3 service/DAO integration tests.

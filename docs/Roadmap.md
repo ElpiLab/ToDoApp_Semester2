@@ -4,12 +4,12 @@ This file tracks planned work and execution order.
 
 ## Active sequence
 
-1. **Analytics page** (no numbered prompt yet)
-   Replace the placeholder sidebar entry with a real view: charts and summary metrics over existing task data.
-2. **Login page polish** (no numbered prompt yet)
+1. **Login/profile polish** (no numbered prompt yet)
    Clean up authentication documentation and any remaining login/registration behavior after user-scoped tasks are explicit.
-3. `040-settings-preferences-and-polish`
-   User preferences, lower-priority settings, cleanup, and interface polish after the core flows are landed.
+2. **UI module split** (no numbered prompt yet)
+   Break down the large NiceGUI page module into smaller modules when the feature set settles.
+3. **Optional export/download** (future scope)
+   Add CSV/JSON task export later if it becomes useful for the final submission.
 
 ## Archived prompts
 
@@ -23,6 +23,10 @@ This file tracks planned work and execution order.
   Added the required 12-test mix and documented the test cases in the course template format.
 - `030-auth-user-scope-cleanup`
   Scoped task operations to the authenticated user and added ownership regression tests.
+- `040-readme-rubric-documentation-cleanup`
+  Rewrote the README to match the current app, architecture, ORM model, run commands, and testing rubric.
+- `050-readme-contributions-and-export-scope`
+  Added README contribution and future-roadmap sections, and kept export/download out of the current UI scope.
 
 ## Notes
 
