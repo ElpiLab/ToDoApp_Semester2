@@ -9,6 +9,12 @@ def _normalize_category(value: str | None) -> str:
     return stripped or "Other"
 
 
+def _validate_user_id(user_id: int) -> int:
+    if not isinstance(user_id, int) or user_id <= 0:
+        raise ValueError("Valid user ID is required")
+    return user_id
+
+
 class TaskService:
     def __init__(self, dao: TaskDAO | None = None):
         self.dao = dao or TaskDAO()
@@ -29,9 +35,12 @@ class TaskService:
         priority: Priority,
         due_date: date | None = None,
         category: str = "Other",
+        *,
+        user_id: int,
     ) -> Task:
         if priority is None:
             raise ValueError("Priority is required")
+        owner_id = _validate_user_id(user_id)
 
         task = Task(
             title=self._normalize_title(title),
@@ -41,39 +50,39 @@ class TaskService:
             category=_normalize_category(category),
             due_date=due_date,
             completed=False,
-            user_id=1,
+            user_id=owner_id,
         )
 
         return self.dao.create(task)
 
-    def get_all_tasks(self) -> list[Task]:
-        return self.dao.get_all()
+    def get_all_tasks(self, user_id: int) -> list[Task]:
+        return self.dao.get_all_for_user(_validate_user_id(user_id))
 
-    def get_task_by_id(self, task_id: int) -> Task:
-        task = self.dao.get_by_id(task_id)
+    def get_task_by_id(self, task_id: int, user_id: int) -> Task:
+        task = self.dao.get_by_id_for_user(task_id, _validate_user_id(user_id))
         if not task:
             raise ValueError("Task not found")
         return task
 
-    def mark_complete(self, task_id: int) -> Task:
-        task = self.get_task_by_id(task_id)
+    def mark_complete(self, task_id: int, user_id: int) -> Task:
+        task = self.get_task_by_id(task_id, user_id)
         task.status = Status.done
         task.completed = True
         return self.dao.update(task)
 
-    def mark_pending(self, task_id: int) -> Task:
-        task = self.get_task_by_id(task_id)
+    def mark_pending(self, task_id: int, user_id: int) -> Task:
+        task = self.get_task_by_id(task_id, user_id)
         task.status = Status.pending
         task.completed = False
         return self.dao.update(task)
 
-    def delete_task(self, task_id: int) -> None:
-        task = self.get_task_by_id(task_id)
+    def delete_task(self, task_id: int, user_id: int) -> None:
+        task = self.get_task_by_id(task_id, user_id)
         assert task.id is not None
         self.dao.delete(task.id)
 
-    def update_task(self, task_id: int, **updates) -> Task:
-        task = self.get_task_by_id(task_id)
+    def update_task(self, task_id: int, user_id: int, **updates) -> Task:
+        task = self.get_task_by_id(task_id, user_id)
 
         allowed_fields = {
             "title",
@@ -102,10 +111,11 @@ class TaskService:
 
     def filter_tasks(
         self,
+        user_id: int,
         status: Status | None = None,
         priority: Priority | None = None,
     ) -> list[Task]:
-        tasks = self.dao.get_all()
+        tasks = self.dao.get_all_for_user(_validate_user_id(user_id))
 
         if status is not None:
             tasks = [task for task in tasks if task.status == status]

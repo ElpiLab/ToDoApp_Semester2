@@ -12,7 +12,7 @@ This file records the current repository state.
 - Prompt workflow: templates and the archived `010-task-list-view-foundation` and `015-consolidate-source-under-src` prompts exist. Recent UI work (Calendar page, Dashboard page, dialog redesign, sidebar cleanup) was iterative follow-up not driven by a numbered prompt.
 - Planning docs: this file and `Changelog.md` are up to date as of 2026-05-20.
 - Source layout: application code now lives under the installable `src/student_task_manager/` package. `application.py` remains at the repository root as the launcher.
-- Test layout: the automated suite includes the required 12-test rubric mix documented in `docs/TestCases.md` (6 unit, 3 database, 3 integration), plus one package smoke test. Broader NiceGUI browser behavior is still exercised by hand.
+- Test layout: the automated suite includes the required 12-test rubric mix documented in `docs/TestCases.md` (6 unit, 3 database, 3 integration), plus task-ownership regression tests and one package smoke test. Broader NiceGUI browser behavior is still exercised by hand.
 
 ## Active prompt
 
@@ -23,7 +23,6 @@ This file records the current repository state.
 - **Analytics page** - replace the placeholder sidebar entry with a real view (charts/summary metrics over tasks). No numbered prompt yet.
 - **Login page** - introduce authentication and a user-scoped task model. No numbered prompt yet; will need a domain decision on User/Student before implementation.
 - **Settings page** (`040-settings-preferences-and-polish`) - user preferences, polish, and lower-priority cleanup after the core flows are landed.
-- **Auth/user-scope cleanup** - login exists, but task creation and queries are still effectively scoped to the default `user_id=1`; this needs a dedicated prompt before presenting multi-user behavior as complete.
 
 ## Support boundary
 

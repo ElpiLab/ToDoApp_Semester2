@@ -4,6 +4,8 @@ This file records landed repository changes.
 
 ## 2026-05-20
 
+- Scoped task creation, listing, updates, completion, reopening, and deletion to the authenticated user instead of the previous implicit default user.
+- Added DAO, service, controller, and integration regression tests proving one user cannot access or modify another user's tasks.
 - Added the required 12-test rubric mix for the course project: 6 unit tests, 3 SQLite DAO/database tests, and 3 service/DAO integration tests.
 - Added `docs/TestCases.md` mapping each rubric test to the FHNW test-case fields: ID, description, preconditions, steps, input, expected and actual result, status, and comments.
 - Recorded the auth/user-scope gap as a follow-up rather than redefining task ownership inside the testing prompt.

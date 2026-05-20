@@ -16,9 +16,19 @@ class TaskDAO:
         with Session(engine) as session:
             return list(session.exec(select(Task)).all())
 
+    def get_all_for_user(self, user_id: int) -> list[Task]:
+        with Session(engine) as session:
+            statement = select(Task).where(Task.user_id == user_id)
+            return list(session.exec(statement).all())
+
     def get_by_id(self, task_id: int) -> Task | None:
         with Session(engine) as session:
             return session.get(Task, task_id)
+
+    def get_by_id_for_user(self, task_id: int, user_id: int) -> Task | None:
+        with Session(engine) as session:
+            statement = select(Task).where(Task.id == task_id, Task.user_id == user_id)
+            return session.exec(statement).first()
 
     def update(self, task: Task) -> Task:
         with Session(engine) as session:
