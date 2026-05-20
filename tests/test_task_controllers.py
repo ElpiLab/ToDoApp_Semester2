@@ -8,7 +8,7 @@ def test_create_task_parses_due_date_and_notifies(monkeypatch) -> None:
     notifications = []
 
     class FakeService:
-        def create_task(self, title, description, priority, due_date):
+        def create_task(self, title, description, priority, due_date, category="Other"):
             assert title == "Task title"
             assert description == "Task description"
             assert priority == Priority.medium
@@ -19,7 +19,7 @@ def test_create_task_parses_due_date_and_notifies(monkeypatch) -> None:
     monkeypatch.setattr(
         controllers.ui,
         "notify",
-        lambda message, type: notifications.append((message, type)),
+        lambda message, type, **kwargs: notifications.append((message, type)),
     )
 
     task = controllers.create_task("Task title", "Task description", "medium", "2026-05-12")
@@ -50,7 +50,7 @@ def test_update_task_uses_service_boundary(monkeypatch) -> None:
     monkeypatch.setattr(
         controllers.ui,
         "notify",
-        lambda message, type: notifications.append((message, type)),
+        lambda message, type, **kwargs: notifications.append((message, type)),
     )
 
     task = controllers.update_task(
