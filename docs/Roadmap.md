@@ -45,6 +45,8 @@ This file tracks planned work and execution order.
   Removed non-persisting Settings cards and documented persisted preferences as future scope.
 - `130-polish-notification-bell`
   Kept the notification bell as an unread dot and added session-level read actions to the notification menu.
+- `140-dashboard-progress-card`
+  Changed the dashboard completed-task card into a percentage-based progress card.
 
 ## Notes
 

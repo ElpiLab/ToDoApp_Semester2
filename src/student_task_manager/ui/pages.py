@@ -80,6 +80,20 @@ def is_valid_email(value: str) -> bool:
     return EMAIL_PATTERN.fullmatch(value) is not None
 
 
+def completion_progress_summary(
+    completed_count: int,
+    total_count: int,
+    period_label: str | None = None,
+) -> tuple[str, str]:
+    if total_count <= 0:
+        return "0%", f"Nothing {period_label}" if period_label else "No tasks yet"
+    pct = round(completed_count / total_count * 100)
+    if period_label:
+        return f"{pct}%", f"{completed_count} of {total_count} {period_label}"
+    plural = "s" if total_count != 1 else ""
+    return f"{pct}%", f"{completed_count} of {total_count} task{plural} done"
+
+
 @ui.page("/logout")
 def logout_page():
     app.storage.user.clear()
@@ -1049,7 +1063,13 @@ def index_page():
                     open_sub = f"{week_count} due this week"
                 else:
                     open_sub = "Nothing this week"
-                done_sub = f"{overall_pct}% of all tasks"
+                week_tasks = [
+                    t for t in all_tasks if t.due_date and today <= t.due_date <= week_end
+                ]
+                week_completed_count = sum(1 for t in week_tasks if t.completed)
+                progress_value, progress_sub = completion_progress_summary(
+                    week_completed_count, len(week_tasks), period_label="due this week"
+                )
 
                 with ui.card().classes("rounded-2xl !p-5 gap-1 !bg-white shadow-none"):
                     ui.label(str(len(open_tasks))).classes(
@@ -1061,13 +1081,13 @@ def index_page():
                     ui.label(open_sub).classes("text-xs text-slate-500")
 
                 with ui.card().classes("rounded-2xl !p-5 gap-1 !bg-emerald-100 shadow-none"):
-                    ui.label(str(len(completed_tasks))).classes(
+                    ui.label(progress_value).classes(
                         "text-3xl font-semibold text-emerald-900 leading-none"
                     )
-                    ui.label("DONE").classes(
+                    ui.label("PROGRESS").classes(
                         "text-xs uppercase tracking-widest text-emerald-800 mt-2"
                     )
-                    ui.label(done_sub).classes("text-xs text-emerald-800")
+                    ui.label(progress_sub).classes("text-xs text-emerald-800")
 
                 with ui.card().classes("rounded-2xl !p-5 gap-1 !bg-orange-100 shadow-none"):
                     ui.label(str(len(overdue))).classes(
@@ -1081,7 +1101,7 @@ def index_page():
                 with ui.card().classes(
                     "row-span-2 rounded-2xl !p-6 gap-3 !bg-emerald-900 !text-white shadow-none"
                 ):
-                    ui.label("PROGRESS").classes(
+                    ui.label("BY CATEGORY").classes(
                         "text-xs uppercase tracking-widest text-emerald-200"
                     )
                     for cat_label, pct in category_progress:
