@@ -43,6 +43,8 @@ This file tracks planned work and execution order.
   Reworded temporary Settings controls before the Settings page was simplified.
 - `120-simplify-settings-page`
   Removed non-persisting Settings cards and documented persisted preferences as future scope.
+- `130-polish-notification-bell`
+  Kept the notification bell as an unread dot and added session-level read actions to the notification menu.
 
 ## Notes
 

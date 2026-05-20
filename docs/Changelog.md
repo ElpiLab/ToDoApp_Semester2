@@ -4,6 +4,7 @@ This file records landed repository changes.
 
 ## 2026-05-20
 
+- Polished the notification bell with an unread dot, a more compact menu, and session-level read actions.
 - Simplified the Settings page to profile and task-deletion controls; non-persisting Preferences, Notifications, and Appearance controls moved to the future roadmap, and profile saving now enables only after edits.
 - Polished app UI wording, moved the profile menu to the sidebar, added a header Settings shortcut, and removed the inactive notification read action.
 - Tightened Settings profile email validation and moved profile-save dependencies to module scope.

@@ -111,7 +111,8 @@ def index_page():
         ".q-drawer--mini .nav-item .q-btn__content .q-icon.on-left "
         "{ margin-right: 0; }"
         ".notif-dot.q-badge--floating "
-        "{ top: 8px !important; right: 8px !important; }"
+        "{ top: 8px !important; right: 8px !important; min-width: 8px !important; "
+        "width: 8px !important; height: 8px !important; padding: 0 !important; }"
         "</style>"
     )
 
@@ -132,6 +133,7 @@ def index_page():
     display_name = app.storage.user.get("full_name") or app.storage.user.get("email") or "User"
     avatar_initial = (display_name[0] if display_name else "?").upper()
     display_email = app.storage.user.get("email") or ""
+    read_notification_keys: set[str] = set(app.storage.user.get("read_notif_keys") or [])
 
     drawer_state = {"open": True}
     drawer = (
@@ -280,14 +282,16 @@ def index_page():
                     notif_badge = (
                         ui.badge("", color="red")
                         .props("floating rounded")
-                        .classes("!w-2 !h-2 !min-h-0 !p-0 notif-dot")
+                        .classes("notif-dot !w-2 !h-2 !min-h-0 !p-0")
                     )
                     notif_badge.set_visibility(False)
                     notif_menu = ui.menu().props(
                         'anchor="bottom right" self="top right" :offset="[0, 12]"'
                     )
                     with notif_menu:
-                        notif_menu_container = ui.column().classes("p-0 gap-0 w-80 min-h-[300px]")
+                        notif_menu_container = ui.column().classes(
+                            "p-0 gap-0 w-80 max-h-[420px] overflow-y-auto"
+                        )
                 settings_header_btn = ui.button(icon="settings").props("flat round color=grey-7")
                 settings_header_btn.tooltip("Settings")
                 settings_header_btn.on("click", lambda: switch_to_page("settings"))
@@ -1912,6 +1916,22 @@ def index_page():
         if complete_task(task_id):
             refresh_tasks()
 
+    def notification_key(task_id: int | None, notification_type: str) -> str:
+        return f"{notification_type}:{task_id or 0}"
+
+    def _persist_read_notifications() -> None:
+        app.storage.user.update({"read_notif_keys": list(read_notification_keys)})
+
+    def mark_notification_read(key: str) -> None:
+        read_notification_keys.add(key)
+        _persist_read_notifications()
+        render_notifications()
+
+    def mark_all_notifications_read(keys: list[str]) -> None:
+        read_notification_keys.update(keys)
+        _persist_read_notifications()
+        render_notifications()
+
     def render_notifications() -> None:
         notif_menu_container.clear()
         all_tasks = get_tasks()
@@ -1932,6 +1952,7 @@ def index_page():
                     when = f"{days_late}d ago"
                 notifications.append(
                     (
+                        notification_key(t.id, "overdue"),
                         t,
                         "Task overdue",
                         sub,
@@ -1947,6 +1968,7 @@ def index_page():
             elif t.due_date == today:
                 notifications.append(
                     (
+                        notification_key(t.id, "due_today"),
                         t,
                         "Due today",
                         f"{t.title} is due today",
@@ -1962,6 +1984,7 @@ def index_page():
             elif t.due_date == tomorrow:
                 notifications.append(
                     (
+                        notification_key(t.id, "due_tomorrow"),
                         t,
                         "Due tomorrow",
                         f"{t.title} is due tomorrow",
@@ -1977,6 +2000,7 @@ def index_page():
             elif t.priority.value == "high" and t.due_date is None:
                 notifications.append(
                     (
+                        notification_key(t.id, "high_no_due_date"),
                         t,
                         "High-priority reminder",
                         f"{t.title} has no due date",
@@ -1990,14 +2014,16 @@ def index_page():
                     )
                 )
 
-        notifications.sort(key=lambda x: (x[8], -x[9], x[0].title.lower()))
+        notifications.sort(key=lambda x: (x[9], -x[10], x[1].title.lower()))
 
         total_count = len(notifications)
-        unread_count = sum(1 for n in notifications if n[7])
+        unread_keys = [key for key, *_ in notifications if key not in read_notification_keys]
+        unread_count = len(unread_keys)
 
-        if total_count == 0:
+        if unread_count == 0:
             notif_badge.set_visibility(False)
         else:
+            notif_badge.set_text("")
             notif_badge.set_visibility(True)
 
         max_show = 8
@@ -2013,16 +2039,29 @@ def index_page():
                             "rounded-full bg-rose-600 px-2 py-0.5 "
                             "min-w-[20px] flex items-center justify-center"
                         ):
-                            ui.label(str(unread_count)).classes("text-xs font-semibold text-white")
+                            ui.label(str(unread_count)).classes(
+                                "text-xs font-semibold text-white"
+                            )
+                if unread_count:
+                    mark_all_btn = ui.button("Mark all read").props(
+                        "flat no-caps dense color=grey-7"
+                    )
+                    mark_all_btn.classes("text-xs px-2 py-1 rounded-md")
+                    mark_all_btn.on(
+                        "click",
+                        lambda keys=list(unread_keys): mark_all_notifications_read(keys),
+                    )
 
             if not notifications:
                 with ui.column().classes("w-full items-center gap-2 py-8"):
                     ui.icon("notifications_off", size="1.75rem").classes("text-slate-300")
                     ui.label("You're all caught up").classes("text-sm font-medium text-slate-700")
+                    ui.label("No overdue or upcoming tasks.").classes("text-xs text-slate-500")
                 return
 
             visible = notifications[:max_show]
             for idx, (
+                key,
                 t,
                 title,
                 sub,
@@ -2030,10 +2069,11 @@ def index_page():
                 icon,
                 bg_class,
                 text_class,
-                is_unread,
+                _,
                 _,
                 _,
             ) in enumerate(visible):
+                is_unread = key not in read_notification_keys
                 bg_row = "bg-rose-50/40" if is_unread else ""
                 border_class = "border-b border-slate-100" if idx < len(visible) - 1 else ""
                 row = ui.element("div").classes(
@@ -2055,7 +2095,10 @@ def index_page():
                             ui.element("div").classes("w-2 h-2 rounded-full bg-emerald-600")
                 row.on(
                     "click",
-                    lambda task=t: open_task_dialog(task),
+                    lambda task=t, k=key: (
+                        mark_notification_read(k),
+                        open_task_dialog(task),
+                    ),
                 )
 
             if total_count > max_show:
