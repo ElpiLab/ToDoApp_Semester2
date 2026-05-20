@@ -92,6 +92,7 @@ def index_page():
         ui.navigate.to("/login")
         return
 
+    ui.colors(primary="#15803d")
     ui.query("body").classes("bg-stone-100")
     ui.query(".q-layout").props('view="lHh LpR fFf"')
     ui.add_head_html(
@@ -372,7 +373,7 @@ def index_page():
         analytics_panel = ui.column().classes("w-full gap-6")
         analytics_panel.set_visibility(False)
 
-        settings_panel = ui.column().classes("w-full gap-6")
+        settings_panel = ui.column().classes("w-full max-w-xl gap-6")
         settings_panel.set_visibility(False)
 
     def open_task_dialog(task=None, default_due_date: date | None = None) -> None:
@@ -1543,7 +1544,7 @@ def index_page():
 
             with ui.column().classes("gap-1"):
                 ui.label("Settings").classes("text-2xl font-semibold text-slate-900")
-                ui.label("Manage your preferences").classes("text-sm text-slate-500")
+                ui.label("Account and data").classes("text-sm text-slate-500")
 
             def section_card(
                 title: str,
@@ -1587,6 +1588,21 @@ def index_page():
                     .props("outlined dense hide-bottom-space")
                     .classes("w-64")
                 )
+                initial_profile = {
+                    "name": (name_input.value or "").strip(),
+                    "email": (email_input.value or "").strip(),
+                }
+
+                def is_profile_dirty() -> bool:
+                    return (name_input.value or "").strip() != initial_profile["name"] or (
+                        email_input.value or ""
+                    ).strip() != initial_profile["email"]
+
+                def check_profile_dirty() -> None:
+                    if is_profile_dirty():
+                        save_btn.enable()
+                    else:
+                        save_btn.disable()
 
                 def save_profile() -> None:
                     user_id = app.storage.user.get("user_id")
@@ -1629,85 +1645,21 @@ def index_page():
                         type="positive",
                         position="top-right",
                     )
+                    initial_profile.update({"name": new_name, "email": new_email})
+                    save_btn.disable()
 
-                ui.button("Save changes", icon="save", on_click=save_profile).props(
-                    "color=green-9 unelevated no-caps dense"
-                ).classes("rounded-lg mt-2")
-
-            with section_card(
-                "Preferences",
-                "Defaults for new tasks and navigation",
-                "tune",
-                "bg-stone-200",
-                "text-slate-700",
-            ):
-                with ui.row().classes("w-full gap-3 flex-wrap"):
-                    ui.select(
-                        {
-                            "dashboard": "Dashboard",
-                            "tasks": "Tasks",
-                            "calendar": "Calendar",
-                            "analytics": "Analytics",
-                        },
-                        value="dashboard",
-                        label="Default landing page",
-                    ).props("outlined dense options-dense hide-bottom-space").classes("w-52")
-                    ui.select(
-                        {"board": "Board", "list": "List"},
-                        value="board",
-                        label="Default task view",
-                    ).props("outlined dense options-dense hide-bottom-space").classes("w-44")
-                    ui.select(
-                        {
-                            "low": "Low",
-                            "medium": "Medium",
-                            "high": "High",
-                        },
-                        value="medium",
-                        label="Default priority",
-                    ).props("outlined dense options-dense hide-bottom-space").classes("w-44")
-                ui.label("Preference choices are not saved yet.").classes("text-xs text-slate-400")
-
-            with section_card(
-                "Notifications",
-                "When and how Bizzy nudges you",
-                "notifications",
-                "bg-amber-100",
-                "text-amber-700",
-            ):
-                with ui.column().classes("w-full gap-2"):
-                    ui.switch("Show notification badge on bell", value=True).props("color=green-9")
-                    ui.switch("Remind me about overdue tasks", value=True).props("color=green-9")
-                    ui.switch("Remind me about tasks due tomorrow", value=True).props(
-                        "color=green-9"
-                    )
-                    ui.switch("Email reminders (not available yet)", value=False).props(
-                        "color=green-9 disable"
-                    )
-                ui.label("Notification choices are not saved yet.").classes(
-                    "text-xs text-slate-400"
+                save_btn = (
+                    ui.button("Update profile", on_click=save_profile)
+                    .props('color=green-9 unelevated no-caps padding="10px 24px"')
+                    .classes("rounded-lg mt-2")
                 )
+                save_btn.disable()
+                name_input.on_value_change(lambda _: check_profile_dirty())
+                email_input.on_value_change(lambda _: check_profile_dirty())
 
             with section_card(
-                "Appearance",
-                "How Bizzy looks",
-                "palette",
-                "bg-emerald-100",
-                "text-emerald-700",
-            ):
-                ui.toggle(
-                    {
-                        "light": "Light",
-                        "dark": "Dark",
-                        "auto": "Auto",
-                    },
-                    value="light",
-                ).props("unelevated no-caps toggle-color=green-9 spread").classes("self-start")
-                ui.label("Appearance choices are not saved yet.").classes("text-xs text-slate-400")
-
-            with section_card(
-                "Data",
-                "Reset task data",
+                "Danger zone",
+                "Remove your task data",
                 "storage",
                 "bg-rose-100",
                 "text-rose-700",
@@ -1740,40 +1692,24 @@ def index_page():
                             ui.button("Cancel", on_click=dialog.close).props(
                                 "flat color=grey-7 no-caps"
                             )
-                            ui.button("Delete all", on_click=confirm).props(
+                            ui.button("Delete all tasks", on_click=confirm).props(
                                 "color=negative unelevated no-caps"
                             )
                     dialog.open()
 
-                def data_row(
-                    label: str,
-                    sublabel: str,
-                    with_top_border: bool,
-                ):
-                    classes = "w-full items-center justify-between gap-3 py-4 flex-wrap"
-                    if with_top_border:
-                        classes += " border-t border-slate-100"
-                    row = ui.row().classes(classes)
-                    with row:
-                        with ui.column().classes("gap-1 flex-1 min-w-0 mr-6"):
-                            ui.label(label).classes("text-sm font-semibold text-slate-900")
-                            ui.label(sublabel).classes("text-xs text-slate-500 leading-relaxed")
-                    return row
-
-                with data_row(
-                    "Permanently delete all data",
-                    "This resets the app — every task is "
-                    "permanently removed and cannot be recovered.",
-                    with_top_border=False,
-                ):
+                with ui.column().classes("w-full gap-2"):
+                    ui.label(
+                        "Permanently removes every task in your account. This cannot be undone."
+                    ).classes("text-xs text-slate-500 leading-relaxed")
                     delete_all_btn = (
-                        ui.button("Delete all")
+                        ui.button("Delete all tasks")
                         .props('unelevated no-caps color=negative padding="6px 12px"')
-                        .classes("rounded-lg")
+                        .classes("rounded-lg mt-2 self-start")
                     )
                     delete_all_btn.on("click", confirm_delete_all)
                     if not all_tasks:
                         delete_all_btn.props("disable")
+                        ui.label("No tasks to delete yet.").classes("text-xs text-slate-400")
 
     def render_calendar() -> None:
         calendar_panel.clear()
@@ -2126,24 +2062,6 @@ def index_page():
                 ui.label(f"+ {total_count - max_show} more").classes(
                     "text-xs text-slate-400 px-3 pt-1"
                 )
-
-            footer = ui.element("div").classes(
-                "w-full flex items-center justify-center gap-1 "
-                "px-3 py-3 border-t border-slate-100 bg-stone-50/60 "
-                "mt-auto"
-            )
-            with footer:
-                settings_link = (
-                    ui.button("Open notification settings")
-                    .props("flat dense no-caps color=green-9")
-                    .classes("text-xs")
-                )
-
-                def open_settings_from_notifications() -> None:
-                    notif_menu.close()
-                    switch_to_page("settings")
-
-                settings_link.on("click", open_settings_from_notifications)
 
     def refresh_tasks() -> None:
         tasks_container.clear()

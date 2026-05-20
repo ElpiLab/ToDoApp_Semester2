@@ -10,6 +10,8 @@ This file tracks planned work and execution order.
    Break down the large NiceGUI page module into smaller modules when the feature set settles.
 3. **Optional export/download** (future scope)
    Add CSV/JSON task export later if it becomes useful for the final submission.
+4. **Persisted user preferences** (future scope)
+   Add storage for default landing page, default task view, default priority, notification toggles, and appearance theme. These controls are not shown in the current Settings page because they are not persisted yet.
 
 ## Archived prompts
 
@@ -29,6 +31,18 @@ This file tracks planned work and execution order.
   Added README contribution and future-roadmap sections, and kept export/download out of the current UI scope.
 - `060-fix-windows-app-startup`
   Fixed Windows console startup output and disabled noisy SQLAlchemy echo logging.
+- `070-narrow-controller-error-handling`
+  Kept validation errors user-facing while letting unexpected controller errors surface.
+- `080-clarify-temporary-settings-controls`
+  Clarified temporary Settings controls before they were removed from the current scope.
+- `090-clean-up-profile-save-validation`
+  Tightened Settings profile email validation and made profile-save imports explicit.
+- `100-polish-app-ui-wording-and-navigation`
+  Polished app wording and moved profile/settings controls into clearer locations.
+- `110-clarify-settings-preview-controls`
+  Reworded temporary Settings controls before the Settings page was simplified.
+- `120-simplify-settings-page`
+  Removed non-persisting Settings cards and documented persisted preferences as future scope.
 
 ## Notes
 
