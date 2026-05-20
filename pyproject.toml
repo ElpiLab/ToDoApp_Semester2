@@ -11,8 +11,8 @@ requires-python = ">=3.11"
 dependencies = [
   "nicegui>=3.11",
   "sqlmodel>=0.0.38",
-  "bcrypt>=4.0",
-  "passlib>=1.7",
+  "bcrypt==4.0.1",
+  "passlib==1.7.4",
 ]
 
 [project.optional-dependencies]
