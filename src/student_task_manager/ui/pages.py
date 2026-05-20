@@ -1707,7 +1707,7 @@ def index_page():
                     ).classes("text-xs text-slate-500 leading-relaxed")
                     delete_all_btn = (
                         ui.button("Delete all tasks")
-                        .props('unelevated no-caps color=negative padding="6px 12px"')
+                        .props('unelevated no-caps color=negative padding="10px 24px"')
                         .classes("rounded-lg mt-2 self-start")
                     )
                     delete_all_btn.on("click", confirm_delete_all)
