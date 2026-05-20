@@ -4,6 +4,7 @@ This file records landed repository changes.
 
 ## 2026-05-20
 
+- Clarified Settings page controls that are currently session-only rather than persisted.
 - Narrowed task controller error handling to catch validation errors only and added a regression test for unexpected service errors.
 - Pinned the auth password libraries (`bcrypt==4.0.1` and `passlib==1.7.4`) in both dependency files so fresh installs use the tested login stack.
 - Removed the broken, unused seed helper and updated `AGENTS.md` so the repository overview reflects the current working app.

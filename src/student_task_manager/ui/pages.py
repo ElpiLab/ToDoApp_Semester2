@@ -1645,10 +1645,9 @@ def index_page():
                         value="medium",
                         label="Default priority",
                     ).props("outlined dense options-dense hide-bottom-space").classes("w-44")
-                ui.label(
-                    "Persistence pending the user-profile model — "
-                    "values are remembered only for this session."
-                ).classes("text-xs text-slate-400")
+                ui.label("Preference choices are session-only for now.").classes(
+                    "text-xs text-slate-400"
+                )
 
             with section_card(
                 "Notifications",
@@ -1666,6 +1665,9 @@ def index_page():
                     ui.switch("Email reminders (requires login)", value=False).props(
                         "color=green-9 disable"
                     )
+                ui.label("Notification choices are session-only for now.").classes(
+                    "text-xs text-slate-400"
+                )
 
             with section_card(
                 "Appearance",
@@ -1682,6 +1684,9 @@ def index_page():
                     },
                     value="light",
                 ).props("unelevated no-caps toggle-color=green-9 spread").classes("self-start")
+                ui.label("Appearance choices are session-only for now.").classes(
+                    "text-xs text-slate-400"
+                )
 
             with section_card(
                 "Data",
