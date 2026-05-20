@@ -930,6 +930,7 @@ def index_page():
 
             def dashboard_quick_complete(task_id: int) -> None:
                 if complete_task(task_id):
+                    render_dashboard()
                     refresh_tasks()
 
             status_pill_classes = {
@@ -1140,7 +1141,8 @@ def index_page():
                             is_last = idx == len(visible) - 1
                             border_class = "" if is_last else " border-b border-slate-100"
                             row = ui.row().classes(
-                                "w-full items-center gap-3 py-3 transition-colors" + border_class
+                                "w-full items-center gap-3 py-3 px-1 -mx-1 rounded-md "
+                                "cursor-pointer hover:bg-stone-50 transition-colors" + border_class
                             )
                             with row:
                                 circle = ui.element("div").classes(
@@ -1163,6 +1165,7 @@ def index_page():
                                 ui.label(pill_label).classes(
                                     f"text-xs font-semibold rounded px-2 py-1 shrink-0 {pill_class}"
                                 )
+                            row.on("click", lambda task=t: open_task_dialog(task))
 
                         more_count = max(len(upcoming_tasks) - 4, 0)
                         view_all_label = (
@@ -1932,6 +1935,10 @@ def index_page():
         _persist_read_notifications()
         render_notifications()
 
+    def open_notification_task(task, key: str) -> None:
+        mark_notification_read(key)
+        open_task_dialog(task)
+
     def render_notifications() -> None:
         notif_menu_container.clear()
         all_tasks = get_tasks()
@@ -2014,7 +2021,14 @@ def index_page():
                     )
                 )
 
-        notifications.sort(key=lambda x: (x[9], -x[10], x[1].title.lower()))
+        notifications.sort(
+            key=lambda x: (
+                0 if x[0] not in read_notification_keys else 1,
+                x[9],
+                -x[10],
+                -(x[1].id or 0),
+            )
+        )
 
         total_count = len(notifications)
         unread_keys = [key for key, *_ in notifications if key not in read_notification_keys]
@@ -2039,9 +2053,7 @@ def index_page():
                             "rounded-full bg-rose-600 px-2 py-0.5 "
                             "min-w-[20px] flex items-center justify-center"
                         ):
-                            ui.label(str(unread_count)).classes(
-                                "text-xs font-semibold text-white"
-                            )
+                            ui.label(str(unread_count)).classes("text-xs font-semibold text-white")
                 if unread_count:
                     mark_all_btn = ui.button("Mark all read").props(
                         "flat no-caps dense color=grey-7"
@@ -2095,10 +2107,7 @@ def index_page():
                             ui.element("div").classes("w-2 h-2 rounded-full bg-emerald-600")
                 row.on(
                     "click",
-                    lambda task=t, k=key: (
-                        mark_notification_read(k),
-                        open_task_dialog(task),
-                    ),
+                    lambda task=t, k=key: open_notification_task(task, k),
                 )
 
             if total_count > max_show:
