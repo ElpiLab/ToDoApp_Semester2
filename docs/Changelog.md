@@ -4,6 +4,9 @@ This file records landed repository changes.
 
 ## 2026-05-20
 
+- Added the required 12-test rubric mix for the course project: 6 unit tests, 3 SQLite DAO/database tests, and 3 service/DAO integration tests.
+- Added `docs/TestCases.md` mapping each rubric test to the FHNW test-case fields: ID, description, preconditions, steps, input, expected and actual result, status, and comments.
+- Recorded the auth/user-scope gap as a follow-up rather than redefining task ownership inside the testing prompt.
 - Consolidated the active application packages (`domain`, `services`, `data_access`, and `ui`) under `src/student_task_manager/` and updated imports in the launcher, source, and tests.
 - Removed the test `sys.path` shim and the stale top-level package marker so tests resolve the installable package through editable install.
 - Updated `pyproject.toml` so the existing auth libraries used by the launcher/login flow are declared for fresh installs, and added the needed mypy override for untyped `passlib`.

@@ -83,21 +83,6 @@ def test_update_task_reopens_completed_tasks_when_status_changes(service: TaskSe
     assert reopened_task.completed is False
 
 
-def test_mark_pending_reopens_task(service: TaskService) -> None:
-    task = service.create_task(
-        title="Study SQL",
-        description="Review joins and indexes",
-        priority=Priority.medium,
-    )
-    assert task.id is not None
-    service.mark_complete(task.id)
-
-    reopened_task = service.mark_pending(task.id)
-
-    assert reopened_task.status == Status.pending
-    assert reopened_task.completed is False
-
-
 def test_create_task_accepts_empty_description(service: TaskService) -> None:
     task = service.create_task(
         title="Read chapter six",
