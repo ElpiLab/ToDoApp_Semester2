@@ -14,24 +14,6 @@ from student_task_manager.ui.controllers import (
 )
 
 
-def get_priority_color(priority: str) -> str:
-    if priority == "high":
-        return "negative"
-    if priority == "medium":
-        return "warning"
-    return "positive"
-
-
-def get_status_color(status: str) -> str:
-    if status == "done":
-        return "positive"
-    if status == "in_progress":
-        return "primary"
-    if status in ("pending", "created"):
-        return "warning"
-    return "secondary"
-
-
 def status_display_label(status_value: str) -> str:
     if status_value in ("created", "pending"):
         return "To do"
@@ -66,10 +48,6 @@ def priority_pill_class(value: str) -> str:
 def category_display(value: str) -> str:
     stripped = (value or "").strip()
     return stripped.title() if stripped else "Other"
-
-
-def format_due_date(due_date: date | None) -> str:
-    return due_date.isoformat() if due_date else "No due date"
 
 
 def relative_due_text(due_date: date, today: date, is_done: bool) -> str:
@@ -914,7 +892,6 @@ def index_page():
             else:
                 greeting_text = "Good evening"
 
-            priority_rank = {"high": 0, "medium": 1, "low": 2}
             priority_pill_classes = {
                 "low": "bg-emerald-100 text-emerald-700",
                 "medium": "bg-amber-100 text-amber-700",
@@ -1010,7 +987,7 @@ def index_page():
                 [t for t in open_tasks if t.due_date],
                 key=lambda t: (
                     t.due_date or date.max,
-                    priority_rank.get(t.priority.value, 99),
+                    PRIORITY_RANK.get(t.priority.value, 99),
                     t.title.lower(),
                 ),
             )
@@ -2179,7 +2156,6 @@ def index_page():
         if query:
             visible_tasks = [t for t in visible_tasks if query in t.title.lower()]
 
-        priority_order = {"high": 0, "medium": 1, "low": 2}
         status_order = {"created": 0, "pending": 1, "in_progress": 2, "done": 3}
         sort_key = state["sort"]
         if sort_key == "due_date":
@@ -2187,7 +2163,7 @@ def index_page():
         elif sort_key == "title":
             visible_tasks.sort(key=lambda t: t.title.lower())
         elif sort_key == "priority":
-            visible_tasks.sort(key=lambda t: priority_order.get(t.priority.value, 99))
+            visible_tasks.sort(key=lambda t: PRIORITY_RANK.get(t.priority.value, 99))
         elif sort_key == "status":
             visible_tasks.sort(key=lambda t: status_order.get(t.status.value, 99))
 
