@@ -1,44 +1,14 @@
-from collections.abc import Iterator
 from datetime import date
 
 import pytest
-from sqlalchemy.pool import StaticPool
-from sqlmodel import Session, SQLModel, create_engine
 
-from student_task_manager.data_access import dao as dao_module
 from student_task_manager.data_access.dao import TaskDAO
-from student_task_manager.domain.models import Priority, Status, Student, Task
+from student_task_manager.domain.models import Priority, Status, Task
 
 
 @pytest.fixture
-def task_dao(monkeypatch: pytest.MonkeyPatch) -> Iterator[TaskDAO]:
-    test_engine = create_engine(
-        "sqlite://",
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
-    )
-    SQLModel.metadata.create_all(test_engine)
-    with Session(test_engine) as session:
-        session.add(
-            Student(
-                id=1,
-                email="student@example.com",
-                password_hash="not-used",
-                full_name="Test Student",
-            )
-        )
-        session.add(
-            Student(
-                id=2,
-                email="other@example.com",
-                password_hash="not-used",
-                full_name="Other Student",
-            )
-        )
-        session.commit()
-
-    monkeypatch.setattr(dao_module, "engine", test_engine)
-    yield TaskDAO()
+def task_dao(seeded_test_engine) -> TaskDAO:
+    return TaskDAO()
 
 
 def test_db_create_persists_task_with_generated_id(task_dao: TaskDAO) -> None:
