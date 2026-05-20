@@ -17,6 +17,8 @@ This file tracks planned work and execution order.
   Bootstrap scaffold, planning docs, shared agent instructions, package skeleton, and default verification setup.
 - `010-task-list-view-foundation`
   Replaced the raw NiceGUI scaffold with the first structured task-list screen and improved task-flow verification.
+- `015-consolidate-source-under-src`
+  Moved the active application packages under `src/student_task_manager/` and made the default verification gates check the real source package.
 
 ## Notes
 

@@ -6,7 +6,7 @@ from datetime import date, datetime, timedelta
 
 from nicegui import app, ui
 
-from ui.controllers import (
+from student_task_manager.ui.controllers import (
     change_task_status,
     complete_task,
     create_task,
@@ -59,15 +59,11 @@ PRIORITY_RANK = {"high": 0, "medium": 1, "low": 2}
 
 
 def category_pill_class(value: str) -> str:
-    return CATEGORY_PILL_CLASSES.get(
-        (value or "").lower(), "bg-slate-100 text-slate-700"
-    )
+    return CATEGORY_PILL_CLASSES.get((value or "").lower(), "bg-slate-100 text-slate-700")
 
 
 def priority_pill_class(value: str) -> str:
-    return PRIORITY_PILL_CLASSES.get(
-        (value or "").lower(), "bg-slate-100 text-slate-700"
-    )
+    return PRIORITY_PILL_CLASSES.get((value or "").lower(), "bg-slate-100 text-slate-700")
 
 
 def category_display(value: str) -> str:
@@ -147,10 +143,10 @@ def index_page():
     }
 
     drawer_state = {"open": True}
-    drawer = ui.left_drawer(
-        value=True, top_corner=False, bottom_corner=True
-    ).classes("bg-white text-slate-900 border-r border-slate-200").props(
-        "width=260"
+    drawer = (
+        ui.left_drawer(value=True, top_corner=False, bottom_corner=True)
+        .classes("bg-white text-slate-900 border-r border-slate-200")
+        .props("width=260")
     )
 
     def toggle_sidebar() -> None:
@@ -160,16 +156,11 @@ def index_page():
 
     with drawer:
         with ui.column().classes("w-full h-full pt-4 px-4 pb-4 gap-0"):
-            with ui.row().classes(
-                "w-full items-center pl-3 mb-2"
-            ):
+            with ui.row().classes("w-full items-center pl-3 mb-2"):
                 ui.label("WORKSPACE").classes(
-                    "text-xs uppercase tracking-widest text-slate-400 "
-                    "flex-1 sidebar-hide"
+                    "text-xs uppercase tracking-widest text-slate-400 flex-1 sidebar-hide"
                 )
-                collapse_btn = ui.button(icon="chevron_left").props(
-                    "flat round dense color=grey-7"
-                )
+                collapse_btn = ui.button(icon="chevron_left").props("flat round dense color=grey-7")
                 collapse_btn.tooltip("Collapse sidebar")
                 collapse_btn.on("click", toggle_sidebar)
             workspace_nav_container = ui.column().classes("w-full gap-2")
@@ -191,9 +182,7 @@ def index_page():
                             btn = (
                                 ui.button(label, icon=icon)
                                 .props("flat no-caps align=left color=green-9")
-                                .classes(
-                                    f"{item_classes} bg-emerald-50 font-semibold"
-                                )
+                                .classes(f"{item_classes} bg-emerald-50 font-semibold")
                             )
                         else:
                             btn = (
@@ -202,9 +191,7 @@ def index_page():
                                 .classes(item_classes)
                             )
                         if key in ("dashboard", "tasks", "calendar", "analytics"):
-                            btn.on(
-                                "click", lambda k=key: switch_to_page(k)
-                            )
+                            btn.on("click", lambda k=key: switch_to_page(k))
                         nav_buttons[key] = btn
 
             def switch_to_page(page_key: str) -> None:
@@ -224,39 +211,34 @@ def index_page():
                     render_settings()
                 render_workspace_nav()
 
-    display_name = (
-        app.storage.user.get("full_name")
-        or app.storage.user.get("email")
-        or "User"
-    )
+    display_name = app.storage.user.get("full_name") or app.storage.user.get("email") or "User"
     avatar_initial = (display_name[0] if display_name else "?").upper()
     display_email = app.storage.user.get("email") or ""
 
-    expand_btn = ui.button(icon="chevron_right").props(
-        "flat round dense color=grey-7"
-    ).classes(
-        "fixed top-20 left-2 z-50 bg-white shadow-md rounded-full"
+    expand_btn = (
+        ui.button(icon="chevron_right")
+        .props("flat round dense color=grey-7")
+        .classes("fixed top-20 left-2 z-50 bg-white shadow-md rounded-full")
     )
     expand_btn.tooltip("Open sidebar")
     expand_btn.set_visibility(False)
     expand_btn.on("click", toggle_sidebar)
 
-    with ui.header().classes(
-        "bg-white items-center px-6 py-3 border-b border-slate-200"
-    ).props("flat"):
+    with (
+        ui.header()
+        .classes("bg-white items-center px-6 py-3 border-b border-slate-200")
+        .props("flat")
+    ):
         with ui.row().classes("items-center flex-1"):
             with ui.row().classes("items-center gap-2"):
-                ui.icon("bolt").classes("text-xl text-emerald-700")
-                ui.label("Bizzy").classes(
-                    "text-lg font-semibold tracking-wide text-slate-900"
-                )
+                ui.html('<img src="/assets/logo.svg" alt="Bizzy" class="h-11 w-auto" />')
 
         with ui.row().classes("items-center gap-3 flex-1 justify-end"):
-            global_search_input = ui.input(
-                placeholder="Search tasks..."
-            ).props(
-                "outlined dense rounded clearable hide-bottom-space"
-            ).classes("w-64")
+            global_search_input = (
+                ui.input(placeholder="Search tasks...")
+                .props("outlined dense rounded clearable hide-bottom-space")
+                .classes("w-64")
+            )
             with global_search_input.add_slot("prepend"):
                 ui.icon("search").classes("text-slate-400 text-xl")
             create_button = ui.button("New Task", icon="add").props(
@@ -264,58 +246,35 @@ def index_page():
             )
             create_button.classes("rounded-lg new-task-btn")
             with ui.row().classes("items-center gap-1"):
-                with ui.button(icon="notifications").props(
-                    "flat round color=grey-7"
-                ):
-                    notif_badge = ui.badge("", color="red").props(
-                        "floating rounded"
-                    ).classes(
-                        "!w-2 !h-2 !min-h-0 !p-0 notif-dot"
+                with ui.button(icon="notifications").props("flat round color=grey-7"):
+                    notif_badge = (
+                        ui.badge("", color="red")
+                        .props("floating rounded")
+                        .classes("!w-2 !h-2 !min-h-0 !p-0 notif-dot")
                     )
                     notif_badge.set_visibility(False)
                     notif_menu = ui.menu().props(
-                        'anchor="bottom right" self="top right" '
-                        ':offset="[0, 12]"'
+                        'anchor="bottom right" self="top right" :offset="[0, 12]"'
                     )
                     with notif_menu:
-                        notif_menu_container = ui.column().classes(
-                            "p-0 gap-0 w-80 min-h-[300px]"
-                        )
-                with ui.button().props(
-                    "flat round dense"
-                ).classes("w-9 h-9 p-0 ml-1"):
+                        notif_menu_container = ui.column().classes("p-0 gap-0 w-80 min-h-[300px]")
+                with ui.button().props("flat round dense").classes("w-9 h-9 p-0 ml-1"):
                     with ui.element("div").classes(
-                        "w-9 h-9 rounded-full bg-emerald-600 "
-                        "flex items-center justify-center"
+                        "w-9 h-9 rounded-full bg-emerald-600 flex items-center justify-center"
                     ):
-                        ui.label(avatar_initial).classes(
-                            "text-white font-semibold text-sm"
-                        )
+                        ui.label(avatar_initial).classes("text-white font-semibold text-sm")
                     user_menu = ui.menu().props(
-                        'anchor="bottom right" self="top right" '
-                        ':offset="[0, 12]"'
+                        'anchor="bottom right" self="top right" :offset="[0, 12]"'
                     )
                     with user_menu:
-                        with ui.column().classes(
-                            "p-3 gap-1 min-w-[220px]"
-                        ):
-                            with ui.column().classes(
-                                "gap-0 pb-2 mb-1 border-b border-slate-200"
-                            ):
-                                ui.label(display_name).classes(
-                                    "text-sm font-medium text-slate-900"
-                                )
-                                ui.label(display_email).classes(
-                                    "text-xs text-slate-500"
-                                )
-                            settings_menu_btn = ui.button(
-                                "Settings", icon="settings"
-                            ).props(
+                        with ui.column().classes("p-3 gap-1 min-w-[220px]"):
+                            with ui.column().classes("gap-0 pb-2 mb-1 border-b border-slate-200"):
+                                ui.label(display_name).classes("text-sm font-medium text-slate-900")
+                                ui.label(display_email).classes("text-xs text-slate-500")
+                            settings_menu_btn = ui.button("Settings", icon="settings").props(
                                 "flat no-caps align=left color=grey-8"
                             )
-                            settings_menu_btn.classes(
-                                "w-full justify-start px-2 py-1 rounded-md"
-                            )
+                            settings_menu_btn.classes("w-full justify-start px-2 py-1 rounded-md")
                             settings_menu_btn.on(
                                 "click",
                                 lambda: (
@@ -323,14 +282,10 @@ def index_page():
                                     switch_to_page("settings"),
                                 ),
                             )
-                            logout_menu_btn = ui.button(
-                                "Logout", icon="logout"
-                            ).props(
+                            logout_menu_btn = ui.button("Logout", icon="logout").props(
                                 "flat no-caps align=left color=grey-8"
                             )
-                            logout_menu_btn.classes(
-                                "w-full justify-start px-2 py-1 rounded-md"
-                            )
+                            logout_menu_btn.classes("w-full justify-start px-2 py-1 rounded-md")
                             logout_menu_btn.on(
                                 "click",
                                 lambda: ui.navigate.to("/logout"),
@@ -430,16 +385,15 @@ def index_page():
         else:
             default_due_iso = date.today().isoformat()
 
-        with ui.dialog().props("persistent") as dialog, ui.card().classes(
-            "w-[460px] max-w-full rounded-2xl p-6 gap-2"
+        with (
+            ui.dialog().props("persistent") as dialog,
+            ui.card().classes("w-[460px] max-w-full rounded-2xl p-6 gap-2"),
         ):
             with ui.row().classes("w-full items-center justify-between"):
                 ui.label("EDIT TASK" if is_edit else "NEW TASK").classes(
                     "text-xs uppercase tracking-widest text-slate-400"
                 )
-                close_btn = ui.button(icon="close").props(
-                    "flat round dense color=grey-7"
-                )
+                close_btn = ui.button(icon="close").props("flat round dense color=grey-7")
                 close_btn.tooltip("Close")
                 close_btn.on("click", dialog.close)
             title_input = (
@@ -447,16 +401,11 @@ def index_page():
                     placeholder="What needs to be done?",
                     value=task.title if is_edit else "",
                 )
-                .props(
-                    'borderless autofocus dense hide-bottom-space '
-                    'input-class="text-xl"'
-                )
+                .props('borderless autofocus dense hide-bottom-space input-class="text-xl"')
                 .classes("w-full")
             )
 
-            with ui.row().classes(
-                "w-full items-center justify-between flex-wrap"
-            ):
+            with ui.row().classes("w-full items-center justify-between flex-wrap"):
                 priority_input = (
                     ui.select(
                         {"low": "Low", "medium": "Medium", "high": "High"},
@@ -468,9 +417,7 @@ def index_page():
                 )
 
                 category_options = ["Project", "Exam", "Assignment", "Reading"]
-                category_initial = (
-                    category_display(task.category) if is_edit else None
-                )
+                category_initial = category_display(task.category) if is_edit else None
                 if category_initial and category_initial not in category_options:
                     category_options.append(category_initial)
                 category_input = (
@@ -481,10 +428,7 @@ def index_page():
                         with_input=True,
                         new_value_mode="add-unique",
                     )
-                    .props(
-                        'dense outlined options-dense '
-                        'placeholder="Pick or type..."'
-                    )
+                    .props('dense outlined options-dense placeholder="Pick or type..."')
                     .classes("w-28")
                 )
 
@@ -497,19 +441,14 @@ def index_page():
                         ),
                         label="Due date",
                     )
-                    .props(
-                        'dense outlined type=date '
-                        'prepend-icon="event" hide-bottom-space'
-                    )
+                    .props('dense outlined type=date prepend-icon="event" hide-bottom-space')
                     .classes("w-32 due-date-input")
                 )
 
                 status_input = None
                 if is_edit:
                     current_status = (
-                        "pending"
-                        if task.status.value == "created"
-                        else task.status.value
+                        "pending" if task.status.value == "created" else task.status.value
                     )
                     status_input = (
                         ui.select(
@@ -564,9 +503,7 @@ def index_page():
                     return
 
                 keep_open = (
-                    not is_edit
-                    and add_another_checkbox is not None
-                    and add_another_checkbox.value
+                    not is_edit and add_another_checkbox is not None and add_another_checkbox.value
                 )
 
                 if keep_open:
@@ -587,15 +524,12 @@ def index_page():
                     render_analytics()
 
             def confirm_delete() -> None:
-                with ui.dialog() as confirm_dialog, ui.card().classes(
-                    "w-[400px] max-w-full rounded-2xl p-6 gap-3"
+                with (
+                    ui.dialog() as confirm_dialog,
+                    ui.card().classes("w-[400px] max-w-full rounded-2xl p-6 gap-3"),
                 ):
-                    ui.label("Delete this task?").classes(
-                        "text-lg font-semibold text-slate-900"
-                    )
-                    ui.label(
-                        "This action cannot be undone."
-                    ).classes("text-sm text-slate-500")
+                    ui.label("Delete this task?").classes("text-lg font-semibold text-slate-900")
+                    ui.label("This action cannot be undone.").classes("text-sm text-slate-500")
 
                     def do_delete() -> None:
                         assert task is not None
@@ -615,22 +549,17 @@ def index_page():
                 confirm_dialog.open()
 
             with ui.row().classes(
-                "w-full items-center justify-between pt-3 mt-1 "
-                "border-t border-slate-100"
+                "w-full items-center justify-between pt-3 mt-1 border-t border-slate-100"
             ):
                 if is_edit:
-                    ui.button(
-                        "Delete", icon="delete", on_click=confirm_delete
-                    ).props("flat color=negative no-caps")
+                    ui.button("Delete", icon="delete", on_click=confirm_delete).props(
+                        "flat color=negative no-caps"
+                    )
                 else:
                     add_another_checkbox = ui.checkbox("Add another")
                 with ui.row().classes("gap-2"):
-                    ui.button("Cancel", on_click=dialog.close).props(
-                        "flat color=grey-7 no-caps"
-                    )
-                    ui.button(button_label, on_click=save).props(
-                        "color=green-9 unelevated no-caps"
-                    )
+                    ui.button("Cancel", on_click=dialog.close).props("flat color=grey-7 no-caps")
+                    ui.button(button_label, on_click=save).props("color=green-9 unelevated no-caps")
 
         dialog.open()
 
@@ -638,9 +567,9 @@ def index_page():
         with ui.column().classes("w-full items-center gap-3 px-6 py-12 text-center"):
             ui.icon("inbox", size="3rem").classes("text-slate-300")
             ui.label("No matching tasks").classes("text-lg font-medium text-slate-700")
-            ui.label(
-                "Create a new task or adjust your filters to see more results."
-            ).classes("text-sm text-slate-500")
+            ui.label("Create a new task or adjust your filters to see more results.").classes(
+                "text-sm text-slate-500"
+            )
 
     def render_list(tasks, on_complete, on_reopen, on_delete) -> None:
         today = date.today()
@@ -716,11 +645,7 @@ def index_page():
                     if is_done:
                         ui.icon("check").classes("text-sm")
 
-                accent = (
-                    "bg-rose-300"
-                    if task.priority.value == "high"
-                    else "bg-emerald-300"
-                )
+                accent = "bg-rose-300" if task.priority.value == "high" else "bg-emerald-300"
                 ui.element("div").classes(f"flex-none w-1 h-10 rounded-full {accent}")
 
                 with ui.column().classes("flex-1 min-w-0 gap-0.5"):
@@ -735,12 +660,8 @@ def index_page():
 
                     meta_parts = [category_display(task.category)]
                     if task.due_date:
-                        meta_parts.append(
-                            f"Due {task.due_date.strftime('%b')} {task.due_date.day}"
-                        )
-                    ui.label(" · ".join(meta_parts)).classes(
-                        "text-xs text-slate-500"
-                    )
+                        meta_parts.append(f"Due {task.due_date.strftime('%b')} {task.due_date.day}")
+                    ui.label(" · ".join(meta_parts)).classes("text-xs text-slate-500")
 
                 ui.label(priority_short[task.priority.value]).classes(
                     "text-xs font-bold tracking-wider rounded px-2 py-1 "
@@ -748,15 +669,15 @@ def index_page():
                 )
 
                 pill_label, dot_color, pill_bg = status_pill(bucket_key)
-                with ui.row().classes(
-                    f"items-center gap-1.5 rounded-full px-2.5 py-1 {pill_bg}"
-                ):
+                with ui.row().classes(f"items-center gap-1.5 rounded-full px-2.5 py-1 {pill_bg}"):
                     ui.element("div").classes(f"w-1.5 h-1.5 rounded-full {dot_color}")
                     ui.label(pill_label).classes("text-xs font-medium")
 
-                delete_btn = ui.button(icon="delete_outline").props(
-                    "flat round dense color=grey-5"
-                ).classes("opacity-0 group-hover:opacity-100 transition-opacity")
+                delete_btn = (
+                    ui.button(icon="delete_outline")
+                    .props("flat round dense color=grey-5")
+                    .classes("opacity-0 group-hover:opacity-100 transition-opacity")
+                )
                 delete_btn.tooltip("Delete task")
                 delete_btn.on(
                     "click.stop",
@@ -775,24 +696,17 @@ def index_page():
             if not bucket:
                 continue
             with ui.row().classes(
-                "w-full items-center gap-3 px-1 pb-3 "
-                + ("pt-1" if first_section else "pt-8")
+                "w-full items-center gap-3 px-1 pb-3 " + ("pt-1" if first_section else "pt-8")
             ):
-                ui.element("div").classes(
-                    f"w-2.5 h-2.5 rounded-full {dot_class}"
-                )
+                ui.element("div").classes(f"w-2.5 h-2.5 rounded-full {dot_class}")
                 ui.label(label.upper()).classes(
                     "text-xs font-bold uppercase tracking-widest text-slate-700"
                 )
-                ui.label(str(len(bucket))).classes(
-                    "text-xs font-medium text-slate-400 ml-1"
-                )
+                ui.label(str(len(bucket))).classes("text-xs font-medium text-slate-400 ml-1")
                 ui.element("div").classes("flex-1 h-px bg-slate-200 ml-2")
             first_section = False
 
-            with ui.card().classes(
-                "w-full rounded-2xl shadow-sm border-0 p-0 overflow-hidden"
-            ):
+            with ui.card().classes("w-full rounded-2xl shadow-sm border-0 p-0 overflow-hidden"):
                 for idx, task in enumerate(bucket):
                     if idx > 0:
                         ui.separator()
@@ -854,14 +768,14 @@ def index_page():
                 )
                 column_card.on(
                     "drop.prevent",
-                    lambda e=None, c=column_card, d=column_depth, s=target_status: drop_on_column(c, d, s),
+                    lambda e=None, c=column_card, d=column_depth, s=target_status: drop_on_column(
+                        c, d, s
+                    ),
                 )
                 with column_card:
                     with ui.row().classes("w-full items-center gap-2"):
                         ui.element("div").classes(f"w-2 h-2 rounded-full {dot_class}")
-                        ui.label(column_title).classes(
-                            f"text-sm font-semibold {text_class}"
-                        )
+                        ui.label(column_title).classes(f"text-sm font-semibold {text_class}")
                         ui.element("div").classes("grow")
                         ui.label(str(len(column_tasks))).classes(
                             "text-xs font-semibold text-slate-500 bg-slate-100 rounded-full px-2 py-1"
@@ -871,24 +785,24 @@ def index_page():
                         assert task.id is not None
                         is_done = task.completed
                         is_late = (
-                            task.due_date is not None
-                            and not is_done
-                            and task.due_date < today
+                            task.due_date is not None and not is_done and task.due_date < today
                         )
 
-                        card = ui.element("div").classes(
-                            "w-full bg-white rounded-xl shadow-sm p-3 flex flex-col gap-2 "
-                            "cursor-pointer hover:shadow-md transition-shadow"
-                        ).props("draggable=true")
+                        card = (
+                            ui.element("div")
+                            .classes(
+                                "w-full bg-white rounded-xl shadow-sm p-3 flex flex-col gap-2 "
+                                "cursor-pointer hover:shadow-md transition-shadow"
+                            )
+                            .props("draggable=true")
+                        )
                         card.on(
                             "click",
                             lambda e=None, current_task=task: open_task_dialog(current_task),
                         )
                         card.on(
                             "dragstart",
-                            lambda e=None, task_id=task.id: state.__setitem__(
-                                "dragging", task_id
-                            ),
+                            lambda e=None, task_id=task.id: state.__setitem__("dragging", task_id),
                         )
                         with card:
                             title_classes = "font-medium text-slate-900 truncate w-full"
@@ -896,25 +810,17 @@ def index_page():
                                 title_classes += " line-through text-slate-400"
                             ui.label(task.title).classes(title_classes)
 
-                            with ui.row().classes(
-                                "items-center gap-2 flex-wrap"
-                            ):
-                                ui.label(
-                                    category_display(task.category)
-                                ).classes(
+                            with ui.row().classes("items-center gap-2 flex-wrap"):
+                                ui.label(category_display(task.category)).classes(
                                     "text-xs rounded px-2 py-1 "
                                     f"{category_pill_class(task.category)}"
                                 )
-                                ui.label(
-                                    task.priority.value.upper()
-                                ).classes(
+                                ui.label(task.priority.value.upper()).classes(
                                     "text-xs rounded px-2 py-1 "
                                     f"{priority_pill_class(task.priority.value)}"
                                 )
                             if task.due_date:
-                                due_text = relative_due_text(
-                                    task.due_date, today, is_done
-                                )
+                                due_text = relative_due_text(task.due_date, today, is_done)
                                 due_classes = (
                                     "text-xs text-red-600 font-medium"
                                     if is_late
@@ -927,13 +833,11 @@ def index_page():
                             "In progress": "Nothing in progress",
                             "Done": "No completed tasks yet",
                         }
-                        with ui.column().classes(
-                            "w-full items-center justify-center py-8 gap-2"
-                        ):
+                        with ui.column().classes("w-full items-center justify-center py-8 gap-2"):
                             ui.icon("inbox", size="1.5rem").classes("text-slate-400")
-                            ui.label(
-                                empty_messages.get(column_title, "No tasks")
-                            ).classes("text-xs text-slate-500")
+                            ui.label(empty_messages.get(column_title, "No tasks")).classes(
+                                "text-xs text-slate-500"
+                            )
 
                     if column_title == "To do":
                         add_btn = ui.element("div").classes(
@@ -993,17 +897,14 @@ def index_page():
 
             open_tasks = [t for t in all_tasks if not t.completed]
             completed_tasks = [t for t in all_tasks if t.completed]
-            overdue = [
-                t for t in open_tasks if t.due_date and t.due_date < today
-            ]
+            overdue = [t for t in open_tasks if t.due_date and t.due_date < today]
             due_today = [t for t in open_tasks if t.due_date == today]
             due_tomorrow = [t for t in open_tasks if t.due_date == tomorrow]
             due_rest_of_week = sorted(
                 [
                     t
                     for t in open_tasks
-                    if t.due_date
-                    and today + timedelta(days=2) <= t.due_date <= week_end
+                    if t.due_date and today + timedelta(days=2) <= t.due_date <= week_end
                 ],
                 key=lambda t: t.due_date,
             )
@@ -1036,11 +937,7 @@ def index_page():
                 pill_color = priority_pill_classes.get(
                     t.priority.value, "bg-slate-100 text-slate-700"
                 )
-                is_late = (
-                    t.due_date is not None
-                    and not t.completed
-                    and t.due_date < today
-                )
+                is_late = t.due_date is not None and not t.completed and t.due_date < today
                 row = ui.element("div").classes(
                     "w-full rounded-lg border border-slate-100 px-3 py-3 "
                     "cursor-pointer hover:bg-slate-50 transition-colors "
@@ -1054,41 +951,29 @@ def index_page():
                     if show_done:
                         circle.on(
                             "click.stop",
-                            lambda task_id=t.id: dashboard_quick_complete(
-                                task_id
-                            ),
+                            lambda task_id=t.id: dashboard_quick_complete(task_id),
                         )
                     circle.tooltip("Mark complete")
 
                     with ui.column().classes("flex-1 min-w-0 gap-2"):
-                        title_classes = (
-                            "text-sm font-semibold text-slate-900 truncate"
-                        )
+                        title_classes = "text-sm font-semibold text-slate-900 truncate"
                         if t.completed:
                             title_classes += " line-through opacity-60"
                         ui.label(t.title).classes(title_classes)
                         with ui.row().classes("items-center gap-2 flex-wrap"):
                             ui.label(category_display(t.category)).classes(
-                                "text-xs rounded px-2 py-1 "
-                                f"{category_pill_class(t.category)}"
+                                f"text-xs rounded px-2 py-1 {category_pill_class(t.category)}"
                             )
                             ui.label(t.priority.value.upper()).classes(
                                 f"text-xs rounded px-2 py-1 {pill_color}"
                             )
                             if t.status.value in status_pill_classes:
-                                status_color = status_pill_classes[
-                                    t.status.value
-                                ]
-                                ui.label(
-                                    status_display_label(t.status.value)
-                                ).classes(
-                                    f"text-xs rounded px-2 py-1 "
-                                    f"{status_color}"
+                                status_color = status_pill_classes[t.status.value]
+                                ui.label(status_display_label(t.status.value)).classes(
+                                    f"text-xs rounded px-2 py-1 {status_color}"
                                 )
                         if t.due_date:
-                            due_text = relative_due_text(
-                                t.due_date, today, t.completed
-                            )
+                            due_text = relative_due_text(t.due_date, today, t.completed)
                             due_classes = (
                                 "text-xs text-red-600 font-medium"
                                 if is_late
@@ -1097,20 +982,14 @@ def index_page():
                             ui.label(due_text).classes(due_classes)
                 row.on("click", lambda task=t: open_task_dialog(task))
 
-            week_count = (
-                len(due_today)
-                + len(due_tomorrow)
-                + len(due_rest_of_week)
-            )
+            week_count = len(due_today) + len(due_tomorrow) + len(due_rest_of_week)
 
             attention_count = len(overdue) + len(due_today)
             if attention_count == 0:
                 attention_msg = "nothing urgent today"
             else:
                 plural = "s" if attention_count != 1 else ""
-                attention_msg = (
-                    f"{attention_count} item{plural} needs attention"
-                )
+                attention_msg = f"{attention_count} item{plural} needs attention"
             hero_date = today.strftime("%a %d %b")
             hero_attention = attention_msg
 
@@ -1121,28 +1000,14 @@ def index_page():
                 if not key or key.lower() in cats_seen:
                     continue
                 cats_seen.add(key.lower())
-                cat_tasks = [
-                    x
-                    for x in all_tasks
-                    if (x.category or "").lower() == key.lower()
-                ]
+                cat_tasks = [x for x in all_tasks if (x.category or "").lower() == key.lower()]
                 if not cat_tasks:
                     continue
-                pct = round(
-                    sum(1 for x in cat_tasks if x.completed)
-                    / len(cat_tasks)
-                    * 100
-                )
+                pct = round(sum(1 for x in cat_tasks if x.completed) / len(cat_tasks) * 100)
                 category_progress.append((category_display(key), pct))
-            category_progress = sorted(
-                category_progress, key=lambda x: -x[1]
-            )[:3]
+            category_progress = sorted(category_progress, key=lambda x: -x[1])[:3]
 
-            overall_pct = (
-                round(len(completed_tasks) / len(all_tasks) * 100)
-                if all_tasks
-                else 0
-            )
+            overall_pct = round(len(completed_tasks) / len(all_tasks) * 100) if all_tasks else 0
 
             upcoming_tasks = sorted(
                 [t for t in open_tasks if t.due_date],
@@ -1153,42 +1018,25 @@ def index_page():
                 ),
             )
 
-            with ui.element("div").classes(
-                "w-full grid grid-cols-3 gap-4"
-            ):
+            with ui.element("div").classes("w-full grid grid-cols-3 gap-4"):
                 with ui.card().classes(
-                    "col-span-2 rounded-2xl !p-6 gap-2 "
-                    "!bg-emerald-900 !text-white shadow-none"
+                    "col-span-2 rounded-2xl !p-6 gap-2 !bg-emerald-900 !text-white shadow-none"
                 ):
-                    first_name = (
-                        display_name.split("@")[0].split()[0]
-                        if display_name
-                        else "there"
-                    )
+                    first_name = display_name.split("@")[0].split()[0] if display_name else "there"
                     ui.label(f"{greeting_text}, {first_name}").classes(
                         "text-2xl font-semibold leading-tight !text-white"
                     )
                     with ui.column().classes("gap-0 mt-2"):
-                        ui.label(hero_date).classes(
-                            "text-sm text-emerald-200"
-                        )
-                        ui.label(hero_attention).classes(
-                            "text-sm text-emerald-200"
-                        )
+                        ui.label(hero_date).classes("text-sm text-emerald-200")
+                        ui.label(hero_attention).classes("text-sm text-emerald-200")
 
                 oldest_overdue_days = max(
-                    (
-                        (today - t.due_date).days
-                        for t in overdue
-                        if t.due_date
-                    ),
+                    ((today - t.due_date).days for t in overdue if t.due_date),
                     default=0,
                 )
                 if overdue:
                     plural = "s" if oldest_overdue_days != 1 else ""
-                    overdue_sub = (
-                        f"Oldest {oldest_overdue_days} day{plural} late"
-                    )
+                    overdue_sub = f"Oldest {oldest_overdue_days} day{plural} late"
                 else:
                     overdue_sub = "All caught up"
                 if week_count:
@@ -1198,148 +1046,97 @@ def index_page():
                     open_sub = "Nothing this week"
                 done_sub = f"{overall_pct}% of all tasks"
 
-                with ui.card().classes(
-                    "rounded-2xl !p-5 gap-1 !bg-white shadow-none"
-                ):
+                with ui.card().classes("rounded-2xl !p-5 gap-1 !bg-white shadow-none"):
                     ui.label(str(len(open_tasks))).classes(
                         "text-3xl font-semibold text-slate-900 leading-none"
                     )
                     ui.label("ACTIVE").classes(
                         "text-xs uppercase tracking-widest text-slate-500 mt-2"
                     )
-                    ui.label(open_sub).classes(
-                        "text-xs text-slate-500"
-                    )
+                    ui.label(open_sub).classes("text-xs text-slate-500")
 
-                with ui.card().classes(
-                    "rounded-2xl !p-5 gap-1 !bg-emerald-100 shadow-none"
-                ):
+                with ui.card().classes("rounded-2xl !p-5 gap-1 !bg-emerald-100 shadow-none"):
                     ui.label(str(len(completed_tasks))).classes(
                         "text-3xl font-semibold text-emerald-900 leading-none"
                     )
                     ui.label("DONE").classes(
-                        "text-xs uppercase tracking-widest "
-                        "text-emerald-800 mt-2"
+                        "text-xs uppercase tracking-widest text-emerald-800 mt-2"
                     )
-                    ui.label(done_sub).classes(
-                        "text-xs text-emerald-800"
-                    )
+                    ui.label(done_sub).classes("text-xs text-emerald-800")
 
-                with ui.card().classes(
-                    "rounded-2xl !p-5 gap-1 !bg-orange-100 shadow-none"
-                ):
+                with ui.card().classes("rounded-2xl !p-5 gap-1 !bg-orange-100 shadow-none"):
                     ui.label(str(len(overdue))).classes(
                         "text-3xl font-semibold text-orange-900 leading-none"
                     )
                     ui.label("OVERDUE").classes(
-                        "text-xs uppercase tracking-widest "
-                        "text-orange-800 mt-2"
+                        "text-xs uppercase tracking-widest text-orange-800 mt-2"
                     )
-                    ui.label(overdue_sub).classes(
-                        "text-xs text-orange-800"
-                    )
+                    ui.label(overdue_sub).classes("text-xs text-orange-800")
 
                 with ui.card().classes(
-                    "row-span-2 rounded-2xl !p-6 gap-3 !bg-emerald-900 "
-                    "!text-white shadow-none"
+                    "row-span-2 rounded-2xl !p-6 gap-3 !bg-emerald-900 !text-white shadow-none"
                 ):
                     ui.label("PROGRESS").classes(
                         "text-xs uppercase tracking-widest text-emerald-200"
                     )
                     for cat_label, pct in category_progress:
-                        with ui.row().classes(
-                            "w-full items-center justify-between"
-                        ):
-                            ui.label(cat_label).classes(
-                                "text-sm !text-white"
-                            )
-                            ui.label(f"{pct}%").classes(
-                                "text-sm text-emerald-200"
-                            )
+                        with ui.row().classes("w-full items-center justify-between"):
+                            ui.label(cat_label).classes("text-sm !text-white")
+                            ui.label(f"{pct}%").classes("text-sm text-emerald-200")
                         track = ui.element("div").classes(
-                            "w-full h-1 rounded-full bg-emerald-800 "
-                            "overflow-hidden"
+                            "w-full h-1 rounded-full bg-emerald-800 overflow-hidden"
                         )
                         with track:
-                            ui.element("div").classes(
-                                "h-full bg-emerald-300 rounded-full"
-                            ).style(f"width: {pct}%;")
-                    with ui.row().classes(
-                        "w-full items-center justify-between mt-2"
-                    ):
-                        ui.label("Overall").classes(
-                            "text-sm font-semibold !text-white"
-                        )
+                            ui.element("div").classes("h-full bg-emerald-300 rounded-full").style(
+                                f"width: {pct}%;"
+                            )
+                    with ui.row().classes("w-full items-center justify-between mt-2"):
+                        ui.label("Overall").classes("text-sm font-semibold !text-white")
                         ui.label(f"{overall_pct}%").classes(
                             "text-sm font-semibold text-emerald-200"
                         )
                     track = ui.element("div").classes(
-                        "w-full h-1 rounded-full bg-emerald-800 "
-                        "overflow-hidden"
+                        "w-full h-1 rounded-full bg-emerald-800 overflow-hidden"
                     )
                     with track:
-                        ui.element("div").classes(
-                            "h-full bg-emerald-300 rounded-full"
-                        ).style(f"width: {overall_pct}%;")
+                        ui.element("div").classes("h-full bg-emerald-300 rounded-full").style(
+                            f"width: {overall_pct}%;"
+                        )
 
-                with ui.card().classes(
-                    "col-span-2 rounded-2xl !p-5 gap-2 "
-                    "!bg-white shadow-none"
-                ):
+                with ui.card().classes("col-span-2 rounded-2xl !p-5 gap-2 !bg-white shadow-none"):
                     ui.label("UPCOMING TASKS").classes(
                         "text-xs uppercase tracking-widest text-slate-500"
                     )
                     if not upcoming_tasks:
-                        with ui.column().classes(
-                            "w-full items-center gap-2 py-6"
-                        ):
-                            ui.icon("event_available", size="2rem").classes(
-                                "text-slate-300"
-                            )
+                        with ui.column().classes("w-full items-center gap-2 py-6"):
+                            ui.icon("event_available", size="2rem").classes("text-slate-300")
                             ui.label("Nothing upcoming").classes(
                                 "text-sm font-semibold text-slate-700"
                             )
                     else:
                         visible = upcoming_tasks[:4]
                         for idx, t in enumerate(visible):
-                            is_overdue = (
-                                t.due_date is not None
-                                and t.due_date < today
-                            )
-                            is_in_progress = (
-                                t.status.value == "in_progress"
-                            )
+                            is_overdue = t.due_date is not None and t.due_date < today
+                            is_in_progress = t.status.value == "in_progress"
                             if is_overdue:
                                 circle_class = "border-rose-500"
                                 title_color = "text-rose-600"
                                 pill_label = "Overdue"
-                                pill_class = (
-                                    "bg-rose-100 text-rose-700"
-                                )
+                                pill_class = "bg-rose-100 text-rose-700"
                             elif is_in_progress:
                                 circle_class = "border-emerald-500"
                                 title_color = "text-slate-900"
                                 pill_label = "In Progress"
-                                pill_class = (
-                                    "bg-emerald-100 text-emerald-700"
-                                )
+                                pill_class = "bg-emerald-100 text-emerald-700"
                             else:
                                 circle_class = "border-slate-300"
                                 title_color = "text-slate-900"
                                 pill_label = "Open"
-                                pill_class = (
-                                    "bg-slate-100 text-slate-600"
-                                )
+                                pill_class = "bg-slate-100 text-slate-600"
                             is_last = idx == len(visible) - 1
-                            border_class = (
-                                ""
-                                if is_last
-                                else " border-b border-slate-100"
-                            )
+                            border_class = "" if is_last else " border-b border-slate-100"
                             row = ui.row().classes(
-                                "w-full items-center gap-3 py-3 "
-                                "transition-colors"
-                                + border_class
+                                "w-full items-center gap-3 py-3 transition-colors" + border_class
                             )
                             with row:
                                 circle = ui.element("div").classes(
@@ -1348,33 +1145,19 @@ def index_page():
                                 )
                                 circle.on(
                                     "click.stop",
-                                    lambda task_id=t.id: (
-                                        dashboard_quick_complete(task_id)
-                                    ),
+                                    lambda task_id=t.id: dashboard_quick_complete(task_id),
                                 )
                                 circle.tooltip("Mark complete")
-                                with ui.column().classes(
-                                    "flex-1 min-w-0 gap-0"
-                                ):
-                                    title_classes = (
-                                        "text-sm font-semibold "
-                                        f"{title_color} truncate"
-                                    )
-                                    ui.label(t.title).classes(
-                                        title_classes
-                                    )
+                                with ui.column().classes("flex-1 min-w-0 gap-0"):
+                                    title_classes = f"text-sm font-semibold {title_color} truncate"
+                                    ui.label(t.title).classes(title_classes)
                                     cat = category_display(t.category)
-                                    date_str = t.due_date.strftime(
-                                        "%d %b"
-                                    )
-                                    ui.label(
-                                        f"{cat} · {date_str}"
-                                    ).classes(
+                                    date_str = t.due_date.strftime("%d %b")
+                                    ui.label(f"{cat} · {date_str}").classes(
                                         "text-xs text-slate-500"
                                     )
                                 ui.label(pill_label).classes(
-                                    "text-xs font-semibold rounded "
-                                    f"px-2 py-1 shrink-0 {pill_class}"
+                                    f"text-xs font-semibold rounded px-2 py-1 shrink-0 {pill_class}"
                                 )
 
                         more_count = max(len(upcoming_tasks) - 4, 0)
@@ -1383,12 +1166,12 @@ def index_page():
                             if more_count
                             else "View all tasks"
                         )
-                        view_all_btn = ui.button(
+                        ui.button(
                             view_all_label,
                             on_click=lambda: switch_to_page("tasks"),
-                        ).props(
-                            "flat no-caps dense color=green-9"
-                        ).classes("text-xs self-start pt-1")
+                        ).props("flat no-caps dense color=green-9").classes(
+                            "text-xs self-start pt-1"
+                        )
 
     def render_analytics() -> None:
         analytics_panel.clear()
@@ -1399,13 +1182,9 @@ def index_page():
 
             open_tasks = [t for t in all_tasks if not t.completed]
             completed_tasks = [t for t in all_tasks if t.completed]
-            overdue = [
-                t for t in open_tasks if t.due_date and t.due_date < today
-            ]
+            overdue = [t for t in open_tasks if t.due_date and t.due_date < today]
 
-            completion_pct = (
-                round(len(completed_tasks) / total * 100) if total else 0
-            )
+            completion_pct = round(len(completed_tasks) / total * 100) if total else 0
 
             category_counts: dict[str, int] = {}
             category_done_counts: dict[str, int] = {}
@@ -1413,29 +1192,17 @@ def index_page():
                 key = category_display(t.category)
                 category_counts[key] = category_counts.get(key, 0) + 1
                 if t.completed:
-                    category_done_counts[key] = (
-                        category_done_counts.get(key, 0) + 1
-                    )
-            category_items = sorted(
-                category_counts.items(), key=lambda x: -x[1]
-            )
+                    category_done_counts[key] = category_done_counts.get(key, 0) + 1
+            category_items = sorted(category_counts.items(), key=lambda x: -x[1])
 
             done_count = len(completed_tasks)
-            in_progress_count = sum(
-                1
-                for t in open_tasks
-                if t.status.value == "in_progress"
-            )
+            in_progress_count = sum(1 for t in open_tasks if t.status.value == "in_progress")
             overdue_count = sum(
                 1
                 for t in open_tasks
-                if t.status.value != "in_progress"
-                and t.due_date
-                and t.due_date < today
+                if t.status.value != "in_progress" and t.due_date and t.due_date < today
             )
-            open_count = (
-                len(open_tasks) - in_progress_count - overdue_count
-            )
+            open_count = len(open_tasks) - in_progress_count - overdue_count
 
             priority_breakdown = []
             for p_value, p_label, p_color in [
@@ -1443,39 +1210,15 @@ def index_page():
                 ("medium", "MEDIUM", "#047857"),
                 ("low", "LOW", "#10B981"),
             ]:
-                p_tasks = [
-                    t for t in all_tasks if t.priority.value == p_value
-                ]
+                p_tasks = [t for t in all_tasks if t.priority.value == p_value]
                 p_done = sum(1 for t in p_tasks if t.completed)
                 p_total = len(p_tasks)
-                p_pct = (
-                    round(p_done / p_total * 100) if p_total else 0
-                )
-                priority_breakdown.append(
-                    (p_label, p_done, p_total, p_pct, p_color)
-                )
-
-            week_start = today - timedelta(days=today.weekday())
-            week_days = [
-                week_start + timedelta(days=i) for i in range(7)
-            ]
-            day_labels = [d.strftime("%a") for d in week_days]
-            day_counts = [
-                sum(
-                    1
-                    for t in all_tasks
-                    if t.due_date == d and not t.completed
-                )
-                for d in week_days
-            ]
+                p_pct = round(p_done / p_total * 100) if p_total else 0
+                priority_breakdown.append((p_label, p_done, p_total, p_pct, p_color))
 
             with ui.column().classes("gap-1"):
-                ui.label("Analytics").classes(
-                    "text-2xl font-semibold text-slate-900"
-                )
-                ui.label("Your productivity at a glance").classes(
-                    "text-sm text-slate-500"
-                )
+                ui.label("Analytics").classes("text-2xl font-semibold text-slate-900")
+                ui.label("Your productivity at a glance").classes("text-sm text-slate-500")
 
             kpi_cards = [
                 (
@@ -1501,40 +1244,21 @@ def index_page():
             ]
             with ui.row().classes("w-full gap-3 flex-nowrap items-stretch"):
                 for label, value, accent in kpi_cards:
-                    with ui.card().classes(
-                        "w-44 rounded-xl shadow-sm !p-5 gap-2 "
-                        "justify-between"
-                    ):
-                        ui.label(label).classes(
-                            "text-xs uppercase tracking-widest text-slate-500"
-                        )
-                        ui.label(value).classes(
-                            f"text-3xl font-semibold {accent} leading-none"
-                        )
+                    with ui.card().classes("w-44 rounded-xl shadow-sm !p-5 gap-2 justify-between"):
+                        ui.label(label).classes("text-xs uppercase tracking-widest text-slate-500")
+                        ui.label(value).classes(f"text-3xl font-semibold {accent} leading-none")
 
-            with ui.row().classes(
-                "w-full items-stretch gap-4 flex-nowrap"
-            ):
-                with ui.card().classes(
-                    "flex-1 min-w-0 rounded-2xl shadow-sm !p-5 gap-3"
-                ):
-                    ui.label("Tasks by category").classes(
-                        "text-lg font-semibold text-slate-900"
+            with ui.row().classes("w-full items-stretch gap-4 flex-nowrap"):
+                with ui.card().classes("flex-1 min-w-0 rounded-2xl shadow-sm !p-5 gap-3"):
+                    ui.label("Tasks by category").classes("text-lg font-semibold text-slate-900")
+                    ui.label("Total vs completed tasks in each category").classes(
+                        "text-sm text-slate-400"
                     )
-                    ui.label(
-                        "Total vs completed tasks in each category"
-                    ).classes("text-sm text-slate-400")
 
                     if not category_items:
-                        with ui.column().classes(
-                            "w-full items-center gap-2 py-10"
-                        ):
-                            ui.icon("inbox", size="2rem").classes(
-                                "text-slate-300"
-                            )
-                            ui.label("No tasks yet").classes(
-                                "text-sm text-slate-500"
-                            )
+                        with ui.column().classes("w-full items-center gap-2 py-10"):
+                            ui.icon("inbox", size="2rem").classes("text-slate-300")
+                            ui.label("No tasks yet").classes("text-sm text-slate-500")
                     else:
                         ui.echart(
                             {
@@ -1548,12 +1272,8 @@ def index_page():
                                 },
                                 "xAxis": {
                                     "type": "category",
-                                    "data": [
-                                        k for k, _ in category_items
-                                    ],
-                                    "axisLine": {
-                                        "lineStyle": {"color": "#cbd5e1"}
-                                    },
+                                    "data": [k for k, _ in category_items],
+                                    "axisLine": {"lineStyle": {"color": "#cbd5e1"}},
                                     "axisLabel": {"color": "#475569"},
                                 },
                                 "yAxis": {
@@ -1561,23 +1281,22 @@ def index_page():
                                     "minInterval": 1,
                                     "axisLine": {"show": False},
                                     "axisTick": {"show": False},
-                                    "splitLine": {
-                                        "lineStyle": {"color": "#e2e8f0"}
-                                    },
+                                    "splitLine": {"lineStyle": {"color": "#e2e8f0"}},
                                     "axisLabel": {"color": "#94a3b8"},
                                 },
                                 "series": [
                                     {
                                         "name": "Total",
                                         "type": "bar",
-                                        "data": [
-                                            v for _, v in category_items
-                                        ],
+                                        "data": [v for _, v in category_items],
                                         "barMaxWidth": 18,
                                         "itemStyle": {
                                             "color": "#A7F3D0",
                                             "borderRadius": [
-                                                4, 4, 0, 0,
+                                                4,
+                                                4,
+                                                0,
+                                                0,
                                             ],
                                         },
                                     },
@@ -1585,16 +1304,17 @@ def index_page():
                                         "name": "Done",
                                         "type": "bar",
                                         "data": [
-                                            category_done_counts.get(
-                                                k, 0
-                                            )
+                                            category_done_counts.get(k, 0)
                                             for k, _ in category_items
                                         ],
                                         "barMaxWidth": 18,
                                         "itemStyle": {
                                             "color": "#064E3B",
                                             "borderRadius": [
-                                                4, 4, 0, 0,
+                                                4,
+                                                4,
+                                                0,
+                                                0,
                                             ],
                                         },
                                     },
@@ -1603,8 +1323,7 @@ def index_page():
                         ).classes("w-full h-64")
 
                         with ui.row().classes(
-                            "w-full items-center justify-center "
-                            "gap-5 mt-auto pt-3 flex-wrap"
+                            "w-full items-center justify-center gap-5 mt-auto pt-3 flex-wrap"
                         ):
                             for legend_label, legend_color in [
                                 ("Total", "bg-emerald-200"),
@@ -1612,37 +1331,23 @@ def index_page():
                             ]:
                                 with ui.row().classes("items-center gap-2"):
                                     ui.element("div").classes(
-                                        f"w-2.5 h-2.5 rounded-full "
-                                        f"{legend_color}"
+                                        f"w-2.5 h-2.5 rounded-full {legend_color}"
                                     )
                                     ui.label(legend_label).classes(
                                         "text-sm font-medium text-slate-700"
                                     )
 
-                with ui.card().classes(
-                    "flex-1 min-w-0 rounded-2xl shadow-sm !p-5 gap-1"
-                ):
-                    ui.label("Status breakdown").classes(
-                        "text-lg font-semibold text-slate-900"
-                    )
-                    ui.label(
-                        "Where your tasks stand right now"
-                    ).classes("text-sm text-slate-400")
+                with ui.card().classes("flex-1 min-w-0 rounded-2xl shadow-sm !p-5 gap-1"):
+                    ui.label("Status breakdown").classes("text-lg font-semibold text-slate-900")
+                    ui.label("Where your tasks stand right now").classes("text-sm text-slate-400")
 
                     if total == 0:
-                        with ui.column().classes(
-                            "w-full items-center gap-2 py-10"
-                        ):
-                            ui.icon("celebration", size="2rem").classes(
-                                "text-emerald-400"
-                            )
-                            ui.label("No tasks yet").classes(
-                                "text-sm text-slate-500"
-                            )
+                        with ui.column().classes("w-full items-center gap-2 py-10"):
+                            ui.icon("celebration", size="2rem").classes("text-emerald-400")
+                            ui.label("No tasks yet").classes("text-sm text-slate-500")
                     else:
                         chart_wrapper = ui.element("div").classes(
-                            "relative w-full flex items-center "
-                            "justify-center mt-2"
+                            "relative w-full flex items-center justify-center mt-2"
                         )
                         with chart_wrapper:
                             ui.echart(
@@ -1665,30 +1370,22 @@ def index_page():
                                                 {
                                                     "value": done_count,
                                                     "name": "Done",
-                                                    "itemStyle": {
-                                                        "color": "#10B981"
-                                                    },
+                                                    "itemStyle": {"color": "#10B981"},
                                                 },
                                                 {
                                                     "value": in_progress_count,
                                                     "name": "In Progress",
-                                                    "itemStyle": {
-                                                        "color": "#064E3B"
-                                                    },
+                                                    "itemStyle": {"color": "#064E3B"},
                                                 },
                                                 {
                                                     "value": open_count,
                                                     "name": "Open",
-                                                    "itemStyle": {
-                                                        "color": "#CBD5E1"
-                                                    },
+                                                    "itemStyle": {"color": "#CBD5E1"},
                                                 },
                                                 {
                                                     "value": overdue_count,
                                                     "name": "Overdue",
-                                                    "itemStyle": {
-                                                        "color": "#E11D48"
-                                                    },
+                                                    "itemStyle": {"color": "#E11D48"},
                                                 },
                                             ],
                                         }
@@ -1704,13 +1401,11 @@ def index_page():
                                     "text-4xl font-semibold text-slate-900"
                                 )
                                 ui.label("TASKS").classes(
-                                    "text-xs font-semibold "
-                                    "text-slate-500 tracking-widest mt-1"
+                                    "text-xs font-semibold text-slate-500 tracking-widest mt-1"
                                 )
 
                         with ui.row().classes(
-                            "w-full items-center justify-center "
-                            "gap-4 mt-auto pt-3 flex-wrap"
+                            "w-full items-center justify-center gap-4 mt-auto pt-3 flex-wrap"
                         ):
                             for label, count, color_class in [
                                 ("Done", done_count, "bg-emerald-500"),
@@ -1730,39 +1425,21 @@ def index_page():
                                         "text-sm font-medium text-slate-700"
                                     )
 
-            with ui.row().classes(
-                "w-full items-stretch gap-4 flex-nowrap"
-            ):
-                with ui.card().classes(
-                    "flex-1 min-w-0 rounded-2xl shadow-sm !p-5 gap-3"
-                ):
-                    ui.label("Due-date heatmap").classes(
-                        "text-lg font-semibold text-slate-900"
-                    )
+            with ui.row().classes("w-full items-stretch gap-4 flex-nowrap"):
+                with ui.card().classes("flex-1 min-w-0 rounded-2xl shadow-sm !p-5 gap-3"):
+                    ui.label("Due-date heatmap").classes("text-lg font-semibold text-slate-900")
                     ui.label(
-                        "Workload over the next 12 weeks "
-                        "— darker means more tasks due"
+                        "Workload over the next 12 weeks — darker means more tasks due"
                     ).classes("text-sm text-slate-400")
 
                     weeks_count = 12
-                    heatmap_start = today - timedelta(
-                        days=today.weekday()
-                    )
-                    horizon_end = (
-                        heatmap_start
-                        + timedelta(weeks=weeks_count)
-                        - timedelta(days=1)
-                    )
+                    heatmap_start = today - timedelta(days=today.weekday())
+                    horizon_end = heatmap_start + timedelta(weeks=weeks_count) - timedelta(days=1)
 
                     due_counts: dict[date, int] = {}
                     for t in open_tasks:
-                        if (
-                            t.due_date
-                            and heatmap_start <= t.due_date <= horizon_end
-                        ):
-                            due_counts[t.due_date] = (
-                                due_counts.get(t.due_date, 0) + 1
-                            )
+                        if t.due_date and heatmap_start <= t.due_date <= horizon_end:
+                            due_counts[t.due_date] = due_counts.get(t.due_date, 0) + 1
 
                     def color_for(count: int) -> str:
                         if count == 0:
@@ -1776,25 +1453,20 @@ def index_page():
                         return "bg-emerald-800"
 
                     if not due_counts:
-                        with ui.column().classes(
-                            "w-full items-center gap-2 py-8"
-                        ):
-                            ui.icon("event_busy", size="2rem").classes(
-                                "text-slate-300"
-                            )
-                            ui.label("No upcoming due dates").classes(
-                                "text-sm text-slate-500"
-                            )
+                        with ui.column().classes("w-full items-center gap-2 py-8"):
+                            ui.icon("event_busy", size="2rem").classes("text-slate-300")
+                            ui.label("No upcoming due dates").classes("text-sm text-slate-500")
                     else:
-                        with ui.row().classes(
-                            "items-start gap-2 mt-3 w-full overflow-x-auto"
-                        ):
-                            with ui.column().classes(
-                                "gap-1 pt-px shrink-0"
-                            ):
+                        with ui.row().classes("items-start gap-2 mt-3 w-full overflow-x-auto"):
+                            with ui.column().classes("gap-1 pt-px shrink-0"):
                                 for d_label in [
-                                    "Mon", "Tue", "Wed", "Thu", "Fri",
-                                    "Sat", "Sun",
+                                    "Mon",
+                                    "Tue",
+                                    "Wed",
+                                    "Thu",
+                                    "Fri",
+                                    "Sat",
+                                    "Sun",
                                 ]:
                                     ui.label(d_label).classes(
                                         "text-xs text-slate-400 h-5 leading-5"
@@ -1804,33 +1476,22 @@ def index_page():
                                 "grid grid-flow-col grid-rows-7 gap-1 shrink-0"
                             ):
                                 for w in range(weeks_count):
-                                    column_start = (
-                                        heatmap_start + timedelta(weeks=w)
-                                    )
+                                    column_start = heatmap_start + timedelta(weeks=w)
                                     for day_offset in range(7):
-                                        d = column_start + timedelta(
-                                            days=day_offset
-                                        )
+                                        d = column_start + timedelta(days=day_offset)
                                         count = due_counts.get(d, 0)
                                         cell = ui.element("div").classes(
-                                            f"w-5 h-5 rounded "
-                                            f"{color_for(count)} "
-                                            "cursor-default"
+                                            f"w-5 h-5 rounded {color_for(count)} cursor-default"
                                         )
                                         plural = "s" if count != 1 else ""
                                         cell.tooltip(
-                                            f"{d.strftime('%a %b %d')}: "
-                                            f"{count} task{plural}"
+                                            f"{d.strftime('%a %b %d')}: {count} task{plural}"
                                             if count
                                             else d.strftime("%a %b %d")
                                         )
 
-                        with ui.row().classes(
-                            "w-full items-center gap-2 mt-3"
-                        ):
-                            ui.label("Less").classes(
-                                "text-xs text-slate-400"
-                            )
+                        with ui.row().classes("w-full items-center gap-2 mt-3"):
+                            ui.label("Less").classes("text-xs text-slate-400")
                             for level_class in [
                                 "bg-stone-200",
                                 "bg-emerald-200",
@@ -1838,33 +1499,19 @@ def index_page():
                                 "bg-emerald-600",
                                 "bg-emerald-800",
                             ]:
-                                ui.element("div").classes(
-                                    f"w-3 h-3 rounded {level_class}"
-                                )
-                            ui.label("More").classes(
-                                "text-xs text-slate-400"
-                            )
+                                ui.element("div").classes(f"w-3 h-3 rounded {level_class}")
+                            ui.label("More").classes("text-xs text-slate-400")
 
-                with ui.card().classes(
-                    "flex-1 min-w-0 rounded-2xl shadow-sm !p-5 gap-3"
-                ):
-                    ui.label("By priority").classes(
-                        "text-lg font-semibold text-slate-900"
+                with ui.card().classes("flex-1 min-w-0 rounded-2xl shadow-sm !p-5 gap-3"):
+                    ui.label("By priority").classes("text-lg font-semibold text-slate-900")
+                    ui.label("Completion rate at each priority level").classes(
+                        "text-sm text-slate-400"
                     )
-                    ui.label(
-                        "Completion rate at each priority level"
-                    ).classes("text-sm text-slate-400")
 
                     if total == 0:
-                        with ui.column().classes(
-                            "w-full items-center gap-2 py-10"
-                        ):
-                            ui.icon("flag", size="2rem").classes(
-                                "text-slate-300"
-                            )
-                            ui.label("No tasks yet").classes(
-                                "text-sm text-slate-500"
-                            )
+                        with ui.column().classes("w-full items-center gap-2 py-10"):
+                            ui.icon("flag", size="2rem").classes("text-slate-300")
+                            ui.label("No tasks yet").classes("text-sm text-slate-500")
                     else:
                         for (
                             p_label,
@@ -1873,46 +1520,31 @@ def index_page():
                             p_pct,
                             p_color,
                         ) in priority_breakdown:
-                            with ui.row().classes(
-                                "w-full items-center justify-between gap-2"
-                            ):
-                                ui.label(p_label).classes(
-                                    "text-sm font-semibold text-slate-900"
-                                )
+                            with ui.row().classes("w-full items-center justify-between gap-2"):
+                                ui.label(p_label).classes("text-sm font-semibold text-slate-900")
                                 if p_total:
-                                    ui.label(
-                                        f"{p_done}/{p_total} done · {p_pct}%"
-                                    ).classes("text-xs text-slate-500")
-                                else:
-                                    ui.label("No tasks").classes(
-                                        "text-xs text-slate-400"
+                                    ui.label(f"{p_done}/{p_total} done · {p_pct}%").classes(
+                                        "text-xs text-slate-500"
                                     )
+                                else:
+                                    ui.label("No tasks").classes("text-xs text-slate-400")
                             track = ui.element("div").classes(
-                                "w-full h-2 rounded-full bg-stone-200 "
-                                "overflow-hidden"
+                                "w-full h-2 rounded-full bg-stone-200 overflow-hidden"
                             )
                             with track:
-                                ui.element("div").classes(
-                                    "h-full rounded-full"
-                                ).style(
-                                    f"width: {p_pct}%; "
-                                    f"background-color: {p_color};"
+                                ui.element("div").classes("h-full rounded-full").style(
+                                    f"width: {p_pct}%; background-color: {p_color};"
                                 )
 
     def render_settings() -> None:
         settings_panel.clear()
         with settings_panel:
             all_tasks = get_tasks()
-            completed_tasks = [t for t in all_tasks if t.completed]
             total = len(all_tasks)
 
             with ui.column().classes("gap-1"):
-                ui.label("Settings").classes(
-                    "text-2xl font-semibold text-slate-900"
-                )
-                ui.label("Manage your preferences").classes(
-                    "text-sm text-slate-500"
-                )
+                ui.label("Settings").classes("text-2xl font-semibold text-slate-900")
+                ui.label("Manage your preferences").classes("text-sm text-slate-500")
 
             def section_card(
                 title: str,
@@ -1921,24 +1553,16 @@ def index_page():
                 icon_bg: str,
                 icon_color: str,
             ):
-                card = ui.card().classes(
-                    "w-full rounded-2xl shadow-sm !p-6 gap-3"
-                )
+                card = ui.card().classes("w-full rounded-2xl shadow-sm !p-6 gap-3")
                 with card:
                     with ui.row().classes("items-center gap-3"):
                         with ui.element("div").classes(
                             f"w-10 h-10 rounded-xl {icon_bg} "
                             "flex items-center justify-center shrink-0"
                         ):
-                            ui.icon(icon, size="1.25rem").classes(
-                                icon_color
-                            )
-                        ui.label(title).classes(
-                            "text-xl font-semibold text-slate-900"
-                        )
-                    ui.label(subtitle).classes(
-                        "text-sm text-slate-500 -mt-1"
-                    )
+                            ui.icon(icon, size="1.25rem").classes(icon_color)
+                        ui.label(title).classes("text-xl font-semibold text-slate-900")
+                    ui.label(subtitle).classes("text-sm text-slate-500 -mt-1")
                 return card
 
             with section_card(
@@ -1948,23 +1572,27 @@ def index_page():
                 "bg-emerald-100",
                 "text-emerald-700",
             ):
-                name_input = ui.input(
-                    label="Display name",
-                    value=app.storage.user.get("full_name") or "",
-                ).props(
-                    "outlined dense hide-bottom-space"
-                ).classes("w-64")
-                email_input = ui.input(
-                    label="Email",
-                    value=app.storage.user.get("email") or "",
-                ).props(
-                    "outlined dense hide-bottom-space"
-                ).classes("w-64")
+                name_input = (
+                    ui.input(
+                        label="Display name",
+                        value=app.storage.user.get("full_name") or "",
+                    )
+                    .props("outlined dense hide-bottom-space")
+                    .classes("w-64")
+                )
+                email_input = (
+                    ui.input(
+                        label="Email",
+                        value=app.storage.user.get("email") or "",
+                    )
+                    .props("outlined dense hide-bottom-space")
+                    .classes("w-64")
+                )
 
                 def save_profile() -> None:
                     from sqlmodel import Session
-                    from data_access.db import engine
-                    from services.auth_service import AuthService
+                    from student_task_manager.data_access.db import engine
+                    from student_task_manager.services.auth_service import AuthService
 
                     user_id = app.storage.user.get("user_id")
                     if not user_id:
@@ -1992,9 +1620,7 @@ def index_page():
                         return
                     try:
                         with Session(engine) as session:
-                            AuthService().update_profile(
-                                session, user_id, new_name, new_email
-                            )
+                            AuthService().update_profile(session, user_id, new_name, new_email)
                     except ValueError as e:
                         ui.notify(
                             str(e),
@@ -2002,18 +1628,14 @@ def index_page():
                             position="top-right",
                         )
                         return
-                    app.storage.user.update(
-                        {"full_name": new_name, "email": new_email}
-                    )
+                    app.storage.user.update({"full_name": new_name, "email": new_email})
                     ui.notify(
                         "Profile saved. Refresh to update the avatar.",
                         type="positive",
                         position="top-right",
                     )
 
-                ui.button(
-                    "Save changes", icon="save", on_click=save_profile
-                ).props(
+                ui.button("Save changes", icon="save", on_click=save_profile).props(
                     "color=green-9 unelevated no-caps dense"
                 ).classes("rounded-lg mt-2")
 
@@ -2034,16 +1656,12 @@ def index_page():
                         },
                         value="dashboard",
                         label="Default landing page",
-                    ).props(
-                        "outlined dense options-dense hide-bottom-space"
-                    ).classes("w-52")
+                    ).props("outlined dense options-dense hide-bottom-space").classes("w-52")
                     ui.select(
                         {"board": "Board", "list": "List"},
                         value="board",
                         label="Default task view",
-                    ).props(
-                        "outlined dense options-dense hide-bottom-space"
-                    ).classes("w-44")
+                    ).props("outlined dense options-dense hide-bottom-space").classes("w-44")
                     ui.select(
                         {
                             "low": "Low",
@@ -2052,9 +1670,7 @@ def index_page():
                         },
                         value="medium",
                         label="Default priority",
-                    ).props(
-                        "outlined dense options-dense hide-bottom-space"
-                    ).classes("w-44")
+                    ).props("outlined dense options-dense hide-bottom-space").classes("w-44")
                 ui.label(
                     "Persistence pending the user-profile model — "
                     "values are remembered only for this session."
@@ -2068,18 +1684,14 @@ def index_page():
                 "text-amber-700",
             ):
                 with ui.column().classes("w-full gap-2"):
-                    ui.switch(
-                        "Show notification badge on bell", value=True
-                    ).props("color=green-9")
-                    ui.switch(
-                        "Remind me about overdue tasks", value=True
-                    ).props("color=green-9")
-                    ui.switch(
-                        "Remind me about tasks due tomorrow", value=True
-                    ).props("color=green-9")
-                    ui.switch(
-                        "Email reminders (requires login)", value=False
-                    ).props("color=green-9 disable")
+                    ui.switch("Show notification badge on bell", value=True).props("color=green-9")
+                    ui.switch("Remind me about overdue tasks", value=True).props("color=green-9")
+                    ui.switch("Remind me about tasks due tomorrow", value=True).props(
+                        "color=green-9"
+                    )
+                    ui.switch("Email reminders (requires login)", value=False).props(
+                        "color=green-9 disable"
+                    )
 
             with section_card(
                 "Appearance",
@@ -2095,9 +1707,7 @@ def index_page():
                         "auto": "Auto",
                     },
                     value="light",
-                ).props(
-                    "unelevated no-caps toggle-color=green-9 spread"
-                ).classes("self-start")
+                ).props("unelevated no-caps toggle-color=green-9 spread").classes("self-start")
 
             with section_card(
                 "Data",
@@ -2117,26 +1727,19 @@ def index_page():
                             "priority": t.priority.value,
                             "status": t.status.value,
                             "category": t.category,
-                            "due_date": (
-                                t.due_date.isoformat()
-                                if t.due_date
-                                else None
-                            ),
+                            "due_date": (t.due_date.isoformat() if t.due_date else None),
                             "completed": t.completed,
                         }
                         for t in all_tasks
                     ]
-                    body = json.dumps(
-                        payload, indent=2
-                    ).encode("utf-8")
+                    body = json.dumps(payload, indent=2).encode("utf-8")
                     ui.download(
                         body,
                         f"bizzy-tasks-{stamp}.json",
                         "application/json",
                     )
                     ui.notify(
-                        f"Exported {len(payload)} task"
-                        f"{'s' if len(payload) != 1 else ''}",
+                        f"Exported {len(payload)} task{'s' if len(payload) != 1 else ''}",
                         type="positive",
                         position="top-right",
                     )
@@ -2166,11 +1769,7 @@ def index_page():
                                 "priority": t.priority.value,
                                 "status": t.status.value,
                                 "category": t.category,
-                                "due_date": (
-                                    t.due_date.isoformat()
-                                    if t.due_date
-                                    else ""
-                                ),
+                                "due_date": (t.due_date.isoformat() if t.due_date else ""),
                                 "completed": t.completed,
                             }
                         )
@@ -2181,8 +1780,7 @@ def index_page():
                         "text/csv",
                     )
                     ui.notify(
-                        f"Exported {len(all_tasks)} task"
-                        f"{'s' if len(all_tasks) != 1 else ''}",
+                        f"Exported {len(all_tasks)} task{'s' if len(all_tasks) != 1 else ''}",
                         type="positive",
                         position="top-right",
                     )
@@ -2190,14 +1788,11 @@ def index_page():
                 def confirm_delete_all() -> None:
                     if not all_tasks:
                         return
-                    with ui.dialog().props("persistent") as dialog, \
-                            ui.card().classes(
-                                "w-[420px] max-w-full rounded-2xl "
-                                "p-6 gap-3"
-                            ):
-                        ui.label(
-                            f"Permanently delete all {total} tasks?"
-                        ).classes(
+                    with (
+                        ui.dialog().props("persistent") as dialog,
+                        ui.card().classes("w-[420px] max-w-full rounded-2xl p-6 gap-3"),
+                    ):
+                        ui.label(f"Permanently delete all {total} tasks?").classes(
                             "text-lg font-semibold text-slate-900"
                         )
                         ui.label(
@@ -2213,15 +1808,11 @@ def index_page():
                             refresh_tasks()
                             render_settings()
 
-                        with ui.row().classes(
-                            "w-full justify-end gap-2 pt-2"
-                        ):
-                            ui.button(
-                                "Cancel", on_click=dialog.close
-                            ).props("flat color=grey-7 no-caps")
-                            ui.button(
-                                "Delete all", on_click=confirm
-                            ).props(
+                        with ui.row().classes("w-full justify-end gap-2 pt-2"):
+                            ui.button("Cancel", on_click=dialog.close).props(
+                                "flat color=grey-7 no-caps"
+                            )
+                            ui.button("Delete all", on_click=confirm).props(
                                 "color=negative unelevated no-caps"
                             )
                     dialog.open()
@@ -2231,23 +1822,14 @@ def index_page():
                     sublabel: str,
                     with_top_border: bool,
                 ):
-                    classes = (
-                        "w-full items-center justify-between "
-                        "gap-3 py-4 flex-wrap"
-                    )
+                    classes = "w-full items-center justify-between gap-3 py-4 flex-wrap"
                     if with_top_border:
                         classes += " border-t border-slate-100"
                     row = ui.row().classes(classes)
                     with row:
-                        with ui.column().classes(
-                            "gap-1 flex-1 min-w-0 mr-6"
-                        ):
-                            ui.label(label).classes(
-                                "text-sm font-semibold text-slate-900"
-                            )
-                            ui.label(sublabel).classes(
-                                "text-xs text-slate-500 leading-relaxed"
-                            )
+                        with ui.column().classes("gap-1 flex-1 min-w-0 mr-6"):
+                            ui.label(label).classes("text-sm font-semibold text-slate-900")
+                            ui.label(sublabel).classes("text-xs text-slate-500 leading-relaxed")
                     return row
 
                 with data_row(
@@ -2256,18 +1838,20 @@ def index_page():
                     with_top_border=False,
                 ):
                     with ui.row().classes("gap-2"):
-                        csv_btn = ui.button("Download CSV").props(
-                            'flat no-caps color=grey-8 '
-                            'padding="6px 12px"'
-                        ).classes("rounded-lg border border-slate-200")
+                        csv_btn = (
+                            ui.button("Download CSV")
+                            .props('flat no-caps color=grey-8 padding="6px 12px"')
+                            .classes("rounded-lg border border-slate-200")
+                        )
                         csv_btn.on("click", export_csv)
                         if not all_tasks:
                             csv_btn.props("disable")
 
-                        json_btn = ui.button("Download JSON").props(
-                            'flat no-caps color=grey-8 '
-                            'padding="6px 12px"'
-                        ).classes("rounded-lg border border-slate-200")
+                        json_btn = (
+                            ui.button("Download JSON")
+                            .props('flat no-caps color=grey-8 padding="6px 12px"')
+                            .classes("rounded-lg border border-slate-200")
+                        )
                         json_btn.on("click", export_json)
                         if not all_tasks:
                             json_btn.props("disable")
@@ -2278,10 +1862,11 @@ def index_page():
                     "permanently removed and cannot be recovered.",
                     with_top_border=True,
                 ):
-                    delete_all_btn = ui.button("Delete all").props(
-                        'unelevated no-caps color=negative '
-                        'padding="6px 12px"'
-                    ).classes("rounded-lg")
+                    delete_all_btn = (
+                        ui.button("Delete all")
+                        .props('unelevated no-caps color=negative padding="6px 12px"')
+                        .classes("rounded-lg")
+                    )
                     delete_all_btn.on("click", confirm_delete_all)
                     if not all_tasks:
                         delete_all_btn.props("disable")
@@ -2301,82 +1886,53 @@ def index_page():
 
             month_start = view_month
             if view_month.month == 12:
-                month_end = view_month.replace(
-                    year=view_month.year + 1, month=1
-                ) - timedelta(days=1)
+                month_end = view_month.replace(year=view_month.year + 1, month=1) - timedelta(
+                    days=1
+                )
             else:
-                month_end = view_month.replace(
-                    month=view_month.month + 1
-                ) - timedelta(days=1)
+                month_end = view_month.replace(month=view_month.month + 1) - timedelta(days=1)
             month_open_count = sum(
                 1
                 for t in all_tasks
-                if t.due_date
-                and not t.completed
-                and month_start <= t.due_date <= month_end
+                if t.due_date and not t.completed and month_start <= t.due_date <= month_end
             )
 
             upcoming_tasks = sorted(
-                [
-                    t
-                    for t in all_tasks
-                    if t.due_date and not t.completed
-                ],
+                [t for t in all_tasks if t.due_date and not t.completed],
                 key=lambda t: t.due_date,
             )
 
-            with ui.row().classes(
-                "w-full items-center justify-between gap-4"
-            ):
+            with ui.row().classes("w-full items-center justify-between gap-4"):
                 with ui.column().classes("gap-1"):
                     ui.label(view_month.strftime("%B %Y")).classes(
                         "text-2xl font-semibold text-emerald-900"
                     )
                     plural = "s" if month_open_count != 1 else ""
-                    ui.label(
-                        f"{month_open_count} task{plural} due this month"
-                    ).classes("text-sm text-slate-500")
+                    ui.label(f"{month_open_count} task{plural} due this month").classes(
+                        "text-sm text-slate-500"
+                    )
                 with ui.row().classes("items-center gap-1"):
-                    today_btn = ui.button("Today").props(
-                        "flat dense no-caps color=green-9"
-                    )
+                    today_btn = ui.button("Today").props("flat dense no-caps color=green-9")
                     today_btn.on("click", navigate_to_today)
-                    prev_btn = ui.button(icon="chevron_left").props(
-                        "flat round dense color=grey-7"
-                    )
+                    prev_btn = ui.button(icon="chevron_left").props("flat round dense color=grey-7")
                     prev_btn.on("click", lambda: navigate_month(-1))
                     next_btn = ui.button(icon="chevron_right").props(
                         "flat round dense color=grey-7"
                     )
                     next_btn.on("click", lambda: navigate_month(1))
 
-            with ui.row().classes(
-                "w-full items-stretch gap-4 flex-nowrap"
-            ):
+            with ui.row().classes("w-full items-stretch gap-4 flex-nowrap"):
                 with ui.card().classes(
-                    "flex-1 min-w-0 rounded-2xl !p-5 gap-3 "
-                    "!bg-white shadow-none"
+                    "flex-1 min-w-0 rounded-2xl !p-5 gap-3 !bg-white shadow-none"
                 ):
-                    with ui.element("div").classes(
-                        "w-full grid grid-cols-7 gap-1 mb-1"
-                    ):
-                        for day_label in [
-                            "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"
-                        ]:
-                            ui.label(day_label).classes(
-                                "text-xs text-slate-400 text-center"
-                            )
+                    with ui.element("div").classes("w-full grid grid-cols-7 gap-1 mb-1"):
+                        for day_label in ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]:
+                            ui.label(day_label).classes("text-xs text-slate-400 text-center")
 
                     cal = cal_module.Calendar(firstweekday=0)
-                    month_dates = list(
-                        cal.itermonthdates(
-                            view_month.year, view_month.month
-                        )
-                    )
+                    month_dates = list(cal.itermonthdates(view_month.year, view_month.month))
 
-                    with ui.element("div").classes(
-                        "w-full grid grid-cols-7 gap-1"
-                    ):
+                    with ui.element("div").classes("w-full grid grid-cols-7 gap-1"):
                         for d in month_dates:
                             is_current_month = d.month == view_month.month
                             is_today_cell = d == today
@@ -2387,13 +1943,9 @@ def index_page():
                                 continue
 
                             cell_tasks_all = tasks_by_date.get(d, [])
-                            cell_tasks_open = [
-                                t for t in cell_tasks_all if not t.completed
-                            ]
+                            cell_tasks_open = [t for t in cell_tasks_all if not t.completed]
                             has_tasks = bool(cell_tasks_open)
-                            is_overdue_day = (
-                                has_tasks and d < today
-                            )
+                            is_overdue_day = has_tasks and d < today
 
                             cell_classes = (
                                 "h-20 rounded-xl flex flex-col "
@@ -2401,43 +1953,31 @@ def index_page():
                                 "transition-colors relative"
                             )
                             if is_selected:
-                                cell_classes += (
-                                    " ring-2 ring-emerald-700 bg-emerald-50"
-                                )
+                                cell_classes += " ring-2 ring-emerald-700 bg-emerald-50"
                             elif is_today_cell:
                                 cell_classes += " bg-emerald-100"
                             else:
-                                cell_classes += (
-                                    " bg-stone-50 hover:bg-stone-100"
-                                )
+                                cell_classes += " bg-stone-50 hover:bg-stone-100"
 
                             cell = ui.element("div").classes(cell_classes)
-                            cell.on(
-                                "click", lambda day=d: select_date(day)
-                            )
+                            cell.on("click", lambda day=d: select_date(day))
                             with cell:
                                 num_classes = "text-sm "
                                 if is_today_cell or is_selected:
-                                    num_classes += (
-                                        "font-semibold text-emerald-900"
-                                    )
+                                    num_classes += "font-semibold text-emerald-900"
                                 else:
                                     num_classes += "text-slate-700"
                                 ui.label(str(d.day)).classes(num_classes)
                                 if has_tasks:
                                     dot_color = (
-                                        "bg-rose-500"
-                                        if is_overdue_day
-                                        else "bg-emerald-600"
+                                        "bg-rose-500" if is_overdue_day else "bg-emerald-600"
                                     )
                                     ui.element("div").classes(
-                                        f"absolute bottom-1 w-1 h-1 "
-                                        f"rounded-full {dot_color}"
+                                        f"absolute bottom-1 w-1 h-1 rounded-full {dot_color}"
                                     )
 
                 with ui.card().classes(
-                    "w-80 shrink-0 rounded-2xl !p-5 gap-3 "
-                    "!bg-white shadow-none"
+                    "w-80 shrink-0 rounded-2xl !p-5 gap-3 !bg-white shadow-none"
                 ):
                     filter_date = state["calendar_filter_date"]
                     if filter_date:
@@ -2449,16 +1989,12 @@ def index_page():
                                 t.title.lower(),
                             ),
                         )
-                        header_label = filter_date.strftime(
-                            "%a %d %b"
-                        ).upper()
+                        header_label = filter_date.strftime("%a %d %b").upper()
                     else:
                         panel_tasks = upcoming_tasks
                         header_label = "UPCOMING"
 
-                    with ui.row().classes(
-                        "w-full items-center justify-between"
-                    ):
+                    with ui.row().classes("w-full items-center justify-between"):
                         ui.label(header_label).classes(
                             "text-xs uppercase tracking-widest text-slate-500"
                         )
@@ -2466,95 +2002,59 @@ def index_page():
                             clear_btn = ui.button("Show all").props(
                                 "flat dense no-caps color=green-9"
                             )
-                            clear_btn.on(
-                                "click", clear_calendar_filter
-                            )
+                            clear_btn.on("click", clear_calendar_filter)
 
                     if not panel_tasks:
-                        with ui.column().classes(
-                            "w-full items-center gap-2 py-6"
-                        ):
-                            ui.icon("event_available", size="2rem").classes(
-                                "text-slate-300"
-                            )
-                            empty_text = (
-                                "No tasks this day"
-                                if filter_date
-                                else "Nothing upcoming"
-                            )
-                            ui.label(empty_text).classes(
-                                "text-sm text-slate-500"
-                            )
+                        with ui.column().classes("w-full items-center gap-2 py-6"):
+                            ui.icon("event_available", size="2rem").classes("text-slate-300")
+                            empty_text = "No tasks this day" if filter_date else "Nothing upcoming"
+                            ui.label(empty_text).classes("text-sm text-slate-500")
                     else:
                         for t in panel_tasks[:8]:
                             is_late = (
-                                t.due_date is not None
-                                and not t.completed
-                                and t.due_date < today
+                                t.due_date is not None and not t.completed and t.due_date < today
                             )
-                            days_diff = (
-                                (t.due_date - today).days
-                                if t.due_date
-                                else 0
-                            )
+                            days_diff = (t.due_date - today).days if t.due_date else 0
                             if is_late:
                                 hint_color = "text-rose-600"
                                 border_color = "border-rose-500"
                                 hint_text = (
-                                    f"{t.due_date.strftime('%d %b')} · "
-                                    f"{-days_diff}d overdue"
+                                    f"{t.due_date.strftime('%d %b')} · {-days_diff}d overdue"
                                 )
                             elif t.completed:
                                 hint_color = "text-slate-400"
                                 border_color = "border-slate-300"
-                                hint_text = (
-                                    f"{t.due_date.strftime('%d %b')} · done"
-                                )
+                                hint_text = f"{t.due_date.strftime('%d %b')} · done"
                             else:
                                 hint_color = "text-slate-500"
                                 border_color = "border-emerald-700"
                                 if days_diff == 0:
-                                    hint_text = (
-                                        f"{t.due_date.strftime('%d %b')} "
-                                        "· today"
-                                    )
+                                    hint_text = f"{t.due_date.strftime('%d %b')} · today"
                                 else:
-                                    hint_text = (
-                                        f"{t.due_date.strftime('%d %b')} "
-                                        f"· in {days_diff}d"
-                                    )
+                                    hint_text = f"{t.due_date.strftime('%d %b')} · in {days_diff}d"
                             item = ui.element("div").classes(
                                 "w-full pl-3 py-1 cursor-pointer "
                                 f"border-l-4 {border_color} "
                                 "hover:bg-stone-50 transition-colors"
                             )
                             with item:
-                                title_classes = (
-                                    "text-sm font-semibold text-slate-900 "
-                                    "truncate"
-                                )
+                                title_classes = "text-sm font-semibold text-slate-900 truncate"
                                 if t.completed:
-                                    title_classes += (
-                                        " line-through opacity-60"
-                                    )
+                                    title_classes += " line-through opacity-60"
                                 ui.label(t.title).classes(title_classes)
-                                ui.label(hint_text).classes(
-                                    f"text-xs {hint_color}"
-                                )
+                                ui.label(hint_text).classes(f"text-xs {hint_color}")
                             item.on(
                                 "click",
                                 lambda task=t: open_task_dialog(task),
                             )
 
                         if len(panel_tasks) > 8:
-                            ui.label(
-                                f"+ {len(panel_tasks) - 8} more"
-                            ).classes("text-xs text-slate-400 pt-2")
+                            ui.label(f"+ {len(panel_tasks) - 8} more").classes(
+                                "text-xs text-slate-400 pt-2"
+                            )
 
                     if filter_date:
-                        add_label = (
-                            f"+ Add task to {filter_date.strftime('%d %b')}"
-                        )
+                        add_label = f"+ Add task to {filter_date.strftime('%d %b')}"
                         add_btn = ui.element("div").classes(
                             "w-full rounded-xl border border-dashed "
                             "border-slate-300 hover:border-slate-400 "
@@ -2562,14 +2062,10 @@ def index_page():
                             "transition-colors mt-2 text-center"
                         )
                         with add_btn:
-                            ui.label(add_label).classes(
-                                "text-sm text-slate-500"
-                            )
+                            ui.label(add_label).classes("text-sm text-slate-500")
                         add_btn.on(
                             "click",
-                            lambda: open_task_dialog(
-                                default_due_date=filter_date
-                            ),
+                            lambda: open_task_dialog(default_due_date=filter_date),
                         )
 
     def notification_quick_complete(task_id: int) -> None:
@@ -2668,39 +2164,28 @@ def index_page():
 
         with notif_menu_container:
             with ui.row().classes(
-                "w-full items-center justify-between px-3 pt-3 pb-2 "
-                "border-b border-slate-100"
+                "w-full items-center justify-between px-3 pt-3 pb-2 border-b border-slate-100"
             ):
                 with ui.row().classes("items-center gap-2"):
-                    ui.label("Notifications").classes(
-                        "text-base font-semibold text-slate-900"
-                    )
+                    ui.label("Notifications").classes("text-base font-semibold text-slate-900")
                     if unread_count:
                         with ui.element("div").classes(
                             "rounded-full bg-rose-600 px-2 py-0.5 "
                             "min-w-[20px] flex items-center justify-center"
                         ):
-                            ui.label(str(unread_count)).classes(
-                                "text-xs font-semibold text-white"
-                            )
+                            ui.label(str(unread_count)).classes("text-xs font-semibold text-white")
                 if total_count:
-                    mark_all = ui.button("Mark all read").props(
-                        "flat dense no-caps color=green-9"
-                    ).classes("text-xs")
-                    mark_all.on(
-                        "click", lambda: notif_menu.close()
+                    mark_all = (
+                        ui.button("Mark all read")
+                        .props("flat dense no-caps color=green-9")
+                        .classes("text-xs")
                     )
+                    mark_all.on("click", lambda: notif_menu.close())
 
             if not notifications:
-                with ui.column().classes(
-                    "w-full items-center gap-2 py-8"
-                ):
-                    ui.icon("notifications_off", size="1.75rem").classes(
-                        "text-slate-300"
-                    )
-                    ui.label("You're all caught up").classes(
-                        "text-sm font-medium text-slate-700"
-                    )
+                with ui.column().classes("w-full items-center gap-2 py-8"):
+                    ui.icon("notifications_off", size="1.75rem").classes("text-slate-300")
+                    ui.label("You're all caught up").classes("text-sm font-medium text-slate-700")
                 return
 
             visible = notifications[:max_show]
@@ -2717,11 +2202,7 @@ def index_page():
                 _,
             ) in enumerate(visible):
                 bg_row = "bg-rose-50/40" if is_unread else ""
-                border_class = (
-                    "border-b border-slate-100"
-                    if idx < len(visible) - 1
-                    else ""
-                )
+                border_class = "border-b border-slate-100" if idx < len(visible) - 1 else ""
                 row = ui.element("div").classes(
                     "w-full flex items-start gap-3 px-3 py-3 "
                     "cursor-pointer hover:bg-stone-50 transition-colors "
@@ -2729,38 +2210,25 @@ def index_page():
                 )
                 with row:
                     with ui.element("div").classes(
-                        f"w-8 h-8 rounded-full {bg_class} "
-                        "flex items-center justify-center shrink-0"
+                        f"w-8 h-8 rounded-full {bg_class} flex items-center justify-center shrink-0"
                     ):
                         ui.icon(icon, size="1rem").classes(text_class)
-                    with ui.column().classes(
-                        "flex-1 min-w-0 gap-0"
-                    ):
-                        ui.label(title).classes(
-                            "text-sm font-semibold text-slate-900"
-                        )
-                        ui.label(sub).classes(
-                            "text-xs text-slate-500 truncate"
-                        )
-                    with ui.column().classes(
-                        "items-end gap-1 shrink-0"
-                    ):
-                        ui.label(when).classes(
-                            "text-xs text-slate-500"
-                        )
+                    with ui.column().classes("flex-1 min-w-0 gap-0"):
+                        ui.label(title).classes("text-sm font-semibold text-slate-900")
+                        ui.label(sub).classes("text-xs text-slate-500 truncate")
+                    with ui.column().classes("items-end gap-1 shrink-0"):
+                        ui.label(when).classes("text-xs text-slate-500")
                         if is_unread:
-                            ui.element("div").classes(
-                                "w-2 h-2 rounded-full bg-emerald-600"
-                            )
+                            ui.element("div").classes("w-2 h-2 rounded-full bg-emerald-600")
                 row.on(
                     "click",
                     lambda task=t: open_task_dialog(task),
                 )
 
             if total_count > max_show:
-                ui.label(
-                    f"+ {total_count - max_show} more"
-                ).classes("text-xs text-slate-400 px-3 pt-1")
+                ui.label(f"+ {total_count - max_show} more").classes(
+                    "text-xs text-slate-400 px-3 pt-1"
+                )
 
             footer = ui.element("div").classes(
                 "w-full flex items-center justify-center gap-1 "
@@ -2768,19 +2236,18 @@ def index_page():
                 "mt-auto"
             )
             with footer:
-                ui.label(
-                    "Manage notification settings in"
-                ).classes("text-xs text-slate-500")
-                settings_link = ui.button("Settings").props(
-                    "flat dense no-caps color=green-9"
-                ).classes("text-xs !p-0 !min-h-0")
-                settings_link.on(
-                    "click",
-                    lambda: (
-                        notif_menu.close(),
-                        switch_to_page("settings"),
-                    ),
+                ui.label("Manage notification settings in").classes("text-xs text-slate-500")
+                settings_link = (
+                    ui.button("Settings")
+                    .props("flat dense no-caps color=green-9")
+                    .classes("text-xs !p-0 !min-h-0")
                 )
+
+                def open_settings_from_notifications() -> None:
+                    notif_menu.close()
+                    switch_to_page("settings")
+
+                settings_link.on("click", open_settings_from_notifications)
 
     def refresh_tasks() -> None:
         tasks_container.clear()
@@ -2791,9 +2258,7 @@ def index_page():
 
         render_notifications()
 
-        subtitle_label.set_text(
-            f"{open_count} open · {completed_count} done"
-        )
+        subtitle_label.set_text(f"{open_count} open · {completed_count} done")
 
         visible_tasks = list(all_tasks)
         if state["status"] == "pending":
@@ -2803,9 +2268,7 @@ def index_page():
         if state["priority"] != "all":
             visible_tasks = [t for t in visible_tasks if t.priority.value == state["priority"]]
         if state["category"] != "all":
-            visible_tasks = [
-                t for t in visible_tasks if t.category == state["category"]
-            ]
+            visible_tasks = [t for t in visible_tasks if t.category == state["category"]]
 
         query = state["search"]
         if query:
@@ -2839,9 +2302,7 @@ def index_page():
             if not all_tasks:
                 with ui.column().classes("w-full items-center gap-3 py-16"):
                     ui.icon("celebration", size="3rem").classes("text-emerald-500")
-                    ui.label("Welcome to Bizzy").classes(
-                        "text-xl font-semibold text-slate-900"
-                    )
+                    ui.label("Welcome to Bizzy").classes("text-xl font-semibold text-slate-900")
                     ui.label("Create your first task to get started.").classes(
                         "text-sm text-slate-500"
                     )
@@ -2862,18 +2323,14 @@ def index_page():
                     render_list(visible_tasks, handle_complete, handle_reopen, handle_delete)
 
     create_button.on("click", lambda: open_task_dialog())
-    status_select.on_value_change(
-        lambda e: (state.__setitem__("status", e.value), refresh_tasks())
-    )
+    status_select.on_value_change(lambda e: (state.__setitem__("status", e.value), refresh_tasks()))
     priority_select.on_value_change(
         lambda e: (state.__setitem__("priority", e.value), refresh_tasks())
     )
     category_select.on_value_change(
         lambda e: (state.__setitem__("category", e.value), refresh_tasks())
     )
-    sort_select.on_value_change(
-        lambda e: (state.__setitem__("sort", e.value), refresh_tasks())
-    )
+    sort_select.on_value_change(lambda e: (state.__setitem__("sort", e.value), refresh_tasks()))
     global_search_input.on_value_change(
         lambda e: (state.__setitem__("search", normalize_query(e.value)), refresh_tasks())
     )

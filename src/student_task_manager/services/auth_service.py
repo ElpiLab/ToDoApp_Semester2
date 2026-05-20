@@ -1,19 +1,13 @@
 from passlib.hash import bcrypt
 from sqlmodel import Session, select
-from domain.models import Student
+from student_task_manager.domain.models import Student
 
 
 class AuthService:
-
     def register(self, session: Session, name: str, email: str, password: str):
         hashed = bcrypt.hash(password)
 
-        student = Student(
-            name=name,
-            email=email,
-            password_hash=hashed,
-            role='student'
-        )
+        student = Student(name=name, email=email, password_hash=hashed, role="student")
 
         session.add(student)
         session.commit()
@@ -43,9 +37,7 @@ class AuthService:
         if email is not None:
             new_email = email.strip()
             if new_email != user.email:
-                existing = session.exec(
-                    select(Student).where(Student.email == new_email)
-                ).first()
+                existing = session.exec(select(Student).where(Student.email == new_email)).first()
                 if existing and existing.id != user_id:
                     raise ValueError("Email already in use")
                 user.email = new_email

@@ -2,8 +2,8 @@ from datetime import date
 
 from nicegui import ui
 
-from domain.models import Priority, Status
-from services.task_service import TaskService
+from student_task_manager.domain.models import Priority, Status
+from student_task_manager.services.task_service import TaskService
 
 
 service = TaskService()
@@ -31,7 +31,9 @@ def create_task(
             due_date=_parse_due_date(due_date),
             category=category,
         )
-        ui.notify(f'Task "{task.title}" created successfully', type="positive", position="top-right")
+        ui.notify(
+            f'Task "{task.title}" created successfully', type="positive", position="top-right"
+        )
         return task
     except Exception as e:
         ui.notify(str(e), type="negative", position="top-right")
@@ -96,7 +98,11 @@ def update_task(
             due_date=_parse_due_date(due_date),
             category=category,
         )
-        ui.notify(f'Task "{updated_task.title}" updated successfully', type="positive", position="top-right")
+        ui.notify(
+            f'Task "{updated_task.title}" updated successfully',
+            type="positive",
+            position="top-right",
+        )
         return updated_task
     except Exception as e:
         ui.notify(str(e), type="negative", position="top-right")

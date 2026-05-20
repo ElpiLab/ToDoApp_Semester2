@@ -1,7 +1,7 @@
 from datetime import date
 
-from domain.models import Priority, Status, Task
-from ui import controllers
+from student_task_manager.domain.models import Priority, Status, Task
+from student_task_manager.ui import controllers
 
 
 def test_create_task_parses_due_date_and_notifies(monkeypatch) -> None:

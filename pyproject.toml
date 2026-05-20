@@ -11,6 +11,8 @@ requires-python = ">=3.11"
 dependencies = [
   "nicegui>=3.11",
   "sqlmodel>=0.0.38",
+  "bcrypt>=4.0",
+  "passlib>=1.7",
 ]
 
 [project.optional-dependencies]
@@ -40,3 +42,7 @@ python_version = "3.11"
 mypy_path = ["src"]
 strict = false
 cache_dir = "C:/Users/lence/AppData/Local/ToDoApp_Semester2/mypy_cache"
+
+[[tool.mypy.overrides]]
+module = ["passlib.*"]
+ignore_missing_imports = true

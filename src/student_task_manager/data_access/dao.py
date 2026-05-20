@@ -1,7 +1,7 @@
 from sqlmodel import Session, select
 
-from data_access.db import engine
-from domain.models import Task
+from student_task_manager.data_access.db import engine
+from student_task_manager.domain.models import Task
 
 
 class TaskDAO:

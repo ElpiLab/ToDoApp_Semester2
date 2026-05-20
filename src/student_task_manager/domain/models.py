@@ -23,14 +23,14 @@ class Student(SQLModel, table=True):
     password_hash: str
     full_name: str = ""
     is_active: bool = True
-    
+
     # Relationship to tasks
     tasks: List["Task"] = Relationship(back_populates="owner")
 
 
 class Task(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    
+
     title: str
     description: str = ""
     priority: Priority = Priority.medium
@@ -39,9 +39,9 @@ class Task(SQLModel, table=True):
 
     due_date: Optional[date] = None
     completed: bool = False
-    
+
     # Foreign key to link to user
     user_id: int = Field(foreign_key="student.id", index=True)
-    
+
     # Relationship back to user
     owner: Student = Relationship(back_populates="tasks")

@@ -2,9 +2,9 @@ from datetime import date
 
 import pytest
 
-from data_access.dao import TaskDAO
-from domain.models import Priority, Status, Task
-from services.task_service import TaskService
+from student_task_manager.data_access.dao import TaskDAO
+from student_task_manager.domain.models import Priority, Status, Task
+from student_task_manager.services.task_service import TaskService
 
 
 class FakeTaskDAO(TaskDAO):

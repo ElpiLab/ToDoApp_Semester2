@@ -1,7 +1,7 @@
 from datetime import date
 
-from data_access.dao import TaskDAO
-from domain.models import Priority, Status, Task
+from student_task_manager.data_access.dao import TaskDAO
+from student_task_manager.domain.models import Priority, Status, Task
 
 
 def _normalize_category(value: str | None) -> str:

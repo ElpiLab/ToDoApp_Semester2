@@ -2,6 +2,13 @@
 
 This file records landed repository changes.
 
+## 2026-05-20
+
+- Consolidated the active application packages (`domain`, `services`, `data_access`, and `ui`) under `src/student_task_manager/` and updated imports in the launcher, source, and tests.
+- Removed the test `sys.path` shim and the stale top-level package marker so tests resolve the installable package through editable install.
+- Updated `pyproject.toml` so the existing auth libraries used by the launcher/login flow are declared for fresh installs, and added the needed mypy override for untyped `passlib`.
+- Archived prompt `015-consolidate-source-under-src` after the canonical verification gates passed.
+
 ## 2026-05-18
 
 - Added a **Priority mix donut chart** to the Analytics page (ECharts) matching the Figma prototype: scoped to open ("pending") tasks, slices for High / Medium / Low with white gaps, total count + "PENDING" caption centered, and a dot-legend below. Replaces the prior horizontal-bar "By priority" card.

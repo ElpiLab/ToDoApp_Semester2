@@ -1,24 +1,25 @@
-from nicegui import ui
+from nicegui import app, ui
 import os
 from sqlmodel import Session, select
 import bcrypt
-from passlib.hash import bcrypt as bcrypt_hash
 
-from data_access.db import create_db_and_tables, engine
-from domain.models import Student
-import ui.pages as pages_module  # noqa: F401
-import ui.login as login_module  # noqa: F401
-import ui.registration as register_module  # noqa: F401  # Make sure this line exists
+from student_task_manager.data_access.db import create_db_and_tables, engine
+from student_task_manager.domain.models import Student
+import student_task_manager.ui.pages as pages_module  # noqa: F401
+import student_task_manager.ui.login as login_module  # noqa: F401
+import student_task_manager.ui.registration as register_module  # noqa: F401
+
+app.add_static_files("/assets", "assets")
 
 
 def hash_password(password: str) -> str:
     """Hash a password safely using bcrypt directly"""
-    password_bytes = password.encode('utf-8')
+    password_bytes = password.encode("utf-8")
     if len(password_bytes) > 72:
         password_bytes = password_bytes[:72]
     salt = bcrypt.gensalt()
     hashed = bcrypt.hashpw(password_bytes, salt)
-    return hashed.decode('utf-8')
+    return hashed.decode("utf-8")
 
 
 def create_default_user():
@@ -32,7 +33,7 @@ def create_default_user():
                     email="admin@example.com",
                     password_hash=hashed_pw,
                     full_name="Admin User",
-                    is_active=True
+                    is_active=True,
                 )
                 session.add(default_user)
                 session.commit()
@@ -43,7 +44,7 @@ def create_default_user():
                 print("=" * 50)
                 return True
             else:
-                print(f"✅ Users already exist.")
+                print("✅ Users already exist.")
                 return False
     except Exception as e:
         print(f"❌ Error creating default user: {e}")
@@ -53,19 +54,13 @@ def create_default_user():
 def run() -> None:
     create_db_and_tables()
     create_default_user()
-    
+
     secret_key = os.environ.get("STORAGE_SECRET")
     if not secret_key:
         secret_key = "dev-secret-key-do-not-use-in-production"
         print("⚠️  WARNING: Using development storage secret.")
-    
-    ui.run(
-        title="Bizzy",
-        port=8081,
-        host="127.0.0.1",
-        reload=False,
-        storage_secret=secret_key
-    )
+
+    ui.run(title="Bizzy", port=8081, host="127.0.0.1", reload=False, storage_secret=secret_key)
 
 
 if __name__ == "__main__":
