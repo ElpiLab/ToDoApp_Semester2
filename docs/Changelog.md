@@ -4,6 +4,10 @@ This file records landed repository changes.
 
 ## 2026-05-20
 
+- Pinned the auth password libraries (`bcrypt==4.0.1` and `passlib==1.7.4`) in both dependency files so fresh installs use the tested login stack.
+- Removed the broken, unused seed helper and updated `AGENTS.md` so the repository overview reflects the current working app.
+- Cleaned up unused UI helpers, removed an unused DB session helper, and reused the shared priority ranking constant in the task UI.
+- Removed outdated wireframe images from `docs/wireframes/` and replaced the README wireframe section with a submission placeholder.
 - Fixed Windows app startup by replacing emoji console output with ASCII messages and disabling noisy SQLAlchemy echo logging.
 - Added blank Team Contributions rows and a concise Future Roadmap section to `README.md`.
 - Removed CSV/JSON task export controls from the Settings UI so analytics remains view-only in the current scope.
