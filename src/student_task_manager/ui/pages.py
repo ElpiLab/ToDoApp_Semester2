@@ -1,8 +1,12 @@
 import calendar as cal_module
+import re
 from datetime import date, datetime, timedelta
 
 from nicegui import app, ui
+from sqlmodel import Session
 
+from student_task_manager.data_access.db import engine
+from student_task_manager.services.auth_service import AuthService
 from student_task_manager.ui.controllers import (
     change_task_status,
     complete_task,
@@ -12,6 +16,9 @@ from student_task_manager.ui.controllers import (
     mark_task_pending,
     update_task,
 )
+
+
+EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s.]+(?:\.[^@\s.]+)+$")
 
 
 def status_display_label(status_value: str) -> str:
@@ -67,6 +74,10 @@ def relative_due_text(due_date: date, today: date, is_done: bool) -> str:
 
 def normalize_query(value: str | None) -> str:
     return (value or "").strip().lower()
+
+
+def is_valid_email(value: str) -> bool:
+    return EMAIL_PATTERN.fullmatch(value) is not None
 
 
 @ui.page("/logout")
@@ -1564,10 +1575,6 @@ def index_page():
                 )
 
                 def save_profile() -> None:
-                    from sqlmodel import Session
-                    from student_task_manager.data_access.db import engine
-                    from student_task_manager.services.auth_service import AuthService
-
                     user_id = app.storage.user.get("user_id")
                     if not user_id:
                         ui.notify(
@@ -1585,7 +1592,7 @@ def index_page():
                             position="top-right",
                         )
                         return
-                    if "@" not in new_email or "." not in new_email:
+                    if not is_valid_email(new_email):
                         ui.notify(
                             "Enter a valid email address",
                             type="negative",
