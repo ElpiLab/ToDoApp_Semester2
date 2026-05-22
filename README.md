@@ -164,6 +164,9 @@ The following wireframes show the planned **Bizzy** UI (working name for the To-
 
 ![New Task](docs/wireframes/new-task.png)
 
+### Login Page
+<img width="1228" height="1188" alt="image" src="https://github.com/user-attachments/assets/1b967699-5e85-4485-bf5b-0a5d05faf938" />
+
 ---
 
 ## 🏛️ Architecture
