@@ -5,9 +5,9 @@ import bcrypt
 
 from data_access.db import create_db_and_tables, engine
 from domain.models import Student
-import ui.pages as pages_module  # noqa: F401
-import ui.login as login_module  # noqa: F401
-import ui.registration as register_module  # noqa: F401
+import ui.pages as pages_module
+import ui.login as login_module
+import ui.registration as register_module
 
 
 def hash_password(password: str) -> str:
@@ -34,24 +34,19 @@ def create_default_user():
                 session.add(default_user)
                 session.commit()
                 print("=" * 50)
-                print("✅ Default user created successfully!")
-                print("📧 Email: admin@example.com")
-                print("🔑 Password: admin123")
+                print("✅ Default user created: admin@example.com / admin123")
                 print("=" * 50)
     except Exception as e:
-        print(f"❌ Error creating default user: {e}")
+        print(f"Error: {e}")
 
 
-def run() -> None:
+def run():
     create_db_and_tables()
     create_default_user()
 
-    # Railway provides PORT, default to 8080 for local testing
     port = int(os.environ.get("PORT", 8080))
-    # Must listen on all interfaces (0.0.0.0) for Railway
     host = "0.0.0.0"
-    # Use environment secret or fallback
-    secret_key = os.environ.get("STORAGE_SECRET", "dev-secret-key-do-not-use-in-production")
+    secret = os.environ.get("STORAGE_SECRET", "dev-secret")
 
     print(f"Starting Bizzy on {host}:{port}")
     ui.run(
@@ -59,7 +54,7 @@ def run() -> None:
         port=port,
         host=host,
         reload=False,
-        storage_secret=secret_key
+        storage_secret=secret
     )
 
 
