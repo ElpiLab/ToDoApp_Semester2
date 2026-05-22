@@ -44,7 +44,8 @@ def run():
     create_db_and_tables()
     create_default_user()
 
-    port = int(os.environ.get("PORT", 8080))
+    # port = int(os.environ.get("PORT", 8080))
+    port = int(os.environ.get("PORT", 8081))  # use 8081 instead of 8080
     host = "0.0.0.0"
     secret = os.environ.get("STORAGE_SECRET", "dev-secret")
 
