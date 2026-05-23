@@ -1,12 +1,26 @@
+import os
+from collections.abc import Mapping
+
 from sqlalchemy import inspect, text
 from sqlmodel import SQLModel, create_engine
 
-DATABASE_URL = "sqlite:///todo.db"
+
+def database_url(env: Mapping[str, str] = os.environ) -> str:
+    return env.get("DATABASE_URL", "sqlite:///todo.db")
+
+
+def engine_connect_args(url: str) -> dict[str, bool]:
+    if url.startswith("sqlite:"):
+        return {"check_same_thread": False}
+    return {}
+
+
+DATABASE_URL = database_url()
 
 engine = create_engine(
     DATABASE_URL,
     echo=False,
-    connect_args={"check_same_thread": False},
+    connect_args=engine_connect_args(DATABASE_URL),
 )
 
 

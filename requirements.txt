@@ -1,4 +1,2 @@
-nicegui>=3.11
-sqlmodel>=0.0.38
-bcrypt==4.0.1
-passlib==1.7.4
+# Runtime dependencies are defined in pyproject.toml.
+-e .

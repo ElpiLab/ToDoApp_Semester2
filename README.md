@@ -283,6 +283,43 @@ python -m pip install -e ".[dev]"
 python application.py
 ```
 
+Local runs default to `http://127.0.0.1:8081`. In deployment, the launcher reads
+Railway's `PORT` variable and binds to `0.0.0.0`.
+
+## Railway Deployment
+
+This repository includes `railway.json` with:
+
+- builder: `NIXPACKS`
+- start command: `python application.py`
+- healthcheck path: `/`
+
+Deploy from GitHub or with Railway CLI:
+
+```bash
+railway up
+```
+
+Set this service variable in Railway:
+
+```text
+STORAGE_SECRET=<long-random-secret>
+```
+
+Railway provides `PORT` automatically. Do not set it manually unless you are
+debugging a port issue.
+
+By default, the app uses `sqlite:///todo.db`. For persistent SQLite storage on
+Railway, attach a Volume and set `DATABASE_URL` to a SQLite file on the mounted
+path, for example:
+
+```text
+DATABASE_URL=sqlite:////data/todo.db
+```
+
+If you do not attach a Volume, task data may be reset when Railway rebuilds or
+restarts the service.
+
 ## Testing
 
 The project includes the required test mix:

@@ -4,6 +4,7 @@ This file records landed repository changes.
 
 ## 2026-05-23
 
+- Prepared Railway deployment by making the launcher read `PORT`, binding deployed runs to `0.0.0.0`, allowing `DATABASE_URL` overrides, and documenting Railway variables.
 - Removed the misleading Tasks `Sort by` dropdown; List view now clearly relies on status sections with due-date ordering inside each section.
 - Kept inactive Board/List view segments white while preserving the active light-green selected state.
 - Strengthened the Tasks Board/List segmented control so the selected option has a visible light-green segment and divider.

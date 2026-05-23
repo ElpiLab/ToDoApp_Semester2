@@ -1,9 +1,11 @@
-from nicegui import app, ui
 import os
+
+from nicegui import app, ui
 from sqlmodel import Session, select
 import bcrypt
 
 from student_task_manager.data_access.db import create_db_and_tables, engine
+from student_task_manager.deployment import server_config
 from student_task_manager.domain.models import Student
 import student_task_manager.ui.pages as pages_module  # noqa: F401
 import student_task_manager.ui.login as login_module  # noqa: F401
@@ -60,7 +62,8 @@ def run() -> None:
         secret_key = "dev-secret-key-do-not-use-in-production"
         print("WARNING: Using development storage secret.")
 
-    ui.run(title="Bizzy", port=8081, host="127.0.0.1", reload=False, storage_secret=secret_key)
+    host, port = server_config()
+    ui.run(title="Bizzy", port=port, host=host, reload=False, storage_secret=secret_key)
 
 
 if __name__ == "__main__":
