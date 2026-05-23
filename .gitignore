@@ -18,6 +18,10 @@ dist/
 # Local scratch and generated files
 tmp/
 *.db
+*.db.bak
 *.sqlite
 *.sqlite3
 *.log
+
+# NiceGUI runtime per-user storage (not source)
+.nicegui/
