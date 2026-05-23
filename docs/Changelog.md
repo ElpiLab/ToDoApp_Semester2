@@ -4,6 +4,7 @@ This file records landed repository changes.
 
 ## 2026-05-23
 
+- Removed tracked NiceGUI runtime storage files so per-user session data no longer lives in source control.
 - Prepared Railway deployment by making the launcher read `PORT`, binding deployed runs to `0.0.0.0`, allowing `DATABASE_URL` overrides, and documenting Railway variables.
 - Removed the misleading Tasks `Sort by` dropdown; List view now clearly relies on status sections with due-date ordering inside each section.
 - Kept inactive Board/List view segments white while preserving the active light-green selected state.
