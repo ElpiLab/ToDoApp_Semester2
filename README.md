@@ -87,8 +87,7 @@ Inputs: due_date `date | None`
 Outputs: task with deadline
 
 ---
-
-### 8. Filter Tasks
+### 8. Filter Tasksks
 
 As a student, I want to filter tasks by status or priority so that I can focus on specific tasks.
 
