@@ -476,7 +476,7 @@ def index_page():
         elif default_due_date:
             default_due_iso = default_due_date.isoformat()
         else:
-            default_due_iso = date.today().isoformat()
+            default_due_iso = ""
 
         with (
             ui.dialog().props("persistent") as dialog,

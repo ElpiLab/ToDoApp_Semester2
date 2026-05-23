@@ -4,6 +4,7 @@ This file records landed repository changes.
 
 ## 2026-05-23
 
+- Kept new task due dates optional by default, synced the roadmap archive list through prompt 370, and clarified README team contributions.
 - Reduced README wireframe and screenshot display widths so the documentation is easier to scan.
 - Updated README wireframes and Railway persistence documentation to match the final deployment setup.
 - Restored `Other` as a built-in category option in the task create/edit dropdown.

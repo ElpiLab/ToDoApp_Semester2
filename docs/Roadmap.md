@@ -47,6 +47,50 @@ This file tracks planned work and execution order.
   Kept the notification bell as an unread dot and added session-level read actions to the notification menu.
 - `140-dashboard-progress-card`
   Changed the dashboard completed-task card into a percentage-based progress card.
+- `150-auth-service-hardening`
+  Hardened password-change validation and removed unused broken registration service code.
+- `160-calendar-sidebar-priority-colors`
+  Fixed calendar sidebar task accents so upcoming tasks use priority colors and overdue tasks stay red.
+- `170-calendar-sidebar-clear-label`
+  Reworked the calendar sidebar clear action into more helpful upcoming-task wording.
+- `180-calendar-sidebar-clear-label-specificity`
+  Made calendar sidebar clear labels more specific to the selected-day state.
+- `190-calendar-upcoming-header-label`
+  Clarified the calendar upcoming sidebar header label.
+- `200-calendar-sidebar-back-label`
+  Added a clearer back label when switching from selected-day tasks to upcoming tasks.
+- `210-calendar-empty-day-clear-label`
+  Improved empty-day calendar sidebar wording.
+- `220-move-task-search-to-toolbar`
+  Moved task search from the global header into the Tasks toolbar.
+- `230-task-toolbar-button-consistency`
+  Polished task toolbar button and view-control consistency.
+- `240-polish-task-toolbar-controls`
+  Improved task toolbar filter sizing, wrapping, and search wording.
+- `250-move-task-view-switch`
+  Moved the Board/List switch beside the page heading.
+- `260-task-view-toggle-active-background`
+  Added a visible active background to the task view toggle.
+- `270-task-view-toggle-selected-segment`
+  Strengthened the selected Board/List segment styling.
+- `280-task-view-toggle-inactive-white`
+  Kept inactive Board/List segments white.
+- `290-remove-misleading-sort-control`
+  Removed the misleading Sort by dropdown from Tasks.
+- `300-railway-deployment-config`
+  Prepared the app for Railway deployment with port, host, database URL, and secret configuration.
+- `310-remove-tracked-nicegui-storage`
+  Removed tracked NiceGUI runtime storage from source control.
+- `320-status-label-consistency`
+  Changed remaining Open labels to To do where they represented pending tasks.
+- `330-task-status-filter-consistency`
+  Aligned task status filter wording with To do / In Progress / Done.
+- `340-list-badge-alignment`
+  Aligned List view priority and status badges with stable right-side columns.
+- `360-fix-task-category-other-option`
+  Restored Other as a task category option.
+- `370-final-rubric-doc-and-due-date-cleanup`
+  Kept new task due dates optional by default, synced archived prompt records, and clarified team contributions.
 
 ## Notes
 

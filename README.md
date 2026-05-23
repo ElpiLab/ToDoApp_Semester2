@@ -206,7 +206,7 @@ creation.
 - Use MVC (Model-View-Controller) pattern
 - Separate UI from business logic and database
 - Store tasks in a database instead of JSON
-- Keep task ownership scoped to the authenticated user
+- Keep task ownership scoped to the authenticated user; students cannot view or modify another user's tasks
 
 The code uses Python's standard `src/` layout: the app package is `student_task_manager`, stored at `src/student_task_manager/`.
 
@@ -389,8 +389,8 @@ python -m mypy src
 
 | Team member | Contribution |
 | --- | --- |
-|  |  |
-|  |  |
+| Elpidio Dogbevi |  |
+| Lencer Obonyo | Frontend/UI implementation with NiceGUI, custom AI-agent prompts/workflows, tests, README/project docs, and final deployment verification |
 
 ## Future Roadmap
 

@@ -11,7 +11,7 @@ This file records the current repository state.
   - **Calendar page** - month grid with task pills, day-cell selection, side panel for the selected day, add-task button per day.
   - **Analytics page** - view-only task metrics and charts.
   - **Settings page** - profile fields and a task deletion action.
-- Prompt workflow: templates and archived prompts exist through `360-fix-task-category-other-option`. Earlier UI work (Calendar page, Dashboard page, dialog redesign, sidebar cleanup) was iterative follow-up not driven by a numbered prompt.
+- Prompt workflow: templates and archived prompts exist through `370-final-rubric-doc-and-due-date-cleanup`. Earlier UI work (Calendar page, Dashboard page, dialog redesign, sidebar cleanup) was iterative follow-up not driven by a numbered prompt.
 - Planning docs: this file and `Changelog.md` are up to date as of 2026-05-23.
 - Source layout: application code now lives under the installable `src/student_task_manager/` package. `application.py` remains at the repository root as the launcher.
 - Deployment: Railway config is present; the launcher reads Railway's `PORT`, binds deployed runs to `0.0.0.0`, and supports a `DATABASE_URL` override for persistent storage. Production uses a Railway volume mounted at `/app/data` with `DATABASE_URL=sqlite:////app/data/todo.db`.
