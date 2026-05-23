@@ -207,8 +207,7 @@ prompts/                               # prompt workflow artifacts
 ```
 
 ## Database and ORM
-
-<img width="1480" height="248" alt="Database and ORM diagram" src="https://github.com/user-attachments/assets/a2aff7bb-68f8-4f6c-aba0-a95a6fb588bf" />
+<img width="1984" height="362" alt="image" src="https://github.com/user-attachments/assets/b1d563d8-a6c9-4356-9460-faa6886b9ed1" />
 
 The database models are defined in `src/student_task_manager/domain/models.py`.
 
