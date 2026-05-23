@@ -4,6 +4,7 @@ This file records landed repository changes.
 
 ## 2026-05-23
 
+- Updated README wireframes and Railway persistence documentation to match the final deployment setup.
 - Restored `Other` as a built-in category option in the task create/edit dropdown.
 - Aligned Tasks List priority and status badges by giving the right-side badge area stable column widths.
 - Fixed the Tasks List status filter so it uses All / To do / In Progress / Done, and made the header summary say "active" instead of "open" for unfinished tasks.

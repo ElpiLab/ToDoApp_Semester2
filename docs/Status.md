@@ -11,12 +11,12 @@ This file records the current repository state.
   - **Calendar page** - month grid with task pills, day-cell selection, side panel for the selected day, add-task button per day.
   - **Analytics page** - view-only task metrics and charts.
   - **Settings page** - profile fields and a task deletion action.
-- Prompt workflow: templates and archived prompts exist through `340-list-badge-alignment`. Earlier UI work (Calendar page, Dashboard page, dialog redesign, sidebar cleanup) was iterative follow-up not driven by a numbered prompt.
+- Prompt workflow: templates and archived prompts exist through `360-fix-task-category-other-option`. Earlier UI work (Calendar page, Dashboard page, dialog redesign, sidebar cleanup) was iterative follow-up not driven by a numbered prompt.
 - Planning docs: this file and `Changelog.md` are up to date as of 2026-05-23.
 - Source layout: application code now lives under the installable `src/student_task_manager/` package. `application.py` remains at the repository root as the launcher.
-- Deployment: Railway config is present; the launcher reads Railway's `PORT`, binds deployed runs to `0.0.0.0`, and supports a `DATABASE_URL` override for persistent storage.
+- Deployment: Railway config is present; the launcher reads Railway's `PORT`, binds deployed runs to `0.0.0.0`, and supports a `DATABASE_URL` override for persistent storage. Production uses a Railway volume mounted at `/app/data` with `DATABASE_URL=sqlite:////app/data/todo.db`.
 - Test layout: the automated suite includes the required 12-test rubric mix documented in `docs/TestCases.md` (6 unit, 3 database, 3 integration), plus task-ownership regression tests and one package smoke test. Broader NiceGUI browser behavior is still exercised by hand.
-- README: current and rubric-facing; it documents implemented behavior, source layout, ORM models, setup/run commands, test requirements, blank team-contribution rows, and future roadmap items.
+- README: current and rubric-facing; it documents implemented behavior, selected wireframes, source layout, ORM models, setup/run commands, Railway persistence, test requirements, blank team-contribution rows, and future roadmap items.
 
 ## Active prompt
 

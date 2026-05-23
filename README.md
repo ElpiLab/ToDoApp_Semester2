@@ -87,12 +87,12 @@ Inputs: due_date `date | None`
 Outputs: task with deadline
 
 ---
-### 8. Filter Tasksks
+### 8. Filter Tasks
 
 As a student, I want to filter tasks by status or priority so that I can focus on specific tasks.
 
 Description: The user filters their task list based on criteria.  
-Inputs: status, priority, category, search text, sort option  
+Inputs: status, priority, category, search text
 Outputs: filtered task list
 
 ---
@@ -154,6 +154,37 @@ Outputs: calendar task overview
 
 ## Wireframes / Mockups
 
+The original prototype and wireframes show the planned Bizzy interface. The final
+implementation has been polished further, but the main flows remain the same:
+dashboard overview, task board/list, calendar planning, analytics, and task
+creation.
+
+- [Interactive Figma prototype](https://www.figma.com/design/iKEgafTYKCCSQv2dSyIWLF/Prototype?node-id=0-1&t=g92BfXm8z582fAA4-1)
+
+### Dashboard Wireframe
+
+![Dashboard wireframe](docs/wireframes/dashboard.png)
+
+### Task Board Wireframe
+
+![Task board wireframe](docs/wireframes/tasks-board.png)
+
+### Task List Wireframe
+
+![Task list wireframe](docs/wireframes/tasks-list.png)
+
+### New Task Wireframe
+
+![New task wireframe](docs/wireframes/add-task.png)
+
+### Calendar Wireframe
+
+![Calendar wireframe](docs/wireframes/calendar.png)
+
+### Analytics Wireframe
+
+![Analytics wireframe](docs/wireframes/analytics.png)
+
 ### Login Page
 
 <img width="1228" height="1188" alt="Login page screenshot" src="https://github.com/user-attachments/assets/1b967699-5e85-4485-bf5b-0a5d05faf938" />
@@ -199,6 +230,7 @@ src/student_task_manager/
     pages.py                           # main NiceGUI views
 tests/                                 # automated pytest suite
 docs/
+  wireframes/                          # selected prototype wireframe images
   TestCases.md                         # rubric test-case table
   Status.md
   Roadmap.md
@@ -310,10 +342,11 @@ debugging a port issue.
 
 By default, the app uses `sqlite:///todo.db`. For persistent SQLite storage on
 Railway, attach a Volume and set `DATABASE_URL` to a SQLite file on the mounted
-path, for example:
+path. The production Railway service uses a `todo-data` volume mounted at
+`/app/data`, with:
 
 ```text
-DATABASE_URL=sqlite:////data/todo.db
+DATABASE_URL=sqlite:////app/data/todo.db
 ```
 
 If you do not attach a Volume, task data may be reset when Railway rebuilds or
