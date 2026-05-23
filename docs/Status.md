@@ -7,12 +7,12 @@ This file records the current repository state.
 - Repository phase: active feature development
 - Implementation state: the main pages are functional against SQLite:
   - **Dashboard page** (default landing) - stat cards (Active/Progress/Overdue), Due today, Coming up (next 7 days), In progress, and High priority lists; all items click through to the task dialog.
-  - **Tasks page** - Board view (default) and List view with drag-and-drop, Status/Priority/Category filter dropdowns, task-toolbar search, click-to-edit, confirmation-before-delete, styling matched to the Figma. CRUD round-trips end-to-end.
+  - **Tasks page** - Board view (default) and List view with drag-and-drop, Status/Priority/Category filter dropdowns, task-toolbar search, click-to-edit, confirmation-before-delete, styling matched to the Figma, and consistent To do / In Progress / Done status labels. CRUD round-trips end-to-end.
   - **Calendar page** - month grid with task pills, day-cell selection, side panel for the selected day, add-task button per day.
   - **Analytics page** - view-only task metrics and charts.
   - **Settings page** - profile fields and a task deletion action.
-- Prompt workflow: templates and archived prompts exist through `310-remove-tracked-nicegui-storage`. Earlier UI work (Calendar page, Dashboard page, dialog redesign, sidebar cleanup) was iterative follow-up not driven by a numbered prompt.
-- Planning docs: this file and `Changelog.md` are up to date as of 2026-05-20.
+- Prompt workflow: templates and archived prompts exist through `320-status-label-consistency`. Earlier UI work (Calendar page, Dashboard page, dialog redesign, sidebar cleanup) was iterative follow-up not driven by a numbered prompt.
+- Planning docs: this file and `Changelog.md` are up to date as of 2026-05-23.
 - Source layout: application code now lives under the installable `src/student_task_manager/` package. `application.py` remains at the repository root as the launcher.
 - Deployment: Railway config is present; the launcher reads Railway's `PORT`, binds deployed runs to `0.0.0.0`, and supports a `DATABASE_URL` override for persistent storage.
 - Test layout: the automated suite includes the required 12-test rubric mix documented in `docs/TestCases.md` (6 unit, 3 database, 3 integration), plus task-ownership regression tests and one package smoke test. Broader NiceGUI browser behavior is still exercised by hand.

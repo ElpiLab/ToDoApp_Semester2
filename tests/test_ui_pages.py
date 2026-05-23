@@ -6,6 +6,7 @@ from student_task_manager.ui.pages import (
     calendar_sidebar_border_class,
     completion_progress_summary,
     is_valid_email,
+    status_display_label,
 )
 
 
@@ -44,6 +45,24 @@ def test_completion_progress_summary_with_period_label(
         completion_progress_summary(completed_count, total_count, period_label="due this week")
         == expected
     )
+
+
+@pytest.mark.parametrize(
+    ("status_value", "expected"),
+    [
+        ("created", "To do"),
+        ("pending", "To do"),
+        ("open", "To do"),
+        ("in_progress", "In Progress"),
+        ("done", "Done"),
+        ("overdue", "Overdue"),
+    ],
+)
+def test_status_display_label_uses_consistent_task_status_terms(
+    status_value: str,
+    expected: str,
+) -> None:
+    assert status_display_label(status_value) == expected
 
 
 @pytest.mark.parametrize(

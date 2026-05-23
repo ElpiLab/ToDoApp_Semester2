@@ -22,7 +22,7 @@ EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s.]+(?:\.[^@\s.]+)+$")
 
 
 def status_display_label(status_value: str) -> str:
-    if status_value in ("created", "pending"):
+    if status_value in ("created", "pending", "open"):
         return "To do"
     return status_value.replace("_", " ").title()
 
@@ -31,7 +31,9 @@ CATEGORY_PILL_CLASSES = {
     "project": "bg-teal-100 text-teal-700",
     "exam": "bg-rose-100 text-rose-700",
     "assignment": "bg-blue-100 text-blue-700",
+    "research": "bg-indigo-100 text-indigo-700",
     "reading": "bg-emerald-100 text-emerald-700",
+    "personal": "bg-violet-100 text-violet-700",
     "other": "bg-slate-100 text-slate-700",
 }
 
@@ -414,7 +416,9 @@ def index_page():
                                 "Project": "Project",
                                 "Exam": "Exam",
                                 "Assignment": "Assignment",
+                                "Research": "Research",
                                 "Reading": "Reading",
+                                "Personal": "Personal",
                                 "Other": "Other",
                             },
                             value=state["category"],
@@ -477,7 +481,14 @@ def index_page():
                     .classes("w-32")
                 )
 
-                category_options = ["Project", "Exam", "Assignment", "Reading"]
+                category_options = [
+                    "Project",
+                    "Exam",
+                    "Assignment",
+                    "Research",
+                    "Reading",
+                    "Personal",
+                ]
                 category_initial = category_display(task.category) if is_edit else None
                 if category_initial and category_initial not in category_options:
                     category_options.append(category_initial)
@@ -514,9 +525,9 @@ def index_page():
                     status_input = (
                         ui.select(
                             {
-                                "pending": "To do",
-                                "in_progress": "In progress",
-                                "done": "Done",
+                                "pending": status_display_label("pending"),
+                                "in_progress": status_display_label("in_progress"),
+                                "done": status_display_label("done"),
                             },
                             value=current_status,
                         )
@@ -658,12 +669,20 @@ def index_page():
 
         def status_pill(bucket_key: str):
             if bucket_key == "overdue":
-                return "Overdue", "bg-rose-500", "bg-rose-100 text-rose-700"
+                return status_display_label("overdue"), "bg-rose-500", "bg-rose-100 text-rose-700"
             if bucket_key == "in_progress":
-                return "In Progress", "bg-blue-500", "bg-blue-100 text-blue-700"
+                return (
+                    status_display_label("in_progress"),
+                    "bg-blue-500",
+                    "bg-blue-100 text-blue-700",
+                )
             if bucket_key == "done":
-                return "Done", "bg-emerald-500", "bg-emerald-100 text-emerald-800"
-            return "Open", "bg-slate-500", "bg-slate-100 text-slate-700"
+                return (
+                    status_display_label("done"),
+                    "bg-emerald-500",
+                    "bg-emerald-100 text-emerald-800",
+                )
+            return status_display_label("open"), "bg-slate-500", "bg-slate-100 text-slate-700"
 
         def render_row(task, bucket_key: str) -> None:
             assert task.id is not None
@@ -744,9 +763,9 @@ def index_page():
                     status_menu = ui.menu().props('anchor="bottom right" self="top right"')
                     with status_menu, ui.column().classes("p-1 gap-0 min-w-[140px]"):
                         for opt_label, opt_status in (
-                            ("Open", "pending"),
-                            ("In progress", "in_progress"),
-                            ("Done", "done"),
+                            (status_display_label("pending"), "pending"),
+                            (status_display_label("in_progress"), "in_progress"),
+                            (status_display_label("done"), "done"),
                         ):
                             opt_btn = ui.button(opt_label).props(
                                 "flat no-caps align=left color=grey-8"
@@ -778,10 +797,10 @@ def index_page():
                 )
 
         sections = [
-            ("Overdue", overdue, "bg-rose-500", "overdue"),
-            ("Open", open_bucket, "bg-slate-700", "open"),
-            ("In Progress", in_progress_bucket, "bg-blue-500", "in_progress"),
-            ("Done", done_bucket, "bg-emerald-500", "done"),
+            (status_display_label("overdue"), overdue, "bg-rose-500", "overdue"),
+            (status_display_label("open"), open_bucket, "bg-slate-700", "open"),
+            (status_display_label("in_progress"), in_progress_bucket, "bg-blue-500", "in_progress"),
+            (status_display_label("done"), done_bucket, "bg-emerald-500", "done"),
         ]
 
         first_section = True
@@ -812,8 +831,20 @@ def index_page():
 
         columns = [
             ("To do", todo_tasks, "bg-slate-400", "text-slate-700", "pending"),
-            ("In progress", in_progress_tasks, "bg-blue-500", "text-blue-700", "in_progress"),
-            ("Done", done_tasks, "bg-emerald-500", "text-emerald-700", "done"),
+            (
+                status_display_label("in_progress"),
+                in_progress_tasks,
+                "bg-blue-500",
+                "text-blue-700",
+                "in_progress",
+            ),
+            (
+                status_display_label("done"),
+                done_tasks,
+                "bg-emerald-500",
+                "text-emerald-700",
+                "done",
+            ),
         ]
 
         today = date.today()
@@ -931,7 +962,7 @@ def index_page():
 
                     if not column_tasks and column_title != "To do":
                         empty_messages = {
-                            "In progress": "Nothing in progress",
+                            status_display_label("in_progress"): "Nothing in progress",
                             "Done": "No completed tasks yet",
                         }
                         with ui.column().classes("w-full items-center justify-center py-8 gap-2"):
@@ -1228,17 +1259,17 @@ def index_page():
                             if is_overdue:
                                 circle_class = "border-rose-500"
                                 title_color = "text-rose-600"
-                                pill_label = "Overdue"
+                                pill_label = status_display_label("overdue")
                                 pill_class = "bg-rose-100 text-rose-700"
                             elif is_in_progress:
                                 circle_class = "border-emerald-500"
                                 title_color = "text-slate-900"
-                                pill_label = "In Progress"
+                                pill_label = status_display_label("in_progress")
                                 pill_class = "bg-emerald-100 text-emerald-700"
                             else:
                                 circle_class = "border-slate-300"
                                 title_color = "text-slate-900"
-                                pill_label = "Open"
+                                pill_label = status_display_label("open")
                                 pill_class = "bg-slate-100 text-slate-600"
                             is_last = idx == len(visible) - 1
                             border_class = "" if is_last else " border-b border-slate-100"
@@ -1478,17 +1509,17 @@ def index_page():
                                             "data": [
                                                 {
                                                     "value": done_count,
-                                                    "name": "Done",
+                                                    "name": status_display_label("done"),
                                                     "itemStyle": {"color": "#10B981"},
                                                 },
                                                 {
                                                     "value": in_progress_count,
-                                                    "name": "In Progress",
+                                                    "name": status_display_label("in_progress"),
                                                     "itemStyle": {"color": "#3B82F6"},
                                                 },
                                                 {
                                                     "value": open_count,
-                                                    "name": "Open",
+                                                    "name": status_display_label("open"),
                                                     "itemStyle": {"color": "#CBD5E1"},
                                                 },
                                                 {
@@ -1517,10 +1548,14 @@ def index_page():
                             "w-full items-center justify-center gap-4 mt-auto pt-3 flex-wrap"
                         ):
                             for label, count, color_class in [
-                                ("Done", done_count, "bg-emerald-500"),
-                                ("In Progress", in_progress_count, "bg-blue-500"),
-                                ("Open", open_count, "bg-slate-400"),
-                                ("Overdue", overdue_count, "bg-rose-600"),
+                                (status_display_label("done"), done_count, "bg-emerald-500"),
+                                (
+                                    status_display_label("in_progress"),
+                                    in_progress_count,
+                                    "bg-blue-500",
+                                ),
+                                (status_display_label("open"), open_count, "bg-slate-400"),
+                                (status_display_label("overdue"), overdue_count, "bg-rose-600"),
                             ]:
                                 with ui.row().classes("items-center gap-2"):
                                     ui.element("div").classes(
