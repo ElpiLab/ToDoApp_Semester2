@@ -155,7 +155,9 @@ Outputs: calendar task overview
 
 ## Wireframes / Mockups
 
-Final wireframes will be added before submission.
+### Login Page
+
+<img width="1228" height="1188" alt="Login page screenshot" src="https://github.com/user-attachments/assets/1b967699-5e85-4485-bf5b-0a5d05faf938" />
 
 ## Architecture
 
