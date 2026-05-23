@@ -8,6 +8,7 @@ auth_service = AuthService()
 
 @ui.page("/login")
 def login_page():
+    ui.colors(primary="#1B5E20")
 
     def try_login():
         with Session(engine) as session:
@@ -27,22 +28,20 @@ def login_page():
             else:
                 ui.notify("Invalid email or password", color="negative")
 
-    # Custom styling for centered card
-    with ui.column().classes("items-center justify-center min-h-screen"):
-        with ui.card().classes("w-96 p-6"):
-            ui.label("Welcome Back").classes("text-h5 font-bold mb-6 text-center")
+    with ui.card().classes("absolute-center w-96 p-6"):
+        ui.label("Welcome Back").classes("text-h5 font-bold mb-6 text-center")
 
-            email = ui.input("Email").props("outlined").classes("w-full mb-3")
-            password = ui.input("Password", password=True).props("outlined").classes("w-full mb-4")
+        email = ui.input("Email").props("outlined").classes("w-full mb-3")
+        password = ui.input("Password", password=True).props("outlined").classes("w-full mb-4")
 
-            password.on("keydown.enter", try_login)
+        password.on("keydown.enter", try_login)
 
-            ui.button("Login", on_click=try_login).props("color=teal-7 unelevated").classes(
-                "w-full mb-3"
-            )
+        ui.button("Login", on_click=try_login).props("color=green-9 unelevated").classes(
+            "w-full mb-3"
+        )
 
-            ui.separator().classes("my-4")
+        ui.separator().classes("my-4")
 
-            with ui.row().classes("w-full justify-center gap-2"):
-                ui.label("Don't have an account?").classes("text-sm text-slate-600")
-                ui.link("Register here", "/register").classes("text-sm font-semibold text-teal-600")
+        with ui.row().classes("w-full justify-center gap-2"):
+            ui.label("Don't have an account?").classes("text-sm text-slate-600")
+            ui.link("Register here", "/register").classes("text-sm font-semibold text-emerald-700")

@@ -1,6 +1,12 @@
+from datetime import date, timedelta
+
 import pytest
 
-from student_task_manager.ui.pages import completion_progress_summary, is_valid_email
+from student_task_manager.ui.pages import (
+    calendar_sidebar_border_class,
+    completion_progress_summary,
+    is_valid_email,
+)
 
 
 @pytest.mark.parametrize(
@@ -65,3 +71,25 @@ def test_is_valid_email_accepts_basic_addresses(email: str) -> None:
 )
 def test_is_valid_email_rejects_incomplete_addresses(email: str) -> None:
     assert not is_valid_email(email)
+
+
+@pytest.mark.parametrize(
+    ("priority", "due_offset_days", "completed", "expected"),
+    [
+        ("high", -1, False, "border-rose-500"),
+        ("high", 4, False, "border-rose-400"),
+        ("medium", 4, False, "border-amber-400"),
+        ("low", 4, False, "border-emerald-400"),
+        ("high", -1, True, "border-slate-300"),
+    ],
+)
+def test_calendar_sidebar_border_class_matches_task_state_and_priority(
+    priority: str,
+    due_offset_days: int,
+    completed: bool,
+    expected: str,
+) -> None:
+    today = date(2026, 5, 23)
+    due_date = today + timedelta(days=due_offset_days)
+
+    assert calendar_sidebar_border_class(priority, due_date, today, completed) == expected

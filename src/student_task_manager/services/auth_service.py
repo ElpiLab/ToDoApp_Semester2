@@ -4,16 +4,6 @@ from student_task_manager.domain.models import Student
 
 
 class AuthService:
-    def register(self, session: Session, name: str, email: str, password: str):
-        hashed = bcrypt.hash(password)
-
-        student = Student(name=name, email=email, password_hash=hashed, role="student")
-
-        session.add(student)
-        session.commit()
-        session.refresh(student)
-        return student
-
     def login(self, session: Session, email: str, password: str):
         statement = select(Student).where(Student.email == email)
         user = session.exec(statement).first()
@@ -41,6 +31,28 @@ class AuthService:
                 if existing and existing.id != user_id:
                     raise ValueError("Email already in use")
                 user.email = new_email
+        session.add(user)
+        session.commit()
+        session.refresh(user)
+        return user
+
+    def change_password(
+        self,
+        session: Session,
+        user_id: int,
+        current_password: str,
+        new_password: str,
+    ):
+        user = session.get(Student, user_id)
+        if not user:
+            raise ValueError("User not found")
+        if not bcrypt.verify(current_password, user.password_hash):
+            raise ValueError("Current password is incorrect")
+        if len(new_password) < 6:
+            raise ValueError("New password must be at least 6 characters")
+        if new_password == current_password:
+            raise ValueError("New password must differ from the current one")
+        user.password_hash = bcrypt.hash(new_password)
         session.add(user)
         session.commit()
         session.refresh(user)

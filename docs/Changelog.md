@@ -2,6 +2,21 @@
 
 This file records landed repository changes.
 
+## 2026-05-23
+
+- Removed the misleading Tasks `Sort by` dropdown; List view now clearly relies on status sections with due-date ordering inside each section.
+- Kept inactive Board/List view segments white while preserving the active light-green selected state.
+- Strengthened the Tasks Board/List segmented control so the selected option has a visible light-green segment and divider.
+- Made the active Tasks Board/List view segment use a visible soft-green selected background.
+- Moved the Tasks Board/List view switch beside the page heading with an explicit `View` label so it no longer wraps under filters in List view.
+- Polished the Tasks toolbar controls with a clearer title-search placeholder, better wrapping, and a quieter Board/List segmented control.
+- Polished task controls by changing the header action to "New task" and framing the Board/List toggle as a segmented control.
+- Moved task search from the global header into the Tasks page toolbar so it sits next to the filters it affects.
+- Made the calendar selected-day sidebar clear action contextual: empty days show "Show upcoming tasks", while days with tasks show "Back to upcoming tasks".
+- Fixed calendar selected-day sidebar accents so upcoming tasks use priority colors while true overdue tasks still show red.
+- Hardened password changes in `AuthService` by rejecting short replacement passwords and current-password reuse, with regression tests.
+- Removed the unused broken `AuthService.register` method.
+
 ## 2026-05-20
 
 - Changed the dashboard completion card into a progress card so large completed-task histories do not dominate the dashboard.

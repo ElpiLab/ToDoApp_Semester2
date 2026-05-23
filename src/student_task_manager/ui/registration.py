@@ -7,6 +7,7 @@ from student_task_manager.domain.models import Student
 
 @ui.page("/register")
 def register_page():
+    ui.colors(primary="#1B5E20")
 
     def try_register():
         # Validate passwords match
@@ -51,22 +52,20 @@ def register_page():
                 ui.notify(f"Error: {str(e)}", color="negative")
                 session.rollback()
 
-    # Custom styling for centered card
-    with ui.column().classes("items-center justify-center min-h-screen"):
-        with ui.card().classes("w-96 p-6"):
-            ui.label("Create Account").classes("text-h5 font-bold mb-4 text-center")
+    with ui.card().classes("absolute-center w-96 p-6"):
+        ui.label("Create Account").classes("text-h5 font-bold mb-4 text-center")
 
-            full_name = ui.input("Full Name").props("outlined").classes("w-full mb-3")
-            email = ui.input("Email").props("outlined type=email").classes("w-full mb-3")
-            password = ui.input("Password", password=True).props("outlined").classes("w-full mb-3")
-            confirm_password = (
-                ui.input("Confirm Password", password=True).props("outlined").classes("w-full mb-4")
+        full_name = ui.input("Full Name").props("outlined").classes("w-full mb-3")
+        email = ui.input("Email").props("outlined type=email").classes("w-full mb-3")
+        password = ui.input("Password", password=True).props("outlined").classes("w-full mb-3")
+        confirm_password = (
+            ui.input("Confirm Password", password=True).props("outlined").classes("w-full mb-4")
+        )
+
+        with ui.row().classes("w-full gap-3"):
+            ui.button("Register", on_click=try_register).props("color=green-9 unelevated").classes(
+                "flex-1"
             )
-
-            with ui.row().classes("w-full gap-3"):
-                ui.button("Register", on_click=try_register).props(
-                    "color=teal-7 unelevated"
-                ).classes("flex-1")
-                ui.button("Back to Login", on_click=lambda: ui.navigate.to("/login")).props(
-                    "flat"
-                ).classes("flex-1")
+            ui.button("Back to Login", on_click=lambda: ui.navigate.to("/login")).props(
+                "flat color=green-9"
+            ).classes("flex-1")
