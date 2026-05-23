@@ -2,6 +2,10 @@
 
 This file records landed repository changes.
 
+## 2026-05-24
+
+- Extracted dashboard rendering from `pages.py` into `ui/dashboard_page.py` as Phase 2 of the UI module split.
+
 ## 2026-05-23
 
 - Extracted pure UI helper constants and formatting/filter functions from `pages.py` into `ui/view_helpers.py` as Phase 1 of the UI module split.

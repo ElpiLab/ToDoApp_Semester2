@@ -7,7 +7,7 @@ This file tracks planned work and execution order.
 1. **Login/profile polish** (no numbered prompt yet)
    Clean up authentication documentation and any remaining login/registration behavior after user-scoped tasks are explicit.
 2. **UI module split** (no numbered prompt yet)
-   Break down the large NiceGUI page module into smaller modules when the feature set settles.
+   Continue breaking down the large NiceGUI page module into smaller page modules. The pure helper functions and dashboard renderer have already been extracted.
 3. **Optional export/download** (future scope)
    Add CSV/JSON task export later if it becomes useful for the final submission.
 4. **Persisted user preferences** (future scope)
@@ -93,6 +93,8 @@ This file tracks planned work and execution order.
   Kept new task due dates optional by default, synced archived prompt records, and clarified team contributions.
 - `380-extract-ui-view-helpers`
   Extracted pure UI helper constants and formatting/filter functions from the main NiceGUI page module.
+- `390-extract-dashboard-page`
+  Extracted dashboard rendering from the main NiceGUI page module into a focused dashboard module.
 
 ## Notes
 
