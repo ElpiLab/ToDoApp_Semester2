@@ -4,6 +4,7 @@ This file records landed repository changes.
 
 ## 2026-05-23
 
+- Fixed the Tasks List status filter so it uses All / To do / In Progress / Done, and made the header summary say "active" instead of "open" for unfinished tasks.
 - Changed remaining pending-task labels from "Open" to "To do" in task status controls, List view sections, dashboard task pills, and analytics status legends.
 - Removed tracked NiceGUI runtime storage files so per-user session data no longer lives in source control.
 - Prepared Railway deployment by making the launcher read `PORT`, binding deployed runs to `0.0.0.0`, allowing `DATABASE_URL` overrides, and documenting Railway variables.

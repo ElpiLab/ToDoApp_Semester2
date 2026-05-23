@@ -7,7 +7,9 @@ from student_task_manager.ui.pages import (
     completion_progress_summary,
     is_valid_email,
     status_display_label,
+    task_matches_status_filter,
 )
+from student_task_manager.domain.models import Status, Task
 
 
 @pytest.mark.parametrize(
@@ -63,6 +65,36 @@ def test_status_display_label_uses_consistent_task_status_terms(
     expected: str,
 ) -> None:
     assert status_display_label(status_value) == expected
+
+
+@pytest.mark.parametrize(
+    ("status", "completed", "status_filter", "expected"),
+    [
+        (Status.pending, False, "to_do", True),
+        (Status.created, False, "to_do", True),
+        (Status.in_progress, False, "to_do", False),
+        (Status.in_progress, False, "in_progress", True),
+        (Status.done, True, "in_progress", False),
+        (Status.done, True, "done", True),
+        (Status.pending, True, "done", True),
+        (Status.pending, False, "all", True),
+    ],
+)
+def test_task_matches_status_filter_matches_visible_status_sections(
+    status: Status,
+    completed: bool,
+    status_filter: str,
+    expected: bool,
+) -> None:
+    task = Task(
+        title="Example",
+        description="",
+        status=status,
+        completed=completed,
+        user_id=1,
+    )
+
+    assert task_matches_status_filter(task, status_filter) is expected
 
 
 @pytest.mark.parametrize(

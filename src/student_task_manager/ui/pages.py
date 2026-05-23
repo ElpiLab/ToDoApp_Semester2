@@ -27,6 +27,24 @@ def status_display_label(status_value: str) -> str:
     return status_value.replace("_", " ").title()
 
 
+TASK_STATUS_FILTER_LABELS = {
+    "all": "All",
+    "to_do": status_display_label("pending"),
+    "in_progress": status_display_label("in_progress"),
+    "done": status_display_label("done"),
+}
+
+
+def task_matches_status_filter(task, status_filter: str) -> bool:
+    if status_filter == "to_do":
+        return not task.completed and task.status.value in ("created", "pending")
+    if status_filter == "in_progress":
+        return not task.completed and task.status.value == "in_progress"
+    if status_filter == "done":
+        return task.completed or task.status.value == "done"
+    return True
+
+
 CATEGORY_PILL_CLASSES = {
     "project": "bg-teal-100 text-teal-700",
     "exam": "bg-rose-100 text-rose-700",
@@ -363,7 +381,7 @@ def index_page():
             with ui.row().classes("w-full items-end justify-between gap-4 flex-wrap"):
                 with ui.column().classes("gap-1"):
                     ui.label("All tasks").classes("text-2xl font-semibold text-slate-900")
-                    subtitle_label = ui.label("0 open · 0 done").classes("text-sm text-slate-500")
+                    subtitle_label = ui.label("0 active · 0 done").classes("text-sm text-slate-500")
                 with ui.row().classes("items-center gap-2 shrink-0"):
                     ui.label("View").classes(
                         "text-xs font-medium uppercase tracking-widest text-slate-400"
@@ -388,7 +406,7 @@ def index_page():
                         ui.icon("search").classes("text-slate-400 text-xl")
                     status_select = (
                         ui.select(
-                            {"all": "All", "pending": "To do", "completed": "Completed"},
+                            TASK_STATUS_FILTER_LABELS,
                             value=state["status"],
                             label="Status",
                         )
@@ -1372,7 +1390,7 @@ def index_page():
                     "text-emerald-700",
                 ),
                 (
-                    "Completed",
+                    "Done",
                     str(len(completed_tasks)),
                     "text-emerald-600",
                 ),
@@ -2379,18 +2397,15 @@ def index_page():
         tasks_container.clear()
 
         all_tasks = get_tasks()
-        open_count = sum(1 for t in all_tasks if not t.completed)
+        active_count = sum(1 for t in all_tasks if not t.completed)
         completed_count = sum(1 for t in all_tasks if t.completed)
 
         render_notifications()
 
-        subtitle_label.set_text(f"{open_count} open · {completed_count} done")
+        subtitle_label.set_text(f"{active_count} active · {completed_count} done")
 
         visible_tasks = list(all_tasks)
-        if state["status"] == "pending":
-            visible_tasks = [t for t in visible_tasks if not t.completed]
-        elif state["status"] == "completed":
-            visible_tasks = [t for t in visible_tasks if t.completed]
+        visible_tasks = [t for t in visible_tasks if task_matches_status_filter(t, state["status"])]
         if state["priority"] != "all":
             visible_tasks = [t for t in visible_tasks if t.priority.value == state["priority"]]
         if state["category"] != "all":
