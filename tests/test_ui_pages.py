@@ -3,6 +3,7 @@ from datetime import date, timedelta
 import pytest
 
 from student_task_manager.ui.pages import (
+    TASK_CATEGORY_OPTIONS,
     calendar_sidebar_border_class,
     completion_progress_summary,
     is_valid_email,
@@ -10,6 +11,18 @@ from student_task_manager.ui.pages import (
     task_matches_status_filter,
 )
 from student_task_manager.domain.models import Status, Task
+
+
+def test_task_category_options_include_other_default() -> None:
+    assert TASK_CATEGORY_OPTIONS == [
+        "Project",
+        "Exam",
+        "Assignment",
+        "Research",
+        "Reading",
+        "Personal",
+        "Other",
+    ]
 
 
 @pytest.mark.parametrize(

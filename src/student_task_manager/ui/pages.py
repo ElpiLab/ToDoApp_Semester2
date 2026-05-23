@@ -34,6 +34,16 @@ TASK_STATUS_FILTER_LABELS = {
     "done": status_display_label("done"),
 }
 
+TASK_CATEGORY_OPTIONS = [
+    "Project",
+    "Exam",
+    "Assignment",
+    "Research",
+    "Reading",
+    "Personal",
+    "Other",
+]
+
 
 def task_matches_status_filter(task, status_filter: str) -> bool:
     if status_filter == "to_do":
@@ -499,14 +509,7 @@ def index_page():
                     .classes("w-32")
                 )
 
-                category_options = [
-                    "Project",
-                    "Exam",
-                    "Assignment",
-                    "Research",
-                    "Reading",
-                    "Personal",
-                ]
+                category_options = list(TASK_CATEGORY_OPTIONS)
                 category_initial = category_display(task.category) if is_edit else None
                 if category_initial and category_initial not in category_options:
                     category_options.append(category_initial)
