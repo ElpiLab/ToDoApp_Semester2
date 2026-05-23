@@ -4,6 +4,7 @@ This file records landed repository changes.
 
 ## 2026-05-23
 
+- Extracted pure UI helper constants and formatting/filter functions from `pages.py` into `ui/view_helpers.py` as Phase 1 of the UI module split.
 - Kept new task due dates optional by default, synced the roadmap archive list through prompt 370, and clarified README team contributions.
 - Reduced README wireframe and screenshot display widths so the documentation is easier to scan.
 - Updated README wireframes and Railway persistence documentation to match the final deployment setup.

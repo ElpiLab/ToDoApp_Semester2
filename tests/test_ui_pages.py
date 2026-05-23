@@ -2,7 +2,7 @@ from datetime import date, timedelta
 
 import pytest
 
-from student_task_manager.ui.pages import (
+from student_task_manager.ui.view_helpers import (
     TASK_CATEGORY_OPTIONS,
     calendar_sidebar_border_class,
     completion_progress_summary,

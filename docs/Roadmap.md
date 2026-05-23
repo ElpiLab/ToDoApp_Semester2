@@ -91,6 +91,8 @@ This file tracks planned work and execution order.
   Restored Other as a task category option.
 - `370-final-rubric-doc-and-due-date-cleanup`
   Kept new task due dates optional by default, synced archived prompt records, and clarified team contributions.
+- `380-extract-ui-view-helpers`
+  Extracted pure UI helper constants and formatting/filter functions from the main NiceGUI page module.
 
 ## Notes
 
