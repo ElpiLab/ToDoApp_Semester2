@@ -4,6 +4,7 @@ This file records landed repository changes.
 
 ## 2026-05-23
 
+- Reduced README wireframe and screenshot display widths so the documentation is easier to scan.
 - Updated README wireframes and Railway persistence documentation to match the final deployment setup.
 - Restored `Other` as a built-in category option in the task create/edit dropdown.
 - Aligned Tasks List priority and status badges by giving the right-side badge area stable column widths.

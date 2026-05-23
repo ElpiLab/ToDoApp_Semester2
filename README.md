@@ -159,35 +159,35 @@ implementation has been polished further, but the main flows remain the same:
 dashboard overview, task board/list, calendar planning, analytics, and task
 creation.
 
-- [Interactive Figma prototype](https://www.figma.com/design/iKEgafTYKCCSQv2dSyIWLF/Prototype?node-id=0-1&t=g92BfXm8z582fAA4-1)
+- [Original interactive Figma prototype](https://www.figma.com/design/iKEgafTYKCCSQv2dSyIWLF/Prototype?node-id=0-1&t=g92BfXm8z582fAA4-1)
 
 ### Dashboard Wireframe
 
-![Dashboard wireframe](docs/wireframes/dashboard.png)
+<img src="docs/wireframes/dashboard.png" alt="Dashboard wireframe" width="650" />
 
 ### Task Board Wireframe
 
-![Task board wireframe](docs/wireframes/tasks-board.png)
+<img src="docs/wireframes/tasks-board.png" alt="Task board wireframe" width="650" />
 
 ### Task List Wireframe
 
-![Task list wireframe](docs/wireframes/tasks-list.png)
+<img src="docs/wireframes/tasks-list.png" alt="Task list wireframe" width="650" />
 
 ### New Task Wireframe
 
-![New task wireframe](docs/wireframes/add-task.png)
+<img src="docs/wireframes/add-task.png" alt="New task wireframe" width="650" />
 
 ### Calendar Wireframe
 
-![Calendar wireframe](docs/wireframes/calendar.png)
+<img src="docs/wireframes/calendar.png" alt="Calendar wireframe" width="650" />
 
 ### Analytics Wireframe
 
-![Analytics wireframe](docs/wireframes/analytics.png)
+<img src="docs/wireframes/analytics.png" alt="Analytics wireframe" width="650" />
 
 ### Login Page
 
-<img width="1228" height="1188" alt="Login page screenshot" src="https://github.com/user-attachments/assets/1b967699-5e85-4485-bf5b-0a5d05faf938" />
+<img src="https://github.com/user-attachments/assets/1b967699-5e85-4485-bf5b-0a5d05faf938" alt="Login page screenshot" width="650" />
 
 ## Architecture
 
@@ -239,7 +239,7 @@ prompts/                               # prompt workflow artifacts
 ```
 
 ## Database and ORM
-<img width="1984" height="362" alt="image" src="https://github.com/user-attachments/assets/b1d563d8-a6c9-4356-9460-faa6886b9ed1" />
+<img src="https://github.com/user-attachments/assets/b1d563d8-a6c9-4356-9460-faa6886b9ed1" alt="Database and ORM diagram" width="700" />
 
 The database models are defined in `src/student_task_manager/domain/models.py`.
 
