@@ -765,43 +765,44 @@ def index_page():
                         meta_parts.append(f"Due {task.due_date.strftime('%b')} {task.due_date.day}")
                     ui.label(" · ".join(meta_parts)).classes("text-xs text-slate-500")
 
-                ui.label(priority_short[task.priority.value]).classes(
-                    "text-xs font-bold tracking-wider rounded px-2 py-1 "
-                    f"{priority_pill_class(task.priority.value)}"
-                )
-
                 pill_label, dot_color, pill_bg = status_pill(bucket_key)
-                status_pill_el = ui.element("div").classes(
-                    "flex items-center gap-1.5 rounded-full px-2.5 py-1 cursor-pointer "
-                    f"hover:opacity-80 transition-opacity {pill_bg}"
-                )
-                with status_pill_el:
-                    ui.element("div").classes(f"w-1.5 h-1.5 rounded-full {dot_color}")
-                    ui.label(pill_label).classes("text-xs font-medium")
-                    status_menu = ui.menu().props('anchor="bottom right" self="top right"')
-                    with status_menu, ui.column().classes("p-1 gap-0 min-w-[140px]"):
-                        for opt_label, opt_status in (
-                            (status_display_label("pending"), "pending"),
-                            (status_display_label("in_progress"), "in_progress"),
-                            (status_display_label("done"), "done"),
-                        ):
-                            opt_btn = ui.button(opt_label).props(
-                                "flat no-caps align=left color=grey-8"
-                            )
-                            opt_btn.classes("w-full justify-start px-2 py-1 rounded-md")
+                with ui.row().classes("flex-none w-[184px] items-center justify-end gap-3"):
+                    ui.label(priority_short[task.priority.value]).classes(
+                        "w-12 text-center text-xs font-bold tracking-wider rounded px-2 py-1 "
+                        f"{priority_pill_class(task.priority.value)}"
+                    )
 
-                            def pick_status(
-                                e=None,
-                                tid=task.id,
-                                s=opt_status,
-                                m=status_menu,
-                            ) -> None:
-                                m.close()
-                                change_task_status(tid, s)
-                                refresh_tasks()
+                    status_pill_el = ui.element("div").classes(
+                        "w-28 flex items-center justify-center gap-1.5 rounded-full px-2.5 py-1 "
+                        f"cursor-pointer hover:opacity-80 transition-opacity {pill_bg}"
+                    )
+                    with status_pill_el:
+                        ui.element("div").classes(f"w-1.5 h-1.5 rounded-full {dot_color}")
+                        ui.label(pill_label).classes("text-xs font-medium")
+                        status_menu = ui.menu().props('anchor="bottom right" self="top right"')
+                        with status_menu, ui.column().classes("p-1 gap-0 min-w-[140px]"):
+                            for opt_label, opt_status in (
+                                (status_display_label("pending"), "pending"),
+                                (status_display_label("in_progress"), "in_progress"),
+                                (status_display_label("done"), "done"),
+                            ):
+                                opt_btn = ui.button(opt_label).props(
+                                    "flat no-caps align=left color=grey-8"
+                                )
+                                opt_btn.classes("w-full justify-start px-2 py-1 rounded-md")
 
-                            opt_btn.on("click", pick_status)
-                status_pill_el.on("click.stop", lambda m=status_menu: m.open())
+                                def pick_status(
+                                    e=None,
+                                    tid=task.id,
+                                    s=opt_status,
+                                    m=status_menu,
+                                ) -> None:
+                                    m.close()
+                                    change_task_status(tid, s)
+                                    refresh_tasks()
+
+                                opt_btn.on("click", pick_status)
+                    status_pill_el.on("click.stop", lambda m=status_menu: m.open())
 
                 delete_btn = (
                     ui.button(icon="delete_outline")
