@@ -95,6 +95,8 @@ This file tracks planned work and execution order.
   Extracted pure UI helper constants and formatting/filter functions from the main NiceGUI page module.
 - `390-extract-dashboard-page`
   Extracted dashboard rendering from the main NiceGUI page module into a focused dashboard module.
+- `400-extract-analytics-page`
+  Extract analytics rendering from the main NiceGUI page module into a focused analytics module.
 
 ## Notes
 

@@ -4,6 +4,7 @@ This file records landed repository changes.
 
 ## 2026-05-24
 
+- Extracted analytics rendering from `pages.py` into `ui/analytics_page.py` as Phase 3 of the UI module split.
 - Extracted dashboard rendering from `pages.py` into `ui/dashboard_page.py` as Phase 2 of the UI module split.
 
 ## 2026-05-23
