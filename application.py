@@ -7,7 +7,7 @@ import bcrypt
 from student_task_manager.data_access.db import create_db_and_tables, engine
 from student_task_manager.deployment import server_config
 from student_task_manager.domain.models import Student
-import student_task_manager.ui.pages as pages_module  # noqa: F401
+import student_task_manager.ui.routes as routes_module  # noqa: F401
 import student_task_manager.ui.login as login_module  # noqa: F401
 import student_task_manager.ui.registration as register_module  # noqa: F401
 

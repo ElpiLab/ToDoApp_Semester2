@@ -225,9 +225,18 @@ src/student_task_manager/
     dao.py                             # task persistence methods
   ui/
     controllers.py                     # UI boundary to services
+    view_helpers.py                    # shared UI formatting and filter helpers
+    app_shell.py                       # shared sidebar, header, and navigation shell
+    dashboard_page.py                  # dashboard page renderer
+    tasks_page.py                      # task board, list, filters, and view toggle
+    task_dialog.py                     # task create/edit dialog
+    calendar_page.py                   # calendar grid and selected-day sidebar
+    analytics_page.py                  # analytics cards and charts
+    settings_page.py                   # profile and account settings page
+    notifications.py                   # notification menu and read-state helpers
     login.py
     registration.py
-    pages.py                           # main NiceGUI views
+    routes.py                          # NiceGUI route setup and page wiring
 tests/                                 # automated pytest suite
 docs/
   wireframes/                          # selected prototype wireframe images
@@ -271,8 +280,7 @@ Priority:
 - high
 
 Status:
-- created
-- pending
+- To do (`created` or `pending` internally)
 - in_progress
 - done
 
@@ -296,7 +304,7 @@ Task validation and business rules are handled by `TaskService`:
 - priority is required
 - category is trimmed and defaults to `Other`
 - completing a task sets `status=done` and `completed=True`
-- reopening a task sets `status=pending` and `completed=False`
+- reopening a task moves it back to the user-facing `To do` state
 - task reads and writes require an authenticated `user_id`
 - accessing another user's task raises a task-not-found error
 
@@ -389,14 +397,19 @@ python -m mypy src
 
 | Team member | Contribution |
 | --- | --- |
-| Elpidio Dogbevi |  |
-| Lencer Obonyo | Frontend/UI implementation with NiceGUI, custom AI-agent prompts/workflows, tests, README/project docs, and final deployment verification |
+| Elpidio Dogbevi | SQLModel architecture, application logic and testing, project documentation, and presentation slides |
+| Lencer Obonyo | Frontend/UI implementation, custom AI-agent prompts/workflows, automated tests, project documentation, and final deployment verification |
 
 ## Future Roadmap
 
 - Optional CSV/JSON task export
 - More analytics views and filters
 - Further login and profile polish
+- Recurring tasks and subtasks for multi-step assignments
+- Email reminders for upcoming due dates
+- Calendar sync via `.ics` export to Outlook or Google Calendar
+- Dark mode and persisted user preferences (default landing page, default view, etc.)
+- OAuth login with Microsoft or Google
 
 ## Project Status
 

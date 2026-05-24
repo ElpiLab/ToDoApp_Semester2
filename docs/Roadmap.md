@@ -6,8 +6,8 @@ This file tracks planned work and execution order.
 
 1. **Login/profile polish** (no numbered prompt yet)
    Clean up authentication documentation and any remaining login/registration behavior after user-scoped tasks are explicit.
-2. **UI module split** (no numbered prompt yet)
-   Continue breaking down the large NiceGUI page module into smaller page modules. The pure helper functions, dashboard, analytics, settings, calendar, task dialog, task board/list code, task header/search/filter controls, notification menu, and shared app shell have already been extracted.
+2. **UI component cleanup** (future scope)
+   The large NiceGUI route module has been split into focused route, page, shell, dialog, notification, and helper modules. Optional follow-up work can extract smaller repeated components if that improves readability.
 3. **Optional export/download** (future scope)
    Add CSV/JSON task export later if it becomes useful for the final submission.
 4. **Persisted user preferences** (future scope)
@@ -111,6 +111,10 @@ This file tracks planned work and execution order.
   Extract notification menu rendering and read-state helpers from the main NiceGUI page module into a focused notification module.
 - `470-extract-app-shell`
   Extract shared sidebar, header, navigation, and profile menu rendering from the main NiceGUI page module into a focused app shell module.
+- `480-add-intent-comments`
+  Added short intent-level comments around route orchestration, app-shell styling, controller ownership checks, and Railway deployment binding.
+- `490-rename-pages-to-routes`
+  Renamed the remaining route orchestration module from `ui/pages.py` to `ui/routes.py`.
 
 ## Notes
 

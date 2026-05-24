@@ -5,7 +5,11 @@ from nicegui import app, ui
 
 
 class AppShell:
-    """Render the shared application frame around the feature pages."""
+    """Render the shared application frame around the feature pages.
+
+    Callbacks keep the shell independent from feature renderers and avoid
+    circular imports between navigation chrome and page modules.
+    """
 
     def __init__(
         self,
@@ -45,6 +49,8 @@ class AppShell:
         ui.colors(primary="#15803d")
         ui.query("body").classes("bg-stone-100")
         ui.query(".q-layout").props('view="lHh LpR fFf"')
+        # Quasar owns several component styles, so shared overrides live beside
+        # the shell elements that depend on them.
         ui.add_head_html(
             "<style>"
             ".new-task-btn .q-btn__content { gap: 0; }"

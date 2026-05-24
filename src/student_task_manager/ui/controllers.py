@@ -16,6 +16,8 @@ def _parse_due_date(due_date: str | None) -> date | None:
     return date.fromisoformat(normalized)
 
 
+# Always derive ownership from the authenticated session; UI code should never
+# pass an arbitrary user_id into task operations.
 def _current_user_id() -> int:
     user_id = app.storage.user.get("user_id")
     if not isinstance(user_id, int):

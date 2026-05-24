@@ -30,6 +30,8 @@ def logout_page():
     ui.navigate.to("/login")
 
 
+# This route owns page-level orchestration: session state, cross-page callbacks,
+# and refresh wiring. Feature modules render the individual screens.
 @ui.page("/")
 def index_page():
     if not app.storage.user.get("authenticated", False):

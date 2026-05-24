@@ -4,6 +4,8 @@ This file records landed repository changes.
 
 ## 2026-05-24
 
+- Updated README, Status, and Roadmap documentation to match the completed UI module split and route-module rename.
+- Renamed the remaining route orchestration module from `ui/pages.py` to `ui/routes.py` after the UI split.
 - Extracted shared app shell rendering from `pages.py` into `ui/app_shell.py` as Phase 10 of the UI module split.
 - Extracted notification menu rendering and read-state helpers from `pages.py` into `ui/notifications.py` as Phase 9 of the UI module split.
 - Extracted task header, search, filters, and Board/List toggle rendering from `pages.py` into `ui/tasks_page.py` as Phase 8 of the UI module split.
