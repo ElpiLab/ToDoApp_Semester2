@@ -133,6 +133,8 @@ This file tracks planned work and execution order.
   Made dashboard refresh wiring explicit and synced the ERD artifacts to the current SQLModel ORM metadata.
 - `590-collapse-task-status-states`
   Collapsed task status persistence to pending, in_progress, and done, with migration coverage for legacy created rows.
+- `600-clarify-registration-duplicate-feedback`
+  Clarified duplicate-safe registration feedback so it no longer implies an existing account password was replaced.
 
 ## Notes
 

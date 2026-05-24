@@ -4,6 +4,7 @@ This file records landed repository changes.
 
 ## 2026-05-24
 
+- Clarified registration feedback so duplicate-email protection no longer implies an existing account password was replaced.
 - Collapsed task statuses to `pending`, `in_progress`, and `done`, with a startup migration from legacy `created` rows to `pending`.
 - Made the dashboard quick-complete refresh callback explicit in route orchestration and synced the ERD DBML, Draw.io source, and PNG to the actual SQLModel metadata details.
 - Added a 10-character password floor, in-memory login throttling, generic duplicate-email registration failures, and direct UI imports from the shared domain email validator.

@@ -260,6 +260,26 @@ def test_register_rejects_duplicate_email(seeded_test_engine) -> None:
         )
 
 
+def test_duplicate_registration_does_not_replace_existing_password(seeded_test_engine) -> None:
+    svc = AuthService(session_factory(seeded_test_engine))
+    with Session(seeded_test_engine) as session:
+        user = session.get(Student, 1)
+        user.password_hash = bcrypt.hash("original123")
+        session.add(user)
+        session.commit()
+
+    with pytest.raises(DuplicateEmailError):
+        svc.register(
+            "Test Student",
+            "student@example.com",
+            "replacement123",
+            "replacement123",
+        )
+
+    assert svc.login("student@example.com", "replacement123") is None
+    assert svc.login("student@example.com", "original123") is not None
+
+
 def test_login_rejects_empty_credentials(seeded_test_engine) -> None:
     svc = AuthService(session_factory(seeded_test_engine))
 
