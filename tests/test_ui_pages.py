@@ -6,10 +6,12 @@ from student_task_manager.ui.view_helpers import (
     TASK_CATEGORY_OPTIONS,
     calendar_sidebar_border_class,
     completion_progress_summary,
-    is_valid_email,
+    filter_visible_tasks,
+    relative_due_text,
     status_display_label,
     task_matches_status_filter,
 )
+from student_task_manager.domain.validation import is_valid_email
 from student_task_manager.domain.models import Status, Task
 
 
@@ -65,12 +67,10 @@ def test_completion_progress_summary_with_period_label(
 @pytest.mark.parametrize(
     ("status_value", "expected"),
     [
-        ("created", "To do"),
         ("pending", "To do"),
         ("open", "To do"),
         ("in_progress", "In Progress"),
         ("done", "Done"),
-        ("overdue", "Overdue"),
     ],
 )
 def test_status_display_label_uses_consistent_task_status_terms(
@@ -84,7 +84,6 @@ def test_status_display_label_uses_consistent_task_status_terms(
     ("status", "completed", "status_filter", "expected"),
     [
         (Status.pending, False, "to_do", True),
-        (Status.created, False, "to_do", True),
         (Status.in_progress, False, "to_do", False),
         (Status.in_progress, False, "in_progress", True),
         (Status.done, True, "in_progress", False),
@@ -108,6 +107,38 @@ def test_task_matches_status_filter_matches_visible_status_sections(
     )
 
     assert task_matches_status_filter(task, status_filter) is expected
+
+
+def test_filter_visible_tasks_ignores_hidden_status_filter_in_board_view() -> None:
+    todo_task = Task(title="Todo task", status=Status.pending, completed=False, user_id=1)
+    done_task = Task(title="Done task", status=Status.done, completed=True, user_id=1)
+
+    visible_tasks = filter_visible_tasks(
+        [todo_task, done_task],
+        view="board",
+        status="done",
+        priority="all",
+        category="all",
+        query="",
+    )
+
+    assert visible_tasks == [todo_task, done_task]
+
+
+def test_filter_visible_tasks_applies_status_filter_in_list_view() -> None:
+    todo_task = Task(title="Todo task", status=Status.pending, completed=False, user_id=1)
+    done_task = Task(title="Done task", status=Status.done, completed=True, user_id=1)
+
+    visible_tasks = filter_visible_tasks(
+        [todo_task, done_task],
+        view="list",
+        status="done",
+        priority="all",
+        category="all",
+        query="",
+    )
+
+    assert visible_tasks == [done_task]
 
 
 @pytest.mark.parametrize(
@@ -157,3 +188,22 @@ def test_calendar_sidebar_border_class_matches_task_state_and_priority(
     due_date = today + timedelta(days=due_offset_days)
 
     assert calendar_sidebar_border_class(priority, due_date, today, completed) == expected
+
+
+@pytest.mark.parametrize(
+    ("due_date", "is_done", "expected"),
+    [
+        (date(2026, 5, 23), False, "Due 23 May - today"),
+        (date(2026, 5, 24), False, "Due 24 May - in 1 day"),
+        (date(2026, 5, 26), False, "Due 26 May - in 3 days"),
+        (date(2026, 5, 22), False, "Due 22 May - 1 day late"),
+        (date(2026, 5, 20), False, "Due 20 May - 3 days late"),
+        (date(2026, 5, 20), True, "Due 20 May"),
+    ],
+)
+def test_relative_due_text_uses_ascii_separator(
+    due_date: date,
+    is_done: bool,
+    expected: str,
+) -> None:
+    assert relative_due_text(due_date, date(2026, 5, 23), is_done) == expected

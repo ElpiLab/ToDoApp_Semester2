@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Any
 
 from nicegui import app, ui
 from student_task_manager.ui.analytics_page import render_analytics_page
@@ -7,6 +8,7 @@ from student_task_manager.ui.calendar_page import render_calendar_page
 from student_task_manager.ui.controllers import (
     change_task_status,
     complete_task,
+    delete_all_tasks,
     delete_task,
     get_tasks,
     mark_task_pending,
@@ -21,24 +23,22 @@ from student_task_manager.ui.tasks_page import (
     render_list,
     render_task_controls,
 )
-from student_task_manager.ui.view_helpers import task_matches_status_filter
+from student_task_manager.ui.view_helpers import filter_visible_tasks
 
 
-@ui.page("/logout")
-def logout_page():
+def logout_page() -> None:
     app.storage.user.clear()
     ui.navigate.to("/login")
 
 
 # This route owns page-level orchestration: session state, cross-page callbacks,
 # and refresh wiring. Feature modules render the individual screens.
-@ui.page("/")
-def index_page():
+def index_page() -> None:
     if not app.storage.user.get("authenticated", False):
         ui.navigate.to("/login")
         return
 
-    state = {
+    state: dict[str, Any] = {
         "status": "all",
         "priority": "all",
         "category": "all",
@@ -66,7 +66,7 @@ def index_page():
         analytics_panel.set_visibility(page_key == "analytics")
         settings_panel.set_visibility(page_key == "settings")
         if page_key == "dashboard":
-            render_dashboard()
+            refresh_dashboard()
         if page_key == "calendar":
             render_calendar()
         if page_key == "analytics":
@@ -92,31 +92,37 @@ def index_page():
         tasks_panel = ui.column().classes("w-full gap-4")
         tasks_panel.set_visibility(False)
         with tasks_panel:
+
+            def update_status_filter(value: str) -> None:
+                state["status"] = value
+                refresh_tasks()
+
+            def update_priority_filter(value: str) -> None:
+                state["priority"] = value
+                refresh_tasks()
+
+            def update_category_filter(value: str) -> None:
+                state["category"] = value
+                refresh_tasks()
+
+            def update_search_filter(value: str) -> None:
+                state["search"] = value
+                refresh_tasks()
+
+            def update_task_view(value: str) -> None:
+                state["view"] = value
+                refresh_tasks()
+
             task_controls = render_task_controls(
                 view=state["view"],
                 status=state["status"],
                 priority=state["priority"],
                 category=state["category"],
-                on_status_change=lambda value: (
-                    state.__setitem__("status", value),
-                    refresh_tasks(),
-                ),
-                on_priority_change=lambda value: (
-                    state.__setitem__("priority", value),
-                    refresh_tasks(),
-                ),
-                on_category_change=lambda value: (
-                    state.__setitem__("category", value),
-                    refresh_tasks(),
-                ),
-                on_search_change=lambda value: (
-                    state.__setitem__("search", value),
-                    refresh_tasks(),
-                ),
-                on_view_change=lambda value: (
-                    state.__setitem__("view", value),
-                    refresh_tasks(),
-                ),
+                on_status_change=update_status_filter,
+                on_priority_change=update_priority_filter,
+                on_category_change=update_category_filter,
+                on_search_change=update_search_filter,
+                on_view_change=update_task_view,
             )
 
             tasks_container = ui.column().classes("w-full")
@@ -137,7 +143,7 @@ def index_page():
             current_page=lambda: state["page"],
             refresh_tasks=refresh_tasks,
             render_calendar=render_calendar,
-            render_dashboard=render_dashboard,
+            render_dashboard=refresh_dashboard,
             render_analytics=render_analytics,
         )
 
@@ -175,15 +181,16 @@ def index_page():
         state["calendar_filter_date"] = None
         render_calendar()
 
-    def render_dashboard() -> None:
+    def refresh_dashboard() -> None:
         render_dashboard_page(
-            dashboard_panel,
-            get_tasks,
-            display_name,
-            complete_task,
-            refresh_tasks,
-            open_task_dialog,
-            switch_to_page,
+            dashboard_panel=dashboard_panel,
+            get_tasks=get_tasks,
+            display_name=display_name,
+            on_complete_task=complete_task,
+            on_refresh_tasks=refresh_tasks,
+            on_open_task=open_task_dialog,
+            on_switch_page=switch_to_page,
+            on_refresh_dashboard=refresh_dashboard,
         )
 
     def render_analytics() -> None:
@@ -194,6 +201,7 @@ def index_page():
             settings_panel,
             get_tasks,
             delete_task,
+            delete_all_tasks,
             refresh_tasks,
             shell.refresh_user_badge,
         )
@@ -230,18 +238,16 @@ def index_page():
 
         notification_menu.render()
 
-        task_controls.subtitle_label.set_text(f"{active_count} active · {completed_count} done")
+        task_controls.subtitle_label.set_text(f"{active_count} active - {completed_count} done")
 
-        visible_tasks = list(all_tasks)
-        visible_tasks = [t for t in visible_tasks if task_matches_status_filter(t, state["status"])]
-        if state["priority"] != "all":
-            visible_tasks = [t for t in visible_tasks if t.priority.value == state["priority"]]
-        if state["category"] != "all":
-            visible_tasks = [t for t in visible_tasks if t.category == state["category"]]
-
-        query = state["search"]
-        if query:
-            visible_tasks = [t for t in visible_tasks if query in t.title.lower()]
+        visible_tasks = filter_visible_tasks(
+            all_tasks,
+            view=state["view"],
+            status=state["status"],
+            priority=state["priority"],
+            category=state["category"],
+            query=state["search"],
+        )
 
         def handle_reopen(task_id: int) -> None:
             if mark_task_pending(task_id):
@@ -309,4 +315,9 @@ def index_page():
 
     shell.render_workspace_nav()
     refresh_tasks()
-    render_dashboard()
+    refresh_dashboard()
+
+
+def register_main_routes() -> None:
+    ui.page("/logout")(logout_page)
+    ui.page("/")(index_page)

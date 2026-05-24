@@ -2,18 +2,17 @@ from collections.abc import Callable
 from typing import Any
 
 from nicegui import app, ui
-from sqlmodel import Session
 
-from student_task_manager.data_access.db import engine
 from student_task_manager.domain.models import Task
+from student_task_manager.domain.validation import is_valid_email
 from student_task_manager.services.auth_service import AuthService
-from student_task_manager.ui.view_helpers import is_valid_email
 
 
 def render_settings_page(
     settings_panel: Any,
     get_tasks: Callable[[], list[Task]],
     on_delete_task: Callable[[int], bool],
+    on_delete_all_tasks: Callable[[], int],
     on_refresh_tasks: Callable[[], None],
     on_refresh_user_badge: Callable[[], None],
 ) -> None:
@@ -67,6 +66,15 @@ def render_settings_page(
                 .props("outlined dense hide-bottom-space")
                 .classes("w-64")
             )
+            profile_password_input = (
+                ui.input(
+                    label="Current password for email changes",
+                    password=True,
+                    password_toggle_button=True,
+                )
+                .props("outlined dense hide-bottom-space")
+                .classes("w-64")
+            )
             initial_profile = {
                 "name": (name_input.value or "").strip(),
                 "email": (email_input.value or "").strip(),
@@ -109,8 +117,12 @@ def render_settings_page(
                     )
                     return
                 try:
-                    with Session(engine) as session:
-                        AuthService().update_profile(session, user_id, new_name, new_email)
+                    AuthService().update_profile(
+                        user_id,
+                        new_name,
+                        new_email,
+                        current_password=profile_password_input.value or None,
+                    )
                 except ValueError as e:
                     ui.notify(
                         str(e),
@@ -119,6 +131,7 @@ def render_settings_page(
                     )
                     return
                 app.storage.user.update({"full_name": new_name, "email": new_email})
+                profile_password_input.value = ""
                 on_refresh_user_badge()
                 ui.notify(
                     "Profile saved",
@@ -136,6 +149,7 @@ def render_settings_page(
             save_btn.disable()
             name_input.on_value_change(lambda _: check_profile_dirty())
             email_input.on_value_change(lambda _: check_profile_dirty())
+            profile_password_input.on_value_change(lambda _: check_profile_dirty())
 
             ui.separator().classes("mt-3")
             password_expansion = ui.expansion("Change password", icon="lock").classes(
@@ -196,9 +210,9 @@ def render_settings_page(
                 if not current or not new or not confirm:
                     ui.notify("Fill in all password fields", type="negative", position="top-right")
                     return
-                if len(new) < 6:
+                if len(new) < 10:
                     ui.notify(
-                        "New password must be at least 6 characters",
+                        "New password must be at least 10 characters",
                         type="negative",
                         position="top-right",
                     )
@@ -214,8 +228,7 @@ def render_settings_page(
                     )
                     return
                 try:
-                    with Session(engine) as session:
-                        AuthService().change_password(session, user_id, current, new)
+                    AuthService().change_password(user_id, current, new)
                 except ValueError as e:
                     ui.notify(str(e), type="negative", position="top-right")
                     return
@@ -261,14 +274,13 @@ def render_settings_page(
 
                     def confirm() -> None:
                         dialog.close()
-                        for task in all_tasks:
-                            if task.id is not None:
-                                on_delete_task(task.id)
+                        on_delete_all_tasks()
                         on_refresh_tasks()
                         render_settings_page(
                             settings_panel,
                             get_tasks,
                             on_delete_task,
+                            on_delete_all_tasks,
                             on_refresh_tasks,
                             on_refresh_user_badge,
                         )

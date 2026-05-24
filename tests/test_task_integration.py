@@ -1,6 +1,7 @@
 from datetime import date
 
 import pytest
+from sqlmodel import Session
 
 from student_task_manager.data_access.dao import TaskDAO
 from student_task_manager.domain.models import Priority, Status
@@ -9,7 +10,8 @@ from student_task_manager.services.task_service import TaskService
 
 @pytest.fixture
 def service_with_database(seeded_test_engine) -> TaskService:
-    return TaskService(dao=TaskDAO())
+    assert seeded_test_engine is not None
+    return TaskService(dao=TaskDAO(lambda: Session(seeded_test_engine)))
 
 
 def test_integration_create_task_round_trips_through_database(
@@ -50,34 +52,6 @@ def test_integration_complete_task_updates_persisted_state(
     assert stored_task.completed is True
 
 
-def test_integration_filter_tasks_uses_persisted_records(
-    service_with_database: TaskService,
-) -> None:
-    high_task = service_with_database.create_task(
-        title="High priority integration task",
-        description="Should match priority filter",
-        priority=Priority.high,
-        user_id=1,
-    )
-    low_task = service_with_database.create_task(
-        title="Low priority integration task",
-        description="Should stay open",
-        priority=Priority.low,
-        user_id=1,
-    )
-    assert high_task.id is not None
-    assert low_task.id is not None
-    service_with_database.mark_complete(high_task.id, user_id=1)
-
-    open_low_tasks = service_with_database.filter_tasks(
-        user_id=1,
-        status=Status.created,
-        priority=Priority.low,
-    )
-
-    assert [task.title for task in open_low_tasks] == ["Low priority integration task"]
-
-
 def test_integration_other_user_cannot_update_task(
     service_with_database: TaskService,
 ) -> None:
@@ -98,3 +72,26 @@ def test_integration_other_user_cannot_update_task(
 
     stored_task = service_with_database.get_task_by_id(created_task.id, user_id=1)
     assert stored_task.title == "Owner-only task"
+
+
+def test_integration_invalid_priority_update_does_not_corrupt_row(
+    service_with_database: TaskService,
+) -> None:
+    created_task = service_with_database.create_task(
+        title="Protected enum task",
+        description="Reject invalid priorities before persistence",
+        priority=Priority.medium,
+        due_date=date(2026, 6, 2),
+        user_id=1,
+    )
+    assert created_task.id is not None
+
+    with pytest.raises(ValueError, match="Priority must be one of"):
+        service_with_database.update_task(
+            created_task.id,
+            user_id=1,
+            priority="urgent",
+        )
+
+    stored_task = service_with_database.get_task_by_id(created_task.id, user_id=1)
+    assert stored_task.priority == Priority.medium

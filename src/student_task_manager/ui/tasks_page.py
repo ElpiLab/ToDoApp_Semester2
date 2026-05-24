@@ -38,7 +38,7 @@ def render_task_controls(
     with ui.row().classes("w-full items-end justify-between gap-4 flex-wrap"):
         with ui.column().classes("gap-1"):
             ui.label("All tasks").classes("text-2xl font-semibold text-slate-900")
-            subtitle_label = ui.label("0 active · 0 done").classes("text-sm text-slate-500")
+            subtitle_label = ui.label("0 active - 0 done").classes("text-sm text-slate-500")
         with ui.row().classes("items-center gap-2 shrink-0"):
             ui.label("View").classes("text-xs font-medium uppercase tracking-widest text-slate-400")
             view_toggle = ui.toggle(
@@ -232,7 +232,7 @@ def render_list(
                 meta_parts = [category_display(task.category)]
                 if task.due_date:
                     meta_parts.append(f"Due {task.due_date.strftime('%b')} {task.due_date.day}")
-                ui.label(" · ".join(meta_parts)).classes("text-xs text-slate-500")
+                ui.label(" - ".join(meta_parts)).classes("text-xs text-slate-500")
 
             pill_label, dot_color, pill_bg = status_pill(bucket_key)
             with ui.row().classes("flex-none w-[184px] items-center justify-end gap-3"):
@@ -261,7 +261,6 @@ def render_list(
                             opt_btn.classes("w-full justify-start px-2 py-1 rounded-md")
 
                             def pick_status(
-                                e=None,
                                 tid=task.id,
                                 s=opt_status,
                                 m=status_menu,
@@ -317,7 +316,7 @@ def render_board(
     on_drag_start: Callable[[int], None],
     on_drop_status: Callable[[str], None],
 ) -> None:
-    todo_tasks = [t for t in tasks if t.status.value in ("created", "pending")]
+    todo_tasks = [t for t in tasks if t.status.value == "pending"]
     in_progress_tasks = [t for t in tasks if t.status.value == "in_progress"]
     done_tasks = [t for t in tasks if t.status.value == "done"]
 
@@ -367,17 +366,15 @@ def render_board(
             column_card.on("dragover.prevent", lambda: None)
             column_card.on(
                 "dragenter",
-                lambda e=None, c=column_card, d=column_depth: enter_column(c, d),
+                lambda c=column_card, d=column_depth: enter_column(c, d),
             )
             column_card.on(
                 "dragleave",
-                lambda e=None, c=column_card, d=column_depth: leave_column(c, d),
+                lambda c=column_card, d=column_depth: leave_column(c, d),
             )
             column_card.on(
                 "drop.prevent",
-                lambda e=None, c=column_card, d=column_depth, s=target_status: drop_on_column(
-                    c, d, s
-                ),
+                lambda c=column_card, d=column_depth, s=target_status: drop_on_column(c, d, s),
             )
             with column_card:
                 with ui.row().classes("w-full items-center gap-2"):
@@ -402,8 +399,8 @@ def render_board(
                         )
                         .props("draggable=true")
                     )
-                    card.on("click", lambda e=None, current_task=task: on_edit(current_task))
-                    card.on("dragstart", lambda e=None, task_id=task.id: on_drag_start(task_id))
+                    card.on("click", lambda current_task=task: on_edit(current_task))
+                    card.on("dragstart", lambda task_id=task.id: on_drag_start(task_id))
                     with card:
                         title_classes = "font-medium text-slate-900 truncate w-full"
                         if is_done:
@@ -437,7 +434,7 @@ def render_board(
                 if not column_tasks and column_title != "To do":
                     empty_messages = {
                         status_display_label("in_progress"): "Nothing in progress",
-                        "Done": "No completed tasks yet",
+                        status_display_label("done"): "No completed tasks yet",
                     }
                     with ui.column().classes("w-full items-center justify-center py-8 gap-2"):
                         ui.icon("inbox", size="1.5rem").classes("text-slate-400")

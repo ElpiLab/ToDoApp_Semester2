@@ -4,13 +4,11 @@ This file tracks planned work and execution order.
 
 ## Active sequence
 
-1. **Login/profile polish** (no numbered prompt yet)
-   Clean up authentication documentation and any remaining login/registration behavior after user-scoped tasks are explicit.
-2. **UI component cleanup** (future scope)
+1. **UI component cleanup** (future scope)
    The large NiceGUI route module has been split into focused route, page, shell, dialog, notification, and helper modules. Optional follow-up work can extract smaller repeated components if that improves readability.
-3. **Optional export/download** (future scope)
+2. **Optional export/download** (future scope)
    Add CSV/JSON task export later if it becomes useful for the final submission.
-4. **Persisted user preferences** (future scope)
+3. **Persisted user preferences** (future scope)
    Add storage for default landing page, default task view, default priority, notification toggles, and appearance theme. These controls are not shown in the current Settings page because they are not persisted yet.
 
 ## Archived prompts
@@ -115,6 +113,26 @@ This file tracks planned work and execution order.
   Added short intent-level comments around route orchestration, app-shell styling, controller ownership checks, and Railway deployment binding.
 - `490-rename-pages-to-routes`
   Renamed the remaining route orchestration module from `ui/pages.py` to `ui/routes.py`.
+- `500-clean-root-and-persistence-contract`
+  Cleaned root artifacts, moved local SQLite persistence under `data/`, removed unscoped task reads, and made route registration explicit.
+- `510-auth-and-contract-hardening`
+  Gated development admin creation, moved registration into `AuthService`, removed inactive-user state, scoped DAO deletion, and refreshed test-case docs.
+- `520-lazy-db-and-auth-boundaries`
+  Made engine creation lazy, moved auth session ownership into `AuthService`, tightened task update transitions, removed ad-hoc schema alteration, and cleaned the local SQLite schema.
+- `530-fix-pytest-cache-warning`
+  Disabled pytest cache writes to remove sandboxed verification cache warnings.
+- `540-small-hygiene-nits`
+  Modernized model type hints, silenced route mypy notes with explicit return types, and removed a fake status test case.
+- `550-review-hardening-followups`
+  Added review-driven validation, deployment-secret, ERD, dependency-monitoring, smoke-test, and instruction-consistency hardening.
+- `560-second-review-followups`
+  Implemented second-review auth, filtering, task-dialog, batch-delete, notification, and validation-source cleanup.
+- `570-auth-throttling-and-cleanups`
+  Added login throttling, generic duplicate-email registration failures, a 10-character password floor, direct domain email validation imports, and dashboard refresh cleanup.
+- `580-dashboard-refresh-and-erd-sync`
+  Made dashboard refresh wiring explicit and synced the ERD artifacts to the current SQLModel ORM metadata.
+- `590-collapse-task-status-states`
+  Collapsed task status persistence to pending, in_progress, and done, with migration coverage for legacy created rows.
 
 ## Notes
 

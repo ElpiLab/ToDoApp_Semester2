@@ -5,7 +5,7 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.pool import StaticPool
 from sqlmodel import Session, SQLModel, create_engine
 
-from student_task_manager.data_access import dao as dao_module
+from student_task_manager.data_access import db as db_module
 from student_task_manager.domain.models import Student
 
 
@@ -36,5 +36,9 @@ def seeded_test_engine(monkeypatch: pytest.MonkeyPatch) -> Iterator[Engine]:
         )
         session.commit()
 
-    monkeypatch.setattr(dao_module, "engine", test_engine)
+    def get_test_engine(url: str | None = None) -> Engine:
+        _ = url
+        return test_engine
+
+    monkeypatch.setattr(db_module, "get_engine", get_test_engine)
     yield test_engine

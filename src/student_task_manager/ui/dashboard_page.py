@@ -21,6 +21,7 @@ def render_dashboard_page(
     on_refresh_tasks: Callable[[], None],
     on_open_task: Callable[[Task], None],
     on_switch_page: Callable[[str], None],
+    on_refresh_dashboard: Callable[[], None],
 ) -> None:
     dashboard_panel.clear()
     with dashboard_panel:
@@ -53,16 +54,8 @@ def render_dashboard_page(
 
         def dashboard_quick_complete(task_id: int) -> None:
             if on_complete_task(task_id):
-                render_dashboard_page(
-                    dashboard_panel,
-                    get_tasks,
-                    display_name,
-                    on_complete_task,
-                    on_refresh_tasks,
-                    on_open_task,
-                    on_switch_page,
-                )
                 on_refresh_tasks()
+                on_refresh_dashboard()
 
         week_count = len(due_today) + len(due_tomorrow) + len(due_rest_of_week)
 
@@ -237,7 +230,7 @@ def render_dashboard_page(
                                 ui.label(t.title).classes(title_classes)
                                 cat = category_display(t.category)
                                 date_str = due_date.strftime("%d %b")
-                                ui.label(f"{cat} · {date_str}").classes("text-xs text-slate-500")
+                                ui.label(f"{cat} - {date_str}").classes("text-xs text-slate-500")
                             ui.label(pill_label).classes(
                                 f"text-xs font-semibold rounded px-2 py-1 shrink-0 {pill_class}"
                             )
@@ -245,7 +238,7 @@ def render_dashboard_page(
 
                     more_count = max(len(upcoming_tasks) - 4, 0)
                     view_all_label = (
-                        f"View all tasks · +{more_count} more" if more_count else "View all tasks"
+                        f"View all tasks - +{more_count} more" if more_count else "View all tasks"
                     )
                     ui.button(
                         view_all_label,

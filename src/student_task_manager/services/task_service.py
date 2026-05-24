@@ -4,6 +4,40 @@ from student_task_manager.data_access.dao import TaskDAO
 from student_task_manager.domain.models import Priority, Status, Task
 
 
+def _allowed_values(enum_type: type[Priority] | type[Status]) -> str:
+    return ", ".join(item.value for item in enum_type)
+
+
+def _coerce_priority(value: Priority | str | None) -> Priority:
+    if value is None:
+        raise ValueError("Priority is required")
+    if isinstance(value, Priority):
+        return value
+    if isinstance(value, str):
+        try:
+            return Priority(value)
+        except ValueError as exc:
+            raise ValueError(f"Priority must be one of: {_allowed_values(Priority)}") from exc
+    raise ValueError(f"Priority must be one of: {_allowed_values(Priority)}")
+
+
+def _coerce_status(value: Status | str) -> Status:
+    if isinstance(value, Status):
+        return value
+    if isinstance(value, str):
+        try:
+            return Status(value)
+        except ValueError as exc:
+            raise ValueError(f"Status must be one of: {_allowed_values(Status)}") from exc
+    raise ValueError(f"Status must be one of: {_allowed_values(Status)}")
+
+
+def _coerce_completed(value: bool) -> bool:
+    if not isinstance(value, bool):
+        raise ValueError("Completed must be true or false")
+    return value
+
+
 def _normalize_category(value: str | None) -> str:
     stripped = (value or "").strip()
     return stripped or "Other"
@@ -38,15 +72,14 @@ class TaskService:
         *,
         user_id: int,
     ) -> Task:
-        if priority is None:
-            raise ValueError("Priority is required")
         owner_id = _validate_user_id(user_id)
+        normalized_priority = _coerce_priority(priority)
 
         task = Task(
             title=self._normalize_title(title),
             description=self._normalize_description(description),
-            priority=priority,
-            status=Status.created,
+            priority=normalized_priority,
+            status=Status.pending,
             category=_normalize_category(category),
             due_date=due_date,
             completed=False,
@@ -77,9 +110,12 @@ class TaskService:
         return self.dao.update(task)
 
     def delete_task(self, task_id: int, user_id: int) -> None:
-        task = self.get_task_by_id(task_id, user_id)
-        assert task.id is not None
-        self.dao.delete(task.id)
+        owner_id = _validate_user_id(user_id)
+        if not self.dao.delete_for_user(task_id, owner_id):
+            raise ValueError("Task not found")
+
+    def delete_all_tasks(self, user_id: int) -> int:
+        return self.dao.delete_all_for_user(_validate_user_id(user_id))
 
     def update_task(self, task_id: int, user_id: int, **updates) -> Task:
         task = self.get_task_by_id(task_id, user_id)
@@ -94,33 +130,32 @@ class TaskService:
             "category",
         }
 
+        original_status = task.status
+        original_completed = task.completed
+
         for key, value in updates.items():
             if key not in allowed_fields:
                 raise ValueError(f"Invalid field: {key}")
+            if key == "priority":
+                value = _coerce_priority(value)
+            elif key == "status":
+                value = _coerce_status(value)
+            elif key == "completed":
+                value = _coerce_completed(value)
             setattr(task, key, value)
 
-        task.title = self._normalize_title(task.title)
-        task.description = self._normalize_description(task.description)
-        task.category = _normalize_category(task.category)
+        if "title" in updates:
+            task.title = self._normalize_title(task.title)
+        if "description" in updates:
+            task.description = self._normalize_description(task.description)
+        if "category" in updates:
+            task.category = _normalize_category(task.category)
         if "status" in updates:
             task.completed = task.status == Status.done
         elif "completed" in updates:
-            task.status = Status.done if task.completed else Status.pending
+            if task.completed:
+                task.status = Status.done
+            elif original_completed and original_status == Status.done:
+                task.status = Status.pending
 
         return self.dao.update(task)
-
-    def filter_tasks(
-        self,
-        user_id: int,
-        status: Status | None = None,
-        priority: Priority | None = None,
-    ) -> list[Task]:
-        tasks = self.dao.get_all_for_user(_validate_user_id(user_id))
-
-        if status is not None:
-            tasks = [task for task in tasks if task.status == status]
-
-        if priority is not None:
-            tasks = [task for task in tasks if task.priority == priority]
-
-        return tasks

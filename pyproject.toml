@@ -11,6 +11,7 @@ requires-python = ">=3.11"
 dependencies = [
   "nicegui>=3.11",
   "sqlmodel>=0.0.38",
+  # passlib 1.7.4 expects bcrypt's legacy __about__ metadata; keep bcrypt pinned.
   "bcrypt==4.0.1",
   "passlib==1.7.4",
 ]
@@ -30,7 +31,7 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-cache_dir = "C:/Users/lence/AppData/Local/ToDoApp_Semester2/pytest_cache"
+addopts = "-p no:cacheprovider"
 
 [tool.ruff]
 line-length = 100

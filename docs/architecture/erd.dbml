@@ -1,0 +1,41 @@
+//// Bizzy Student Task Manager ORM model
+//// Source of truth: src/student_task_manager/domain/models.py
+
+Enum priority {
+  low
+  medium
+  high
+}
+
+Enum status {
+  pending
+  in_progress
+  done
+}
+
+Table student {
+  id integer [pk, increment, not null]
+  email varchar [unique, not null, note: "SQLModel Field(unique=True, index=True)"]
+  password_hash varchar [not null]
+  full_name varchar [not null, default: ""]
+
+  indexes {
+    email [unique]
+  }
+}
+
+Table task {
+  id integer [pk, increment, not null]
+  title varchar [not null]
+  description varchar [not null, default: ""]
+  priority varchar(6) [not null, default: "medium", note: "Priority enum values: low, medium, high"]
+  status varchar(11) [not null, default: "pending", note: "Status enum values: pending, in_progress, done"]
+  category varchar [not null, default: "Other"]
+  due_date date
+  completed boolean [not null, default: false]
+  user_id integer [not null, ref: > student.id, note: "SQLModel Field(foreign_key='student.id', index=True)"]
+
+  indexes {
+    user_id
+  }
+}

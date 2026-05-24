@@ -1,4 +1,5 @@
 from datetime import date
+from types import SimpleNamespace
 
 import pytest
 
@@ -15,16 +16,17 @@ def test_create_task_parses_due_date_and_notifies(monkeypatch) -> None:
             assert description == "Task description"
             assert priority == Priority.medium
             assert due_date == date(2026, 5, 12)
+            assert category == "Other"
             assert user_id == 5
             return Task(id=1, title=title, description=description, priority=priority)
 
+    def capture_notify(message, type, **kwargs) -> None:
+        assert kwargs["position"] == "top-right"
+        notifications.append((message, type))
+
     monkeypatch.setattr(controllers, "service", FakeService())
     monkeypatch.setattr(controllers, "_current_user_id", lambda: 5)
-    monkeypatch.setattr(
-        controllers.ui,
-        "notify",
-        lambda message, type, **kwargs: notifications.append((message, type)),
-    )
+    monkeypatch.setattr(controllers.ui, "notify", capture_notify)
 
     task = controllers.create_task("Task title", "Task description", "medium", "2026-05-12")
 
@@ -51,13 +53,13 @@ def test_update_task_uses_service_boundary(monkeypatch) -> None:
                 due_date=updates["due_date"],
             )
 
+    def capture_notify(message, type, **kwargs) -> None:
+        assert kwargs["position"] == "top-right"
+        notifications.append((message, type))
+
     monkeypatch.setattr(controllers, "service", FakeService())
     monkeypatch.setattr(controllers, "_current_user_id", lambda: 5)
-    monkeypatch.setattr(
-        controllers.ui,
-        "notify",
-        lambda message, type, **kwargs: notifications.append((message, type)),
-    )
+    monkeypatch.setattr(controllers.ui, "notify", capture_notify)
 
     task = controllers.update_task(
         3,
@@ -75,16 +77,16 @@ def test_update_task_uses_service_boundary(monkeypatch) -> None:
 def test_create_task_requires_logged_in_user(monkeypatch) -> None:
     notifications = []
 
+    def capture_notify(message, type, **kwargs) -> None:
+        assert kwargs["position"] == "top-right"
+        notifications.append((message, type))
+
     monkeypatch.setattr(
         controllers,
         "_current_user_id",
         lambda: (_ for _ in ()).throw(ValueError("Login required")),
     )
-    monkeypatch.setattr(
-        controllers.ui,
-        "notify",
-        lambda message, type, **kwargs: notifications.append((message, type)),
-    )
+    monkeypatch.setattr(controllers.ui, "notify", capture_notify)
 
     task = controllers.create_task("Task title", "Task description", "medium", "2026-05-12")
 
@@ -92,20 +94,53 @@ def test_create_task_requires_logged_in_user(monkeypatch) -> None:
     assert notifications == [("Login required", "negative")]
 
 
+@pytest.mark.parametrize("stored_user_id", [True, False])
+def test_current_user_id_rejects_boolean_session_values(monkeypatch, stored_user_id: bool) -> None:
+    fake_app = SimpleNamespace(storage=SimpleNamespace(user={"user_id": stored_user_id}))
+    monkeypatch.setattr(controllers, "app", fake_app)
+
+    with pytest.raises(ValueError, match="Login required"):
+        controllers._current_user_id()
+
+
+def test_delete_all_tasks_uses_single_success_notification(monkeypatch) -> None:
+    notifications = []
+
+    class FakeService:
+        def delete_all_tasks(self, *, user_id):
+            assert user_id == 5
+            return 3
+
+    def capture_notify(message, type, **kwargs) -> None:
+        assert kwargs["position"] == "top-right"
+        notifications.append((message, type))
+
+    monkeypatch.setattr(controllers, "service", FakeService())
+    monkeypatch.setattr(controllers, "_current_user_id", lambda: 5)
+    monkeypatch.setattr(controllers.ui, "notify", capture_notify)
+
+    deleted_count = controllers.delete_all_tasks()
+
+    assert deleted_count == 3
+    assert notifications == [("Deleted 3 tasks", "positive")]
+
+
 def test_create_task_reraises_unexpected_service_error(monkeypatch) -> None:
     notifications = []
 
     class BrokenService:
         def create_task(self, *args, **kwargs):
+            assert args == ()
+            assert kwargs["title"] == "Task title"
+            assert kwargs["user_id"] == 5
             raise RuntimeError("database unavailable")
+
+    def fail_notify(message, type, **kwargs) -> None:
+        pytest.fail(f"Unexpected notification: {message} {type} {kwargs}")
 
     monkeypatch.setattr(controllers, "service", BrokenService())
     monkeypatch.setattr(controllers, "_current_user_id", lambda: 5)
-    monkeypatch.setattr(
-        controllers.ui,
-        "notify",
-        lambda message, type, **kwargs: notifications.append((message, type)),
-    )
+    monkeypatch.setattr(controllers.ui, "notify", fail_notify)
 
     with pytest.raises(RuntimeError, match="database unavailable"):
         controllers.create_task("Task title", "Task description", "medium", "2026-05-12")

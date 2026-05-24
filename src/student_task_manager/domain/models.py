@@ -1,7 +1,7 @@
 from datetime import date
 from enum import Enum
-from typing import Optional, List
-from sqlmodel import Field, SQLModel, Relationship
+
+from sqlmodel import Field, Relationship, SQLModel
 
 
 class Priority(str, Enum):
@@ -11,33 +11,31 @@ class Priority(str, Enum):
 
 
 class Status(str, Enum):
-    created = "created"
     pending = "pending"
     in_progress = "in_progress"
     done = "done"
 
 
 class Student(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
     email: str = Field(unique=True, index=True)
     password_hash: str
     full_name: str = ""
-    is_active: bool = True
 
     # Relationship to tasks
-    tasks: List["Task"] = Relationship(back_populates="owner")
+    tasks: list["Task"] = Relationship(back_populates="owner")
 
 
 class Task(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
+    id: int | None = Field(default=None, primary_key=True)
 
     title: str
     description: str = ""
     priority: Priority = Priority.medium
-    status: Status = Status.created
+    status: Status = Status.pending
     category: str = "Other"
 
-    due_date: Optional[date] = None
+    due_date: date | None = None
     completed: bool = False
 
     # Foreign key to link to user

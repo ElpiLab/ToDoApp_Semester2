@@ -20,7 +20,7 @@ def _parse_due_date(due_date: str | None) -> date | None:
 # pass an arbitrary user_id into task operations.
 def _current_user_id() -> int:
     user_id = app.storage.user.get("user_id")
-    if not isinstance(user_id, int):
+    if not isinstance(user_id, int) or isinstance(user_id, bool):
         raise ValueError("Login required")
     return user_id
 
@@ -58,6 +58,20 @@ def delete_task(task_id: int):
     except ValueError as e:
         ui.notify(str(e), type="negative", position="top-right")
         return False
+
+
+def delete_all_tasks():
+    try:
+        deleted_count = service.delete_all_tasks(user_id=_current_user_id())
+        ui.notify(
+            f"Deleted {deleted_count} task{'s' if deleted_count != 1 else ''}",
+            type="positive",
+            position="top-right",
+        )
+        return deleted_count
+    except ValueError as e:
+        ui.notify(str(e), type="negative", position="top-right")
+        return 0
 
 
 def complete_task(task_id: int):

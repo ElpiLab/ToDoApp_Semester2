@@ -1,12 +1,19 @@
 import os
 from collections.abc import Mapping
+from functools import lru_cache
+from pathlib import Path
 
-from sqlalchemy import inspect, text
+from sqlalchemy import text
+from sqlalchemy.engine import Engine
+from sqlalchemy.engine import make_url
+from sqlmodel import Session
 from sqlmodel import SQLModel, create_engine
+
+DEFAULT_DATABASE_URL = "sqlite:///data/todo.db"
 
 
 def database_url(env: Mapping[str, str] = os.environ) -> str:
-    return env.get("DATABASE_URL", "sqlite:///todo.db")
+    return env.get("DATABASE_URL", DEFAULT_DATABASE_URL)
 
 
 def engine_connect_args(url: str) -> dict[str, bool]:
@@ -15,27 +22,34 @@ def engine_connect_args(url: str) -> dict[str, bool]:
     return {}
 
 
-DATABASE_URL = database_url()
-
-engine = create_engine(
-    DATABASE_URL,
-    echo=False,
-    connect_args=engine_connect_args(DATABASE_URL),
-)
-
-
-def _ensure_task_columns() -> None:
-    inspector = inspect(engine)
-    if not inspector.has_table("task"):
+def _ensure_sqlite_parent_dir(url: str) -> None:
+    parsed = make_url(url)
+    if parsed.drivername != "sqlite" or not parsed.database or parsed.database == ":memory:":
         return
-    existing = {col["name"] for col in inspector.get_columns("task")}
-    with engine.begin() as conn:
-        if "category" not in existing:
-            conn.execute(text("ALTER TABLE task ADD COLUMN category VARCHAR DEFAULT 'other'"))
-        if "user_id" not in existing:
-            conn.execute(text("ALTER TABLE task ADD COLUMN user_id INTEGER NOT NULL DEFAULT 1"))
+    Path(parsed.database).parent.mkdir(parents=True, exist_ok=True)
+
+
+@lru_cache(maxsize=1)
+def get_engine(url: str | None = None) -> Engine:
+    database_url_value = url or database_url()
+    _ensure_sqlite_parent_dir(database_url_value)
+    return create_engine(
+        database_url_value,
+        echo=False,
+        connect_args=engine_connect_args(database_url_value),
+    )
+
+
+def get_session() -> Session:
+    return Session(get_engine())
+
+
+def migrate_legacy_task_statuses(engine: Engine) -> None:
+    with engine.begin() as connection:
+        connection.execute(text("UPDATE task SET status = 'pending' WHERE status = 'created'"))
 
 
 def create_db_and_tables() -> None:
+    engine = get_engine()
     SQLModel.metadata.create_all(engine)
-    _ensure_task_columns()
+    migrate_legacy_task_statuses(engine)

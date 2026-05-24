@@ -4,6 +4,31 @@ This file records landed repository changes.
 
 ## 2026-05-24
 
+- Collapsed task statuses to `pending`, `in_progress`, and `done`, with a startup migration from legacy `created` rows to `pending`.
+- Made the dashboard quick-complete refresh callback explicit in route orchestration and synced the ERD DBML, Draw.io source, and PNG to the actual SQLModel metadata details.
+- Added a 10-character password floor, in-memory login throttling, generic duplicate-email registration failures, and direct UI imports from the shared domain email validator.
+- Implemented second-review follow-ups: shared email validation, current-password re-authentication for email changes, duplicate-email rollback on profile updates, boolean session-user rejection, board-view status-filter isolation, created-status preservation in task dialogs, batch task deletion, notification-key validation, and label consistency cleanup.
+- Added review hardening for task enum validation, auth profile validation, bcrypt password byte limits, public-host storage-secret enforcement, and ASCII due-date helper text.
+- Added Dependabot pip monitoring and NiceGUI simulated-browser smoke coverage for the login and registration pages.
+- Updated the ERD source, draw.io file, and PNG to match the current SQLModel `Student` and `Task` entities.
+- Reconciled agent verification guidance so dependency installation is documented as environment setup rather than a per-change quality gate.
+- Modernized ORM model type hints to PEP 604 style, added explicit route return types, and removed a UI helper test case that used a non-existent `overdue` status value.
+- Disabled pytest's cache provider so sandboxed verification runs no longer emit cache write warnings from inaccessible cache temp files.
+- Made database engine creation lazy through `get_engine()`, removed ad-hoc task-column `ALTER TABLE` handling, and documented local SQLite wipe/recreate expectations for schema-changing development updates.
+- Removed the stale physical `is_active` column from the local `data/todo.db` `student` table.
+- Moved auth session ownership into `AuthService`, tightened login empty-field and malformed-hash handling, and kept deployed runs fail-fast when `STORAGE_SECRET` is missing.
+- Fixed task updates so status-only edits do not revalidate untouched legacy titles and `completed=False` no longer demotes an in-progress task.
+- Kept future planning in `docs/Roadmap.md`, made `docs/Status.md` current-state only, and changed README future-scope documentation to link to the roadmap.
+- Gated development admin creation behind `BIZZY_CREATE_DEV_ADMIN=1` and required `BIZZY_DEV_ADMIN_PASSWORD`; the flag is rejected under Railway environment variables.
+- Moved registration validation and persistence into `AuthService.register`, made missing profile users raise `ValueError("User not found")`, and removed inactive-user state from the model as out of scope.
+- Replaced unscoped DAO deletion with `delete_for_user(task_id, user_id)` and added a regression test that another user cannot delete a task.
+- Synced `docs/TestCases.md` with the current integration tests and updated the repo contract through prompt `510-auth-and-contract-hardening`.
+- Removed the empty tracked VS Code settings file.
+- Moved ERD artifacts under `docs/architecture/`, removed the obsolete `procfile.txt`, and pointed the README ERD image at the local diagram.
+- Moved local SQLite persistence to `data/todo.db`, changed the default database URL to `sqlite:///data/todo.db`, and kept Railway persistence on `/app/data/todo.db`.
+- Removed unscoped `TaskDAO` read methods and the unused `TaskService.filter_tasks()` API so task reads stay user-scoped.
+- Made NiceGUI route registration explicit from the launcher instead of relying on unused side-effect imports.
+- Removed Conda preference settings from the tracked VS Code settings file.
 - Updated README, Status, and Roadmap documentation to match the completed UI module split and route-module rename.
 - Renamed the remaining route orchestration module from `ui/pages.py` to `ui/routes.py` after the UI split.
 - Extracted shared app shell rendering from `pages.py` into `ui/app_shell.py` as Phase 10 of the UI module split.

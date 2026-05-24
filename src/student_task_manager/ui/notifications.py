@@ -27,7 +27,9 @@ class NotificationMenu:
 
     @staticmethod
     def notification_key(task_id: int | None, notification_type: str) -> str:
-        return f"{notification_type}:{task_id or 0}"
+        if task_id is None:
+            raise ValueError("Notification tasks must be persisted")
+        return f"{notification_type}:{task_id}"
 
     def _persist_read_notifications(self) -> None:
         self.persist_read_keys(self.read_keys)

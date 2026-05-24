@@ -13,6 +13,18 @@ from student_task_manager.ui.view_helpers import (
 )
 
 
+def _status_value_for_task(task: Task) -> str:
+    return task.status.value
+
+
+def _status_options_for_task() -> dict[str, str]:
+    return {
+        "pending": status_display_label("pending"),
+        "in_progress": status_display_label("in_progress"),
+        "done": status_display_label("done"),
+    }
+
+
 def open_task_dialog(
     task: Task | None = None,
     default_due_date: date | None = None,
@@ -94,15 +106,10 @@ def open_task_dialog(
 
             status_input: Any | None = None
             if is_edit and task:
-                current_status = "pending" if task.status.value == "created" else task.status.value
                 status_input = (
                     ui.select(
-                        {
-                            "pending": status_display_label("pending"),
-                            "in_progress": status_display_label("in_progress"),
-                            "done": status_display_label("done"),
-                        },
-                        value=current_status,
+                        _status_options_for_task(),
+                        value=_status_value_for_task(task),
                     )
                     .props("dense outlined options-dense")
                     .classes("w-36")

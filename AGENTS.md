@@ -14,7 +14,7 @@ Current repository status:
 - application code lives under the installable `src/student_task_manager/` package; `application.py` at the repo root is the launcher
 - the automated suite covers the rubric mix documented in `docs/TestCases.md` (unit, database, and integration tests)
 - `README.md` defines product scope and the current architecture; `docs/Status.md` tracks the current repository state
-- prompt templates exist under `prompts/templates/`; archived prompts run through `060-fix-windows-app-startup`
+- prompt templates exist under `prompts/templates/`; archived prompts run through `540-small-hygiene-nits`
 - implementation work should be driven by the prompt workflow, not ad-hoc coding
 
 Architecture constraints:
@@ -137,8 +137,8 @@ These invariants outrank local implementation convenience:
 
 1. Business rules belong in services or domain logic, not in NiceGUI page code.
 2. `models.py` is the ORM source of truth for entities and constraints.
-3. Engine and session creation must be centralized, for example in `session.py`.
-4. Bootstrap schema from ORM metadata with `Base.metadata.create_all(engine)` unless the repository later adopts an explicit migration tool. If a migration tool is introduced, update this file through the prompt workflow before normalizing the new rule elsewhere.
+3. Engine and session creation must be centralized, currently in `data_access/db.py`.
+4. Bootstrap schema from ORM metadata with `SQLModel.metadata.create_all(engine)` unless the repository later adopts an explicit migration tool. If a migration tool is introduced, update this file through the prompt workflow before normalizing the new rule elsewhere.
 5. Failed SQL writes must not be silently ignored. Surface the error with enough context to retry or diagnose it.
 6. Validation errors should be explicit and actionable.
 7. Temporary or generated artifacts must not accumulate in the repo root.
@@ -148,16 +148,22 @@ These invariants outrank local implementation convenience:
 Run these commands before marking implementation work done:
 
 ```bash
-python -m pip install -e ".[dev]"
 pytest tests/ --tb=short
 ruff format --check src tests
 ruff check src tests
 python -m mypy src
 ```
 
+Set up or refresh the local development environment with:
+
+```bash
+python -m pip install -e ".[dev]"
+```
+
 Verification rules:
 
 - if a command is not yet available because the repo is still being scaffolded, say so explicitly
+- if dependency setup was not rerun because the environment is already installed, say so explicitly
 - prefer running checks relevant to touched files first, then the broader suite when practical
 - do not proceed past a failing gate without fixing it and re-running the relevant checks
 - if a check is unavailable because the repo is still being scaffolded, document the gap explicitly and leave the task marked incomplete
@@ -169,7 +175,7 @@ If the repository later adds a canonical `make verify` or equivalent wrapper, up
 
 - Do not commit datasets, DB files, logs, caches, or other generated artifacts to the repo root.
 - Keep scratch files in an ignored location such as `build/`, `tmp/`, or another documented non-root path.
-- Tool caches (pytest, ruff, mypy) are stored under `C:/Users/lence/AppData/Local/ToDoApp_Semester2/`, and virtual environments should stay outside the repo. Do not move these inside the project root.
+- Pytest's cache provider is disabled so sandboxed verification does not create inaccessible cache temp files. Ruff and mypy caches are stored under `C:/Users/lence/AppData/Local/ToDoApp_Semester2/`. Virtual environments should stay outside the repo.
 - Ensure generated-artifact paths are covered by `.gitignore` when they are expected to recur.
 - Prefer editing existing files over adding new files when sensible.
 - Avoid unnecessary dependencies; justify any new dependency in the PR description or archive notes.

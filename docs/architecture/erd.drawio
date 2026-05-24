@@ -1,0 +1,40 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="bizzy-orm-erd" name="Bizzy ORM ERD">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="860" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="Bizzy ORM Entity Relationship Diagram&#xa;Source of truth: src/student_task_manager/domain/models.py" style="text;html=1;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=18;" parent="1" vertex="1">
+          <mxGeometry x="80" y="40" width="720" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="student" value="student table&#xa;id: INTEGER PK NOT NULL&#xa;email: VARCHAR NOT NULL UNIQUE INDEX&#xa;password_hash: VARCHAR NOT NULL&#xa;full_name: VARCHAR NOT NULL DEFAULT ''" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=10;fontStyle=1;fillColor=#ecfdf5;strokeColor=#047857;" parent="1" vertex="1">
+          <mxGeometry x="90" y="150" width="370" height="170" as="geometry"/>
+        </mxCell>
+        <mxCell id="task" value="task table&#xa;id: INTEGER PK NOT NULL&#xa;title: VARCHAR NOT NULL&#xa;description: VARCHAR NOT NULL DEFAULT ''&#xa;priority: VARCHAR(6) NOT NULL DEFAULT medium&#xa;status: VARCHAR(11) NOT NULL DEFAULT pending&#xa;category: VARCHAR NOT NULL DEFAULT Other&#xa;due_date: DATE NULL&#xa;completed: BOOLEAN NOT NULL DEFAULT false&#xa;user_id: INTEGER NOT NULL FK INDEX" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=10;fontStyle=1;fillColor=#eff6ff;strokeColor=#1d4ed8;" parent="1" vertex="1">
+          <mxGeometry x="640" y="105" width="430" height="305" as="geometry"/>
+        </mxCell>
+        <mxCell id="priority" value="Priority enum&#xa;low&#xa;medium&#xa;high&#xa;&#xa;Used by task.priority" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=10;fontStyle=1;fillColor=#fff7ed;strokeColor=#c2410c;" parent="1" vertex="1">
+          <mxGeometry x="640" y="500" width="185" height="150" as="geometry"/>
+        </mxCell>
+        <mxCell id="status" value="Status enum&#xa;pending&#xa;in_progress&#xa;done&#xa;&#xa;Used by task.status" style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=10;fontStyle=1;fillColor=#f8fafc;strokeColor=#475569;" parent="1" vertex="1">
+          <mxGeometry x="885" y="500" width="185" height="170" as="geometry"/>
+        </mxCell>
+        <mxCell id="student-task-edge" value="student.id 1 -&gt; * task.user_id&#xa;indexed foreign key" style="endArrow=ERoneToMany;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;labelBackgroundColor=#ffffff;" parent="1" source="student" target="task" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="460" y="235" as="sourcePoint"/>
+            <mxPoint x="640" y="235" as="targetPoint"/>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="priority-edge" value="Python enum" style="endArrow=open;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;dashed=1;labelBackgroundColor=#ffffff;" parent="1" source="task" target="priority" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="status-edge" value="Python enum" style="endArrow=open;html=1;rounded=0;edgeStyle=orthogonalEdgeStyle;dashed=1;labelBackgroundColor=#ffffff;" parent="1" source="task" target="status" edge="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="notes" value="No module, category, priority, or status lookup tables exist in the ORM.&#xa;Categories are stored as task.category strings. Priority and status are Python enums persisted as VARCHAR columns." style="rounded=0;whiteSpace=wrap;html=1;align=left;verticalAlign=top;spacing=10;fillColor=#fefce8;strokeColor=#a16207;" parent="1" vertex="1">
+          <mxGeometry x="90" y="400" width="460" height="120" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

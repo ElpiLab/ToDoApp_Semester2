@@ -11,23 +11,17 @@ This file records the current repository state.
   - **Calendar page** - month grid with task pills, day-cell selection, side panel for the selected day, add-task button per day.
   - **Analytics page** - view-only task metrics and charts.
   - **Settings page** - profile fields and a task deletion action.
-- Prompt workflow: templates and archived prompts exist through `490-rename-pages-to-routes`. Earlier UI work (dialog redesign, sidebar cleanup) was iterative follow-up not driven by a numbered prompt.
+- Prompt workflow: templates and archived prompts exist through `590-collapse-task-status-states`. Earlier UI work (dialog redesign, sidebar cleanup) was iterative follow-up not driven by a numbered prompt.
 - Planning docs: this file and `Changelog.md` are up to date as of 2026-05-24.
-- Source layout: application code now lives under the installable `src/student_task_manager/` package. `application.py` remains at the repository root as the launcher. NiceGUI route orchestration lives in `src/student_task_manager/ui/routes.py`. Pure UI formatting/filter helpers live in `src/student_task_manager/ui/view_helpers.py`; dashboard rendering lives in `src/student_task_manager/ui/dashboard_page.py`; analytics rendering lives in `src/student_task_manager/ui/analytics_page.py`; settings rendering lives in `src/student_task_manager/ui/settings_page.py`; calendar rendering lives in `src/student_task_manager/ui/calendar_page.py`; task create/edit dialog rendering lives in `src/student_task_manager/ui/task_dialog.py`; task board/list rendering and task header/search/filter controls live in `src/student_task_manager/ui/tasks_page.py`; notification menu rendering and read-state helpers live in `src/student_task_manager/ui/notifications.py`; shared sidebar, header, navigation, and profile-menu rendering live in `src/student_task_manager/ui/app_shell.py`.
-- Deployment: Railway config is present; the launcher reads Railway's `PORT`, binds deployed runs to `0.0.0.0`, and supports a `DATABASE_URL` override for persistent storage. Production uses a Railway volume mounted at `/app/data` with `DATABASE_URL=sqlite:////app/data/todo.db`.
-- Test layout: the automated suite includes the required 12-test rubric mix documented in `docs/TestCases.md` (6 unit, 3 database, 3 integration), plus task-ownership regression tests and one package smoke test. Broader NiceGUI browser behavior is still exercised by hand.
-- README: current and rubric-facing; it documents implemented behavior, selected wireframes, source layout, ORM models, setup/run commands, Railway persistence, test requirements, team contributions, and future roadmap items.
+- Source layout: application code now lives under the installable `src/student_task_manager/` package. `application.py` remains at the repository root as the launcher and explicitly registers NiceGUI routes before startup. NiceGUI route orchestration lives in `src/student_task_manager/ui/routes.py`. Pure UI formatting/filter helpers live in `src/student_task_manager/ui/view_helpers.py`; dashboard rendering lives in `src/student_task_manager/ui/dashboard_page.py`; analytics rendering lives in `src/student_task_manager/ui/analytics_page.py`; settings rendering lives in `src/student_task_manager/ui/settings_page.py`; calendar rendering lives in `src/student_task_manager/ui/calendar_page.py`; task create/edit dialog rendering lives in `src/student_task_manager/ui/task_dialog.py`; task board/list rendering and task header/search/filter controls live in `src/student_task_manager/ui/tasks_page.py`; notification menu rendering and read-state helpers live in `src/student_task_manager/ui/notifications.py`; shared sidebar, header, navigation, and profile-menu rendering live in `src/student_task_manager/ui/app_shell.py`.
+- Deployment: Railway config is present; the launcher reads Railway's `PORT`, binds deployed runs to `0.0.0.0`, requires `STORAGE_SECRET` for deployed runs, and supports a `DATABASE_URL` override for persistent storage. Local SQLite defaults to `sqlite:///data/todo.db`. Production uses a Railway volume mounted at `/app/data` with `DATABASE_URL=sqlite:////app/data/todo.db`. `runtime.txt` pins the Nixpacks Python runtime to `python-3.11.9`, matching the project tooling target.
+- Test layout: the automated suite includes the required 12-test rubric mix documented in `docs/TestCases.md` (6 unit, 3 database, 3 integration), plus task-ownership, validation, deployment-secret, UI-helper, package-smoke, and NiceGUI simulated-browser smoke tests. Broader full-browser behavior is still exercised by hand.
+- README: current and rubric-facing; it documents implemented behavior, selected wireframes, source layout, ORM models, setup/run commands, local DB reset expectations, Railway persistence, test requirements, team contributions, and links to the roadmap for future scope.
+- Architecture ERD artifacts live under `docs/architecture/` and match the current SQLModel ORM metadata for the `student` and `task` tables, including defaults, nullability, indexes, the foreign key, and enum value sets.
 
 ## Active prompt
 
 - N/A
-
-## Next planned work
-
-- **Login/profile polish** - refine authentication and profile behavior after user-scoped tasks are explicit.
-- **Registration service boundary cleanup** - move `/register` persistence and validation behind `AuthService` after upload timing risk is lower.
-- **UI component cleanup** - optionally extract smaller repeated UI components from the page modules if more polish time is available.
-- **Optional export/download** - add CSV/JSON export later if it becomes part of the submitted scope.
 
 ## Support boundary
 
@@ -39,3 +33,6 @@ This file records the current repository state.
 
 - Use this file for current-state truth, not future planning.
 - Tool caches are configured under `C:/Users/lence/AppData/Local/ToDoApp_Semester2/`.
+- Auth is suitable for the course project scope, not a full production identity system. Current safeguards include in-memory login throttling, generic registration failures for duplicate emails, current-password re-authentication for email changes, and explicit bcrypt input limits. Known limitations: no persistent/distributed throttling and no account recovery flow.
+- Passwords must be at least 10 characters and fit bcrypt's 72-byte input limit; registration and password changes reject values outside that range explicitly.
+- Task statuses are `pending`, `in_progress`, and `done`; the UI labels `pending` as To do. Startup database bootstrap migrates legacy `created` task rows to `pending`.

@@ -215,13 +215,14 @@ The code uses Python's standard `src/` layout: the app package is `student_task_
 ```text
 application.py                         # NiceGUI launcher
 src/student_task_manager/
+  deployment.py                        # runtime env and deployment config helpers
   domain/
     models.py                          # SQLModel entities and enums
   services/
     auth_service.py                    # login/profile service logic
     task_service.py                    # task business rules
   data_access/
-    db.py                              # engine and schema bootstrap
+    db.py                              # lazy engine/session helpers and schema bootstrap
     dao.py                             # task persistence methods
   ui/
     controllers.py                     # UI boundary to services
@@ -239,6 +240,7 @@ src/student_task_manager/
     routes.py                          # NiceGUI route setup and page wiring
 tests/                                 # automated pytest suite
 docs/
+  architecture/                       # ERD source files and exported diagram
   wireframes/                          # selected prototype wireframe images
   TestCases.md                         # rubric test-case table
   Status.md
@@ -248,7 +250,7 @@ prompts/                               # prompt workflow artifacts
 ```
 
 ## Database and ORM
-<img src="https://github.com/user-attachments/assets/b1d563d8-a6c9-4356-9460-faa6886b9ed1" alt="Database and ORM diagram" width="700" />
+<img src="docs/architecture/erd.png" alt="Database and ORM diagram" width="700" />
 
 The database models are defined in `src/student_task_manager/domain/models.py`.
 
@@ -259,7 +261,6 @@ Student:
 - email (`str`)
 - password_hash (`str`)
 - full_name (`str`)
-- is_active (`bool`)
 
 Task:
 - id (`int`)
@@ -280,11 +281,12 @@ Priority:
 - high
 
 Status:
-- To do (`created` or `pending` internally)
+- pending (shown as To do)
 - in_progress
 - done
 
 Tasks are linked to a student through `user_id`, so each logged-in student only works with their own tasks.
+Inactive-user lifecycle management is outside the current project scope.
 
 ### Libraries Used
 
@@ -322,8 +324,27 @@ python -m pip install -e ".[dev]"
 python application.py
 ```
 
-Local runs default to `http://127.0.0.1:8081`. In deployment, the launcher reads
-Railway's `PORT` variable and binds to `0.0.0.0`.
+Local runs default to `http://127.0.0.1:8081` and store SQLite data in
+`data/todo.db`. In deployment, the launcher reads Railway's `PORT` variable and
+binds to `0.0.0.0`.
+
+### Local Development Database
+
+The project does not currently include a migration tool. During development,
+schema-changing updates are applied by deleting and recreating the local SQLite
+file at `data/todo.db`, then starting the app or running tests so SQLModel can
+bootstrap the schema from `models.py`. Do not keep generated SQLite files in the
+repository root.
+
+To seed a development-only admin account in a local empty database, set:
+
+```text
+BIZZY_CREATE_DEV_ADMIN=1
+BIZZY_DEV_ADMIN_PASSWORD=<local-dev-password>
+```
+
+Optional overrides are `BIZZY_DEV_ADMIN_EMAIL` and `BIZZY_DEV_ADMIN_NAME`.
+The dev-admin flag is rejected when Railway environment variables are present.
 
 ## Railway Deployment
 
@@ -332,6 +353,11 @@ This repository includes `railway.json` with:
 - builder: `NIXPACKS`
 - start command: `python application.py`
 - healthcheck path: `/`
+
+`runtime.txt` pins the Railway/Nixpacks Python runtime to `python-3.11.9`,
+matching the project's Python tooling target. Do not bump it to a local Python
+version unless `pyproject.toml`, Ruff, mypy, and the deployment target are moved
+to that version together.
 
 Deploy from GitHub or with Railway CLI:
 
@@ -348,7 +374,7 @@ STORAGE_SECRET=<long-random-secret>
 Railway provides `PORT` automatically. Do not set it manually unless you are
 debugging a port issue.
 
-By default, the app uses `sqlite:///todo.db`. For persistent SQLite storage on
+By default, the app uses `sqlite:///data/todo.db`. For persistent SQLite storage on
 Railway, attach a Volume and set `DATABASE_URL` to a SQLite file on the mounted
 path. The production Railway service uses a `todo-data` volume mounted at
 `/app/data`, with:
@@ -400,18 +426,7 @@ python -m mypy src
 | Elpidio Dogbevi | SQLModel architecture, application logic and testing, project documentation, and presentation slides |
 | Lencer Obonyo | Frontend/UI implementation, custom AI-agent prompts/workflows, automated tests, project documentation, and final deployment verification |
 
-## Future Roadmap
-
-- Optional CSV/JSON task export
-- More analytics views and filters
-- Further login and profile polish
-- Recurring tasks and subtasks for multi-step assignments
-- Email reminders for upcoming due dates
-- Calendar sync via `.ics` export to Outlook or Google Calendar
-- Dark mode and persisted user preferences (default landing page, default view, etc.)
-- OAuth login with Microsoft or Google
-
 ## Project Status
 
 - [docs/Status.md](docs/Status.md)
-- [docs/Roadmap.md](docs/Roadmap.md)
+- [docs/Roadmap.md](docs/Roadmap.md) - planned work and future scope

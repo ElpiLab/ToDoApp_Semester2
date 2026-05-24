@@ -1,14 +1,10 @@
-import re
 from datetime import date
 
 from student_task_manager.domain.models import Task
 
 
-EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s.]+(?:\.[^@\s.]+)+$")
-
-
 def status_display_label(status_value: str) -> str:
-    if status_value in ("created", "pending", "open"):
+    if status_value in ("pending", "open"):
         return "To do"
     return status_value.replace("_", " ").title()
 
@@ -33,12 +29,33 @@ TASK_CATEGORY_OPTIONS = [
 
 def task_matches_status_filter(task: Task, status_filter: str) -> bool:
     if status_filter == "to_do":
-        return not task.completed and task.status.value in ("created", "pending")
+        return not task.completed and task.status.value == "pending"
     if status_filter == "in_progress":
         return not task.completed and task.status.value == "in_progress"
     if status_filter == "done":
         return task.completed or task.status.value == "done"
     return True
+
+
+def filter_visible_tasks(
+    tasks: list[Task],
+    *,
+    view: str,
+    status: str,
+    priority: str,
+    category: str,
+    query: str,
+) -> list[Task]:
+    visible_tasks = list(tasks)
+    if view == "list":
+        visible_tasks = [t for t in visible_tasks if task_matches_status_filter(t, status)]
+    if priority != "all":
+        visible_tasks = [t for t in visible_tasks if t.priority.value == priority]
+    if category != "all":
+        visible_tasks = [t for t in visible_tasks if t.category == category]
+    if query:
+        visible_tasks = [t for t in visible_tasks if query in t.title.lower()]
+    return visible_tasks
 
 
 CATEGORY_PILL_CLASSES = {
@@ -102,21 +119,17 @@ def relative_due_text(due_date: date, today: date, is_done: bool) -> str:
         return f"Due {formatted}"
     delta = (due_date - today).days
     if delta == 0:
-        return f"Due {formatted} · today"
+        return f"Due {formatted} - today"
     if delta > 0:
         plural = "s" if delta != 1 else ""
-        return f"Due {formatted} · in {delta} day{plural}"
+        return f"Due {formatted} - in {delta} day{plural}"
     days_late = -delta
     plural = "s" if days_late != 1 else ""
-    return f"Due {formatted} · {days_late} day{plural} late"
+    return f"Due {formatted} - {days_late} day{plural} late"
 
 
 def normalize_query(value: str | None) -> str:
     return (value or "").strip().lower()
-
-
-def is_valid_email(value: str) -> bool:
-    return EMAIL_PATTERN.fullmatch(value) is not None
 
 
 def completion_progress_summary(
