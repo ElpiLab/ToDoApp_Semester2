@@ -135,6 +135,10 @@ This file tracks planned work and execution order.
   Collapsed task status persistence to pending, in_progress, and done, with migration coverage for legacy created rows.
 - `600-clarify-registration-duplicate-feedback`
   Clarified duplicate-safe registration feedback so it no longer implies an existing account password was replaced.
+- `610-make-duplicate-registration-actionable`
+  Kept duplicate registration on the registration page with an actionable failure message and browser-smoke coverage.
+- `620-railway-volume-database-url`
+  Made Railway SQLite deployments default to `/app/data/todo.db` and correct the known bad `/data/todo.db` path.
 
 ## Notes
 

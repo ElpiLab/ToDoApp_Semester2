@@ -10,10 +10,23 @@ from sqlmodel import Session
 from sqlmodel import SQLModel, create_engine
 
 DEFAULT_DATABASE_URL = "sqlite:///data/todo.db"
+RAILWAY_DATABASE_URL = "sqlite:////app/data/todo.db"
+LEGACY_RAILWAY_DATABASE_URL = "sqlite:////data/todo.db"
+
+
+def _is_railway(env: Mapping[str, str]) -> bool:
+    return any(key.startswith("RAILWAY_") for key in env)
 
 
 def database_url(env: Mapping[str, str] = os.environ) -> str:
-    return env.get("DATABASE_URL", DEFAULT_DATABASE_URL)
+    configured_url = env.get("DATABASE_URL")
+    if configured_url:
+        if _is_railway(env) and configured_url == LEGACY_RAILWAY_DATABASE_URL:
+            return RAILWAY_DATABASE_URL
+        return configured_url
+    if _is_railway(env):
+        return RAILWAY_DATABASE_URL
+    return DEFAULT_DATABASE_URL
 
 
 def engine_connect_args(url: str) -> dict[str, bool]:

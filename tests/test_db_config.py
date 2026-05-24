@@ -6,6 +6,8 @@ from sqlalchemy.pool import StaticPool
 from sqlmodel import SQLModel, Session, create_engine
 
 from student_task_manager.data_access.db import (
+    LEGACY_RAILWAY_DATABASE_URL,
+    RAILWAY_DATABASE_URL,
     database_url,
     engine_connect_args,
     get_engine,
@@ -20,6 +22,36 @@ def test_database_url_defaults_to_local_sqlite_file() -> None:
 
 def test_database_url_can_be_overridden() -> None:
     assert database_url({"DATABASE_URL": "sqlite:////data/todo.db"}) == "sqlite:////data/todo.db"
+
+
+def test_database_url_defaults_to_railway_volume_when_deployed() -> None:
+    assert database_url({"RAILWAY_ENVIRONMENT": "production"}) == RAILWAY_DATABASE_URL
+
+
+def test_database_url_corrects_legacy_railway_absolute_data_path() -> None:
+    assert (
+        database_url(
+            {
+                "RAILWAY_ENVIRONMENT": "production",
+                "DATABASE_URL": LEGACY_RAILWAY_DATABASE_URL,
+            }
+        )
+        == RAILWAY_DATABASE_URL
+    )
+
+
+def test_database_url_respects_explicit_non_legacy_railway_database_url() -> None:
+    custom_url = "sqlite:////app/data/custom.db"
+
+    assert (
+        database_url(
+            {
+                "RAILWAY_ENVIRONMENT": "production",
+                "DATABASE_URL": custom_url,
+            }
+        )
+        == custom_url
+    )
 
 
 def test_engine_connect_args_are_sqlite_specific() -> None:

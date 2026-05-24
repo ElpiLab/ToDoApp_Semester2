@@ -374,14 +374,18 @@ STORAGE_SECRET=<long-random-secret>
 Railway provides `PORT` automatically. Do not set it manually unless you are
 debugging a port issue.
 
-By default, the app uses `sqlite:///data/todo.db`. For persistent SQLite storage on
-Railway, attach a Volume and set `DATABASE_URL` to a SQLite file on the mounted
-path. The production Railway service uses a `todo-data` volume mounted at
-`/app/data`, with:
+By default, local runs use `sqlite:///data/todo.db`. On Railway, the app detects
+Railway environment variables and defaults to the persistent volume path
+`sqlite:////app/data/todo.db`. For persistent SQLite storage on Railway, attach
+a Volume at `/app/data`. You may also set `DATABASE_URL` explicitly:
 
 ```text
 DATABASE_URL=sqlite:////app/data/todo.db
 ```
+
+The app also corrects the known bad Railway value `sqlite:////data/todo.db` to
+`sqlite:////app/data/todo.db`, because `/data` is not the mounted persistent
+volume for this service.
 
 If you do not attach a Volume, task data may be reset when Railway rebuilds or
 restarts the service.

@@ -2,9 +2,10 @@ from nicegui import ui
 from student_task_manager.services.auth_service import AuthService, DuplicateEmailError
 
 auth_service = AuthService()
-REGISTRATION_RESULT_MESSAGE = (
-    "If these details can be used, the account is ready. "
-    "If this email was already registered, log in with the existing password."
+REGISTRATION_RESULT_MESSAGE = "Account created. Please login."
+DUPLICATE_REGISTRATION_MESSAGE = (
+    "Unable to create an account with those details. "
+    "Try logging in with the existing password or use a different email."
 )
 
 
@@ -20,8 +21,7 @@ def register_page():
                 confirm_password.value or "",
             )
         except DuplicateEmailError:
-            ui.notify(REGISTRATION_RESULT_MESSAGE, color="positive")
-            ui.navigate.to("/login")
+            ui.notify(DUPLICATE_REGISTRATION_MESSAGE, color="negative")
             return
         except ValueError as e:
             ui.notify(str(e), color="negative")
