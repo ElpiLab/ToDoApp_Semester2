@@ -409,6 +409,7 @@ Current future-scope items include:
 - persisted preferences, including dark mode
 - custom categories, statuses, tags, and project/module codes
 - groupwork collaboration and richer task planning features
+- mobile-responsive layout polish
 
 ## Testing
 

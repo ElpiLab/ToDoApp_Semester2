@@ -4,6 +4,8 @@ This file records landed repository changes.
 
 ## 2026-05-24
 
+- Documented missing email verification as a current auth limitation.
+- Documented mobile responsiveness as a current desktop-first limitation and future roadmap polish item.
 - Documented the Board/Kanban `Add another` task-dialog limitation in Status and tracked the future polish item in Roadmap.
 - Expanded the future roadmap with account recovery, password visibility, email verification, export/import, calendar sync, dark mode, custom organization, collaboration, and richer planning ideas, with a concise README pointer.
 - Documented the 10-character password floor and 72-byte bcrypt password limit in the README business rules and test-case reference.

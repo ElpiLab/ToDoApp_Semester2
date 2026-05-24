@@ -28,7 +28,9 @@ This file tracks planned work and execution order.
    Improve search across titles, descriptions, categories, statuses, module codes, and tags. Add bulk actions for status, priority, category, and deletion.
 12. **Task creation flow polish** (future scope)
    Fix the "Add another" checkbox so task creation from Board/Kanban entry points keeps the dialog open and ready for the next task when the option is checked.
-13. **UI component cleanup** (future scope)
+13. **Mobile-responsive layout polish** (future scope)
+   Adapt the desktop-first interface for smaller screens, including the sidebar, task board/list, task dialog, dashboard cards, calendar, analytics, and settings pages.
+14. **UI component cleanup** (future scope)
    The large NiceGUI route module has been split into focused route, page, shell, dialog, notification, and helper modules. Optional follow-up work can extract smaller repeated components if that improves readability.
 
 ## Archived prompts
