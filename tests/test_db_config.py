@@ -12,6 +12,7 @@ from student_task_manager.data_access.db import (
     engine_connect_args,
     get_engine,
     migrate_legacy_task_statuses,
+    safe_database_url_for_logs,
 )
 from student_task_manager.domain.models import Task
 
@@ -57,6 +58,13 @@ def test_database_url_respects_explicit_non_legacy_railway_database_url() -> Non
 def test_engine_connect_args_are_sqlite_specific() -> None:
     assert engine_connect_args("sqlite:///data/todo.db") == {"check_same_thread": False}
     assert engine_connect_args("postgresql://example") == {}
+
+
+def test_safe_database_url_for_logs_hides_password() -> None:
+    logged_url = safe_database_url_for_logs("postgresql://user:secret@example.com/app")
+
+    assert logged_url == "postgresql://user:***@example.com/app"
+    assert "secret" not in logged_url
 
 
 def test_get_engine_creates_sqlite_parent_directory() -> None:

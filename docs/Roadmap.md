@@ -139,6 +139,8 @@ This file tracks planned work and execution order.
   Kept duplicate registration on the registration page with an actionable failure message and browser-smoke coverage.
 - `620-railway-volume-database-url`
   Made Railway SQLite deployments default to `/app/data/todo.db` and correct the known bad `/data/todo.db` path.
+- `630-registration-diagnostics`
+  Added safe startup database URL output and server-side registration diagnostics for Railway troubleshooting.
 
 ## Notes
 

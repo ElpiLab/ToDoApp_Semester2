@@ -1,5 +1,6 @@
 from collections.abc import Callable
 from dataclasses import dataclass, field
+import logging
 from time import monotonic
 
 from passlib.hash import bcrypt
@@ -13,6 +14,7 @@ MAX_BCRYPT_PASSWORD_BYTES = 72
 MIN_PASSWORD_LENGTH = 10
 MAX_LOGIN_FAILURES = 5
 LOGIN_LOCKOUT_SECONDS = 60.0
+logger = logging.getLogger(__name__)
 
 
 class DuplicateEmailError(ValueError):
@@ -157,6 +159,7 @@ class AuthService:
                 select(Student).where(Student.email == normalized_email)
             ).first()
             if existing:
+                logger.warning("Registration rejected because email already exists")
                 raise DuplicateEmailError("Unable to create account with those details")
 
             user = Student(
@@ -169,6 +172,7 @@ class AuthService:
                 session.commit()
             except IntegrityError as exc:
                 session.rollback()
+                logger.exception("Registration rejected because database integrity check failed")
                 raise DuplicateEmailError("Unable to create account with those details") from exc
             session.refresh(user)
             return user

@@ -29,6 +29,10 @@ def database_url(env: Mapping[str, str] = os.environ) -> str:
     return DEFAULT_DATABASE_URL
 
 
+def safe_database_url_for_logs(url: str) -> str:
+    return make_url(url).render_as_string(hide_password=True)
+
+
 def engine_connect_args(url: str) -> dict[str, bool]:
     if url.startswith("sqlite:"):
         return {"check_same_thread": False}

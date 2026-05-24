@@ -4,6 +4,7 @@ This file records landed repository changes.
 
 ## 2026-05-24
 
+- Added Railway-facing registration diagnostics that print the effective database URL with credentials hidden and log whether duplicate registration came from an existing row or an integrity failure.
 - Made Railway SQLite deployments default to the persistent `/app/data/todo.db` volume path and correct the known bad `/data/todo.db` path.
 - Changed duplicate registration feedback to stay on the registration page with an actionable failure message instead of navigating to login as if creation succeeded, with simulated-browser coverage.
 - Clarified registration feedback so duplicate-email protection no longer implies an existing account password was replaced.

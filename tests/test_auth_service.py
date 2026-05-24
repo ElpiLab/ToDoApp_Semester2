@@ -248,9 +248,12 @@ def test_register_validates_input(
         svc.register(full_name, email, password, confirm_password)
 
 
-def test_register_rejects_duplicate_email(seeded_test_engine) -> None:
+def test_register_rejects_duplicate_email(
+    seeded_test_engine, caplog: pytest.LogCaptureFixture
+) -> None:
     svc = AuthService(session_factory(seeded_test_engine))
 
+    caplog.set_level("WARNING", logger="student_task_manager.services.auth_service")
     with pytest.raises(DuplicateEmailError, match="Unable to create account with those details"):
         svc.register(
             "Test Student",
@@ -258,6 +261,9 @@ def test_register_rejects_duplicate_email(seeded_test_engine) -> None:
             "secret1234",
             "secret1234",
         )
+
+    assert "Registration rejected because email already exists" in caplog.text
+    assert "student@example.com" not in caplog.text
 
 
 def test_duplicate_registration_does_not_replace_existing_password(seeded_test_engine) -> None:
