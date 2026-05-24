@@ -36,3 +36,4 @@ This file records the current repository state.
 - Auth is suitable for the course project scope, not a full production identity system. Current safeguards include in-memory login throttling, generic registration failures for duplicate emails, current-password re-authentication for email changes, and explicit bcrypt input limits. Known limitations: no persistent/distributed throttling and no account recovery flow.
 - Passwords must be at least 10 characters and fit bcrypt's 72-byte input limit; registration and password changes reject values outside that range explicitly.
 - Task statuses are `pending`, `in_progress`, and `done`; the UI labels `pending` as To do. Startup database bootstrap migrates legacy `created` task rows to `pending`.
+- Known UI limitation: the task dialog's "Add another" checkbox does not keep the dialog open when creating a task from Board/Kanban add-task entry points.

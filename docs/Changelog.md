@@ -4,6 +4,8 @@ This file records landed repository changes.
 
 ## 2026-05-24
 
+- Documented the Board/Kanban `Add another` task-dialog limitation in Status and tracked the future polish item in Roadmap.
+- Expanded the future roadmap with account recovery, password visibility, email verification, export/import, calendar sync, dark mode, custom organization, collaboration, and richer planning ideas, with a concise README pointer.
 - Documented the 10-character password floor and 72-byte bcrypt password limit in the README business rules and test-case reference.
 - Added a startup migration that drops the stale legacy `student.is_active` column from existing SQLite databases so Railway registration matches the current `Student` ORM model.
 - Added Railway-facing registration diagnostics that print the effective database URL with credentials hidden and log whether duplicate registration came from an existing row or an integrity failure.

@@ -398,6 +398,18 @@ volume for this service.
 If you do not attach a Volume, task data may be reset when Railway rebuilds or
 restarts the service.
 
+## Future Roadmap
+
+Planned follow-up work is tracked in [docs/Roadmap.md](docs/Roadmap.md).
+Current future-scope items include:
+
+- account recovery and email verification
+- password visibility toggles and login-form polish
+- CSV/JSON export, import, and calendar sync
+- persisted preferences, including dark mode
+- custom categories, statuses, tags, and project/module codes
+- groupwork collaboration and richer task planning features
+
 ## Testing
 
 The project includes the required test mix:

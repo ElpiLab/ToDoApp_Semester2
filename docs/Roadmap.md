@@ -4,12 +4,32 @@ This file tracks planned work and execution order.
 
 ## Active sequence
 
-1. **UI component cleanup** (future scope)
-   The large NiceGUI route module has been split into focused route, page, shell, dialog, notification, and helper modules. Optional follow-up work can extract smaller repeated components if that improves readability.
-2. **Optional export/download** (future scope)
-   Add CSV/JSON task export later if it becomes useful for the final submission.
-3. **Persisted user preferences** (future scope)
+1. **Account recovery** (future scope)
+   Add a password reset or account recovery flow. The current project has secure password changes for logged-in users, but no recovery path if a user forgets their password.
+2. **Password and login UX polish** (future scope)
+   Add show/hide password toggles on login, registration, and password-change forms. Consider showing password requirements before submit, adding a strength hint, and warning when Caps Lock is active.
+3. **Email verification** (future scope)
+   Confirm that users own their email address before relying on it for account recovery or collaboration invitations.
+4. **Optional export/download** (future scope)
+   Add CSV/JSON task export later if it becomes useful for submission, backups, or personal reporting.
+5. **Import and calendar sync** (future scope)
+   Allow users to import tasks or calendar events, and optionally sync task due dates with an external calendar.
+6. **Persisted user preferences** (future scope)
    Add storage for default landing page, default task view, default priority, notification toggles, and appearance theme. These controls are not shown in the current Settings page because they are not persisted yet.
+7. **Dark mode** (future scope)
+   Add a persisted light/dark appearance preference and verify the full task, calendar, dashboard, analytics, and settings UI in both modes.
+8. **Custom task organization** (future scope)
+   Allow users to create their own categories, custom statuses, tags, and project/module codes for courses, assignments, and group projects.
+9. **Groupwork collaboration** (future scope)
+   Support shared tasks or projects for group assignments, including ownership, invited members, and permission boundaries.
+10. **Richer task planning** (future scope)
+   Add recurring tasks, subtasks/checklists, reminders, attachments or useful links, and manual drag-and-drop ordering within board columns.
+11. **Search and bulk actions** (future scope)
+   Improve search across titles, descriptions, categories, statuses, module codes, and tags. Add bulk actions for status, priority, category, and deletion.
+12. **Task creation flow polish** (future scope)
+   Fix the "Add another" checkbox so task creation from Board/Kanban entry points keeps the dialog open and ready for the next task when the option is checked.
+13. **UI component cleanup** (future scope)
+   The large NiceGUI route module has been split into focused route, page, shell, dialog, notification, and helper modules. Optional follow-up work can extract smaller repeated components if that improves readability.
 
 ## Archived prompts
 
