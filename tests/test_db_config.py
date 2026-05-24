@@ -11,10 +11,11 @@ from student_task_manager.data_access.db import (
     database_url,
     engine_connect_args,
     get_engine,
+    migrate_legacy_student_is_active,
     migrate_legacy_task_statuses,
     safe_database_url_for_logs,
 )
-from student_task_manager.domain.models import Task
+from student_task_manager.domain.models import Student, Task
 
 
 def test_database_url_defaults_to_local_sqlite_file() -> None:
@@ -105,3 +106,63 @@ def test_migrate_legacy_task_statuses_collapses_created_rows_to_pending() -> Non
 
     assert stored_task is not None
     assert stored_task.status.value == "pending"
+
+
+def test_migrate_legacy_student_is_active_drops_stale_not_null_column() -> None:
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "CREATE TABLE student ("
+                "id INTEGER PRIMARY KEY, "
+                "email VARCHAR NOT NULL, "
+                "password_hash VARCHAR NOT NULL, "
+                "full_name VARCHAR NOT NULL, "
+                "is_active BOOLEAN NOT NULL)"
+            )
+        )
+        connection.execute(text("CREATE UNIQUE INDEX ix_student_email ON student (email)"))
+
+    SQLModel.metadata.create_all(engine)
+    migrate_legacy_student_is_active(engine)
+
+    with engine.connect() as connection:
+        columns = connection.execute(text("PRAGMA table_info(student)")).mappings().all()
+    assert {column["name"] for column in columns} == {
+        "id",
+        "email",
+        "password_hash",
+        "full_name",
+    }
+
+    with Session(engine) as session:
+        user = Student(
+            email="new@example.com",
+            password_hash="hash",
+            full_name="New Student",
+        )
+        session.add(user)
+        session.commit()
+
+    with Session(engine) as session:
+        assert session.get(Student, 1) is not None
+
+
+def test_migrate_legacy_student_is_active_is_idempotent() -> None:
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    SQLModel.metadata.create_all(engine)
+
+    migrate_legacy_student_is_active(engine)
+    migrate_legacy_student_is_active(engine)
+
+    with engine.connect() as connection:
+        columns = connection.execute(text("PRAGMA table_info(student)")).mappings().all()
+    assert "is_active" not in {column["name"] for column in columns}

@@ -141,6 +141,8 @@ This file tracks planned work and execution order.
   Made Railway SQLite deployments default to `/app/data/todo.db` and correct the known bad `/data/todo.db` path.
 - `630-registration-diagnostics`
   Added safe startup database URL output and server-side registration diagnostics for Railway troubleshooting.
+- `640-drop-legacy-student-is-active`
+  Added a startup migration for stale SQLite databases that still contained the removed `student.is_active` column.
 
 ## Notes
 

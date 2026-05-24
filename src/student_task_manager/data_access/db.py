@@ -1,6 +1,7 @@
 import os
 from collections.abc import Mapping
 from functools import lru_cache
+import logging
 from pathlib import Path
 
 from sqlalchemy import text
@@ -12,6 +13,7 @@ from sqlmodel import SQLModel, create_engine
 DEFAULT_DATABASE_URL = "sqlite:///data/todo.db"
 RAILWAY_DATABASE_URL = "sqlite:////app/data/todo.db"
 LEGACY_RAILWAY_DATABASE_URL = "sqlite:////data/todo.db"
+logger = logging.getLogger(__name__)
 
 
 def _is_railway(env: Mapping[str, str]) -> bool:
@@ -66,7 +68,19 @@ def migrate_legacy_task_statuses(engine: Engine) -> None:
         connection.execute(text("UPDATE task SET status = 'pending' WHERE status = 'created'"))
 
 
+def migrate_legacy_student_is_active(engine: Engine) -> None:
+    if engine.dialect.name != "sqlite":
+        return
+    with engine.begin() as connection:
+        columns = connection.execute(text("PRAGMA table_info(student)")).mappings().all()
+        if not any(column["name"] == "is_active" for column in columns):
+            return
+        logger.warning("Dropping legacy student.is_active column")
+        connection.execute(text("ALTER TABLE student DROP COLUMN is_active"))
+
+
 def create_db_and_tables() -> None:
     engine = get_engine()
     SQLModel.metadata.create_all(engine)
+    migrate_legacy_student_is_active(engine)
     migrate_legacy_task_statuses(engine)
