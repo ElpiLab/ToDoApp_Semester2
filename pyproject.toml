@@ -12,7 +12,7 @@ dependencies = [
   "nicegui>=3.11",
   "sqlmodel>=0.0.38",
   # passlib 1.7.4 expects bcrypt's legacy __about__ metadata; keep bcrypt pinned.
-  "bcrypt==4.0.1",
+  "bcrypt==5.0.0",
   "passlib==1.7.4",
 ]
 
