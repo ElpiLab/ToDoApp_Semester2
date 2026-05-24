@@ -21,6 +21,7 @@ class Student(SQLModel, table=True):
     email: str = Field(unique=True, index=True)
     password_hash: str
     full_name: str = ""
+    is_active: bool = True
 
     # Relationship to tasks
     tasks: list["Task"] = Relationship(back_populates="owner")
