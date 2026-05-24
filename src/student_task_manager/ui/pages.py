@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date
 
 from nicegui import app, ui
 from student_task_manager.ui.analytics_page import render_analytics_page
@@ -11,6 +11,7 @@ from student_task_manager.ui.controllers import (
     mark_task_pending,
 )
 from student_task_manager.ui.dashboard_page import render_dashboard_page
+from student_task_manager.ui.notifications import NotificationMenu
 from student_task_manager.ui.settings_page import render_settings_page
 from student_task_manager.ui.task_dialog import open_task_dialog as open_task_dialog_modal
 from student_task_manager.ui.tasks_page import (
@@ -383,205 +384,14 @@ def index_page():
             open_task_dialog,
         )
 
-    def notification_quick_complete(task_id: int) -> None:
-        if complete_task(task_id):
-            refresh_tasks()
-
-    def notification_key(task_id: int | None, notification_type: str) -> str:
-        return f"{notification_type}:{task_id or 0}"
-
-    def _persist_read_notifications() -> None:
-        app.storage.user.update({"read_notif_keys": list(read_notification_keys)})
-
-    def mark_notification_read(key: str) -> None:
-        read_notification_keys.add(key)
-        _persist_read_notifications()
-        render_notifications()
-
-    def mark_all_notifications_read(keys: list[str]) -> None:
-        read_notification_keys.update(keys)
-        _persist_read_notifications()
-        render_notifications()
-
-    def open_notification_task(task, key: str) -> None:
-        mark_notification_read(key)
-        open_task_dialog(task)
-
-    def render_notifications() -> None:
-        notif_menu_container.clear()
-        all_tasks = get_tasks()
-        today = date.today()
-        tomorrow = today + timedelta(days=1)
-
-        open_tasks = [t for t in all_tasks if not t.completed]
-
-        notifications = []
-        for t in open_tasks:
-            if t.due_date and t.due_date < today:
-                days_late = (today - t.due_date).days
-                if days_late == 1:
-                    sub = f"{t.title} was due yesterday"
-                    when = "1d ago"
-                else:
-                    sub = f"{t.title} is {days_late} days late"
-                    when = f"{days_late}d ago"
-                notifications.append(
-                    (
-                        notification_key(t.id, "overdue"),
-                        t,
-                        "Task overdue",
-                        sub,
-                        when,
-                        "error_outline",
-                        "bg-rose-100",
-                        "text-rose-600",
-                        True,
-                        0,
-                        days_late,
-                    )
-                )
-            elif t.due_date == today:
-                notifications.append(
-                    (
-                        notification_key(t.id, "due_today"),
-                        t,
-                        "Due today",
-                        f"{t.title} is due today",
-                        "today",
-                        "schedule",
-                        "bg-amber-100",
-                        "text-amber-600",
-                        True,
-                        1,
-                        0,
-                    )
-                )
-            elif t.due_date == tomorrow:
-                notifications.append(
-                    (
-                        notification_key(t.id, "due_tomorrow"),
-                        t,
-                        "Due tomorrow",
-                        f"{t.title} is due tomorrow",
-                        "tomorrow",
-                        "event",
-                        "bg-amber-100",
-                        "text-amber-600",
-                        False,
-                        2,
-                        0,
-                    )
-                )
-            elif t.priority.value == "high" and t.due_date is None:
-                notifications.append(
-                    (
-                        notification_key(t.id, "high_no_due_date"),
-                        t,
-                        "High-priority reminder",
-                        f"{t.title} has no due date",
-                        "—",
-                        "bookmark",
-                        "bg-blue-100",
-                        "text-blue-600",
-                        False,
-                        3,
-                        0,
-                    )
-                )
-
-        notifications.sort(
-            key=lambda x: (
-                0 if x[0] not in read_notification_keys else 1,
-                x[9],
-                -x[10],
-                -(x[1].id or 0),
-            )
-        )
-
-        total_count = len(notifications)
-        unread_keys = [key for key, *_ in notifications if key not in read_notification_keys]
-        unread_count = len(unread_keys)
-
-        if unread_count == 0:
-            notif_badge.set_visibility(False)
-        else:
-            notif_badge.set_text("")
-            notif_badge.set_visibility(True)
-
-        max_show = 8
-
-        with notif_menu_container:
-            with ui.row().classes(
-                "w-full items-center justify-between px-3 pt-3 pb-2 border-b border-slate-100"
-            ):
-                with ui.row().classes("items-center gap-2"):
-                    ui.label("Notifications").classes("text-base font-semibold text-slate-900")
-                    if unread_count:
-                        with ui.element("div").classes(
-                            "rounded-full bg-rose-600 px-2 py-0.5 "
-                            "min-w-[20px] flex items-center justify-center"
-                        ):
-                            ui.label(str(unread_count)).classes("text-xs font-semibold text-white")
-                if unread_count:
-                    mark_all_btn = ui.button("Mark all read").props(
-                        "flat no-caps dense color=grey-7"
-                    )
-                    mark_all_btn.classes("text-xs px-2 py-1 rounded-md")
-                    mark_all_btn.on(
-                        "click",
-                        lambda keys=list(unread_keys): mark_all_notifications_read(keys),
-                    )
-
-            if not notifications:
-                with ui.column().classes("w-full items-center gap-2 py-8"):
-                    ui.icon("notifications_off", size="1.75rem").classes("text-slate-300")
-                    ui.label("You're all caught up").classes("text-sm font-medium text-slate-700")
-                    ui.label("No overdue or upcoming tasks.").classes("text-xs text-slate-500")
-                return
-
-            visible = notifications[:max_show]
-            for idx, (
-                key,
-                t,
-                title,
-                sub,
-                when,
-                icon,
-                bg_class,
-                text_class,
-                _,
-                _,
-                _,
-            ) in enumerate(visible):
-                is_unread = key not in read_notification_keys
-                bg_row = "bg-rose-50/40" if is_unread else ""
-                border_class = "border-b border-slate-100" if idx < len(visible) - 1 else ""
-                row = ui.element("div").classes(
-                    "w-full flex items-start gap-3 px-3 py-3 "
-                    "cursor-pointer hover:bg-stone-50 transition-colors "
-                    f"{bg_row} {border_class}"
-                )
-                with row:
-                    with ui.element("div").classes(
-                        f"w-8 h-8 rounded-full {bg_class} flex items-center justify-center shrink-0"
-                    ):
-                        ui.icon(icon, size="1rem").classes(text_class)
-                    with ui.column().classes("flex-1 min-w-0 gap-0"):
-                        ui.label(title).classes("text-sm font-semibold text-slate-900")
-                        ui.label(sub).classes("text-xs text-slate-500 truncate")
-                    with ui.column().classes("items-end gap-1 shrink-0"):
-                        ui.label(when).classes("text-xs text-slate-500")
-                        if is_unread:
-                            ui.element("div").classes("w-2 h-2 rounded-full bg-emerald-600")
-                row.on(
-                    "click",
-                    lambda task=t, k=key: open_notification_task(task, k),
-                )
-
-            if total_count > max_show:
-                ui.label(f"+ {total_count - max_show} more").classes(
-                    "text-xs text-slate-400 px-3 pt-1"
-                )
+    notification_menu = NotificationMenu(
+        badge=notif_badge,
+        container=notif_menu_container,
+        read_keys=read_notification_keys,
+        get_tasks=get_tasks,
+        open_task_dialog=lambda task: open_task_dialog(task),
+        persist_read_keys=lambda keys: app.storage.user.update({"read_notif_keys": list(keys)}),
+    )
 
     def refresh_tasks() -> None:
         tasks_container.clear()
@@ -590,7 +400,7 @@ def index_page():
         active_count = sum(1 for t in all_tasks if not t.completed)
         completed_count = sum(1 for t in all_tasks if t.completed)
 
-        render_notifications()
+        notification_menu.render()
 
         task_controls.subtitle_label.set_text(f"{active_count} active · {completed_count} done")
 

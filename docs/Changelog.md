@@ -4,6 +4,7 @@ This file records landed repository changes.
 
 ## 2026-05-24
 
+- Extracted notification menu rendering and read-state helpers from `pages.py` into `ui/notifications.py` as Phase 9 of the UI module split.
 - Extracted task header, search, filters, and Board/List toggle rendering from `pages.py` into `ui/tasks_page.py` as Phase 8 of the UI module split.
 - Extracted task board/list rendering from `pages.py` into `ui/tasks_page.py` as Phase 7 of the UI module split.
 - Extracted the task create/edit dialog from `pages.py` into `ui/task_dialog.py` as Phase 6 of the UI module split.
