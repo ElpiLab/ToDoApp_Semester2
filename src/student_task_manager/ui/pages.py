@@ -13,12 +13,13 @@ from student_task_manager.ui.controllers import (
 from student_task_manager.ui.dashboard_page import render_dashboard_page
 from student_task_manager.ui.settings_page import render_settings_page
 from student_task_manager.ui.task_dialog import open_task_dialog as open_task_dialog_modal
-from student_task_manager.ui.tasks_page import render_board, render_empty_state, render_list
-from student_task_manager.ui.view_helpers import (
-    TASK_STATUS_FILTER_LABELS,
-    normalize_query,
-    task_matches_status_filter,
+from student_task_manager.ui.tasks_page import (
+    render_board,
+    render_empty_state,
+    render_list,
+    render_task_controls,
 )
+from student_task_manager.ui.view_helpers import task_matches_status_filter
 
 
 @ui.page("/logout")
@@ -262,74 +263,32 @@ def index_page():
         tasks_panel = ui.column().classes("w-full gap-4")
         tasks_panel.set_visibility(False)
         with tasks_panel:
-            with ui.row().classes("w-full items-end justify-between gap-4 flex-wrap"):
-                with ui.column().classes("gap-1"):
-                    ui.label("All tasks").classes("text-2xl font-semibold text-slate-900")
-                    subtitle_label = ui.label("0 active · 0 done").classes("text-sm text-slate-500")
-                with ui.row().classes("items-center gap-2 shrink-0"):
-                    ui.label("View").classes(
-                        "text-xs font-medium uppercase tracking-widest text-slate-400"
-                    )
-                    view_toggle = ui.toggle(
-                        {"board": "Board", "list": "List"},
-                        value=state["view"],
-                    ).props("unelevated no-caps toggle-color=green-1 toggle-text-color=green-9")
-                    view_toggle.classes(
-                        "task-view-toggle h-10 shrink-0 rounded-lg overflow-hidden "
-                        "border border-slate-200 bg-white"
-                    )
-
-            with ui.row().classes("w-full items-center justify-between gap-4 flex-wrap"):
-                with ui.row().classes("items-center gap-2 flex-wrap"):
-                    task_search_input = (
-                        ui.input(placeholder="Search by title...")
-                        .props("outlined dense rounded clearable hide-bottom-space")
-                        .classes("w-56")
-                    )
-                    with task_search_input.add_slot("prepend"):
-                        ui.icon("search").classes("text-slate-400 text-xl")
-                    status_select = (
-                        ui.select(
-                            TASK_STATUS_FILTER_LABELS,
-                            value=state["status"],
-                            label="Status",
-                        )
-                        .props("outlined dense options-dense")
-                        .classes("w-36")
-                    )
-                    priority_select = (
-                        ui.select(
-                            {
-                                "all": "All",
-                                "low": "Low",
-                                "medium": "Medium",
-                                "high": "High",
-                            },
-                            value=state["priority"],
-                            label="Priority",
-                        )
-                        .props("outlined dense options-dense")
-                        .classes("w-32")
-                    )
-                    category_select = (
-                        ui.select(
-                            {
-                                "all": "All",
-                                "Project": "Project",
-                                "Exam": "Exam",
-                                "Assignment": "Assignment",
-                                "Research": "Research",
-                                "Reading": "Reading",
-                                "Personal": "Personal",
-                                "Other": "Other",
-                            },
-                            value=state["category"],
-                            label="Category",
-                        )
-                        .props("outlined dense options-dense")
-                        .classes("w-36")
-                    )
-            status_select.set_visibility(state["view"] == "list")
+            task_controls = render_task_controls(
+                view=state["view"],
+                status=state["status"],
+                priority=state["priority"],
+                category=state["category"],
+                on_status_change=lambda value: (
+                    state.__setitem__("status", value),
+                    refresh_tasks(),
+                ),
+                on_priority_change=lambda value: (
+                    state.__setitem__("priority", value),
+                    refresh_tasks(),
+                ),
+                on_category_change=lambda value: (
+                    state.__setitem__("category", value),
+                    refresh_tasks(),
+                ),
+                on_search_change=lambda value: (
+                    state.__setitem__("search", value),
+                    refresh_tasks(),
+                ),
+                on_view_change=lambda value: (
+                    state.__setitem__("view", value),
+                    refresh_tasks(),
+                ),
+            )
 
             tasks_container = ui.column().classes("w-full")
 
@@ -633,7 +592,7 @@ def index_page():
 
         render_notifications()
 
-        subtitle_label.set_text(f"{active_count} active · {completed_count} done")
+        task_controls.subtitle_label.set_text(f"{active_count} active · {completed_count} done")
 
         visible_tasks = list(all_tasks)
         visible_tasks = [t for t in visible_tasks if task_matches_status_filter(t, state["status"])]
@@ -711,24 +670,6 @@ def index_page():
                     )
 
     create_button.on("click", lambda: open_task_dialog())
-    status_select.on_value_change(lambda e: (state.__setitem__("status", e.value), refresh_tasks()))
-    priority_select.on_value_change(
-        lambda e: (state.__setitem__("priority", e.value), refresh_tasks())
-    )
-    category_select.on_value_change(
-        lambda e: (state.__setitem__("category", e.value), refresh_tasks())
-    )
-    task_search_input.on_value_change(
-        lambda e: (state.__setitem__("search", normalize_query(e.value)), refresh_tasks())
-    )
-
-    def on_view_change(e) -> None:
-        state["view"] = e.value
-        status_select.set_visibility(e.value == "list")
-        refresh_tasks()
-
-    view_toggle.on_value_change(on_view_change)
-
     render_workspace_nav()
     refresh_tasks()
     render_dashboard()

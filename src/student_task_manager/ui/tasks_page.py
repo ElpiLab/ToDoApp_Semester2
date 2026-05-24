@@ -1,17 +1,119 @@
 from collections.abc import Callable
+from dataclasses import dataclass
 from datetime import date
+from typing import Any
 
 from nicegui import ui
 
 from student_task_manager.domain.models import Task
 from student_task_manager.ui.view_helpers import (
+    TASK_STATUS_FILTER_LABELS,
     category_display,
     category_pill_class,
+    normalize_query,
     priority_pill_class,
     priority_rail_class,
     relative_due_text,
     status_display_label,
 )
+
+
+@dataclass(frozen=True)
+class TaskControls:
+    subtitle_label: Any
+
+
+def render_task_controls(
+    *,
+    view: str,
+    status: str,
+    priority: str,
+    category: str,
+    on_status_change: Callable[[str], None],
+    on_priority_change: Callable[[str], None],
+    on_category_change: Callable[[str], None],
+    on_search_change: Callable[[str], None],
+    on_view_change: Callable[[str], None],
+) -> TaskControls:
+    with ui.row().classes("w-full items-end justify-between gap-4 flex-wrap"):
+        with ui.column().classes("gap-1"):
+            ui.label("All tasks").classes("text-2xl font-semibold text-slate-900")
+            subtitle_label = ui.label("0 active · 0 done").classes("text-sm text-slate-500")
+        with ui.row().classes("items-center gap-2 shrink-0"):
+            ui.label("View").classes("text-xs font-medium uppercase tracking-widest text-slate-400")
+            view_toggle = ui.toggle(
+                {"board": "Board", "list": "List"},
+                value=view,
+            ).props("unelevated no-caps toggle-color=green-1 toggle-text-color=green-9")
+            view_toggle.classes(
+                "task-view-toggle h-10 shrink-0 rounded-lg overflow-hidden "
+                "border border-slate-200 bg-white"
+            )
+
+    with ui.row().classes("w-full items-center justify-between gap-4 flex-wrap"):
+        with ui.row().classes("items-center gap-2 flex-wrap"):
+            task_search_input = (
+                ui.input(placeholder="Search by title...")
+                .props("outlined dense rounded clearable hide-bottom-space")
+                .classes("w-56")
+            )
+            with task_search_input.add_slot("prepend"):
+                ui.icon("search").classes("text-slate-400 text-xl")
+            status_select = (
+                ui.select(
+                    TASK_STATUS_FILTER_LABELS,
+                    value=status,
+                    label="Status",
+                )
+                .props("outlined dense options-dense")
+                .classes("w-36")
+            )
+            priority_select = (
+                ui.select(
+                    {
+                        "all": "All",
+                        "low": "Low",
+                        "medium": "Medium",
+                        "high": "High",
+                    },
+                    value=priority,
+                    label="Priority",
+                )
+                .props("outlined dense options-dense")
+                .classes("w-32")
+            )
+            category_select = (
+                ui.select(
+                    {
+                        "all": "All",
+                        "Project": "Project",
+                        "Exam": "Exam",
+                        "Assignment": "Assignment",
+                        "Research": "Research",
+                        "Reading": "Reading",
+                        "Personal": "Personal",
+                        "Other": "Other",
+                    },
+                    value=category,
+                    label="Category",
+                )
+                .props("outlined dense options-dense")
+                .classes("w-36")
+            )
+    status_select.set_visibility(view == "list")
+
+    status_select.on_value_change(lambda e: on_status_change(e.value))
+    priority_select.on_value_change(lambda e: on_priority_change(e.value))
+    category_select.on_value_change(lambda e: on_category_change(e.value))
+    task_search_input.on_value_change(lambda e: on_search_change(normalize_query(e.value)))
+
+    def handle_view_change(e) -> None:
+        status_select.set_visibility(e.value == "list")
+        on_view_change(e.value)
+
+    view_toggle.on_value_change(handle_view_change)
+
+    return TaskControls(subtitle_label=subtitle_label)
 
 
 def render_empty_state() -> None:
