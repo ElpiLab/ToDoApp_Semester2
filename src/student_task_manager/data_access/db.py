@@ -9,7 +9,7 @@ from sqlalchemy.engine import make_url
 from sqlmodel import Session
 from sqlmodel import SQLModel, create_engine
 
-DEFAULT_DATABASE_URL = "sqlite:///data/todo.db"
+DEFAULT_DATABASE_URL = "sqlite:////app/data/todo.db"
 
 
 def database_url(env: Mapping[str, str] = os.environ) -> str:
