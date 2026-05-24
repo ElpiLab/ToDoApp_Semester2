@@ -6,16 +6,14 @@ from student_task_manager.ui.calendar_page import render_calendar_page
 from student_task_manager.ui.controllers import (
     change_task_status,
     complete_task,
-    create_task,
     delete_task,
     get_tasks,
     mark_task_pending,
-    update_task,
 )
 from student_task_manager.ui.dashboard_page import render_dashboard_page
 from student_task_manager.ui.settings_page import render_settings_page
+from student_task_manager.ui.task_dialog import open_task_dialog as open_task_dialog_modal
 from student_task_manager.ui.view_helpers import (
-    TASK_CATEGORY_OPTIONS,
     TASK_STATUS_FILTER_LABELS,
     category_display,
     category_pill_class,
@@ -350,192 +348,15 @@ def index_page():
         settings_panel.set_visibility(False)
 
     def open_task_dialog(task=None, default_due_date: date | None = None) -> None:
-        is_edit = task is not None
-        button_label = "Save changes" if is_edit else "Save task"
-        if is_edit:
-            default_due_iso = ""
-        elif default_due_date:
-            default_due_iso = default_due_date.isoformat()
-        else:
-            default_due_iso = ""
-
-        with (
-            ui.dialog().props("persistent") as dialog,
-            ui.card().classes("w-[460px] max-w-full rounded-2xl p-6 gap-2"),
-        ):
-            with ui.row().classes("w-full items-center justify-between"):
-                ui.label("EDIT TASK" if is_edit else "NEW TASK").classes(
-                    "text-xs uppercase tracking-widest text-slate-400"
-                )
-                close_btn = ui.button(icon="close").props("flat round dense color=grey-7")
-                close_btn.tooltip("Close")
-                close_btn.on("click", dialog.close)
-            title_input = (
-                ui.input(
-                    placeholder="What needs to be done?",
-                    value=task.title if is_edit else "",
-                )
-                .props('borderless autofocus dense hide-bottom-space input-class="text-xl"')
-                .classes("w-full")
-            )
-
-            with ui.row().classes("w-full items-center justify-between flex-wrap"):
-                priority_input = (
-                    ui.select(
-                        {"low": "Low", "medium": "Medium", "high": "High"},
-                        value=task.priority.value if is_edit else None,
-                        label="Priority",
-                    )
-                    .props('dense outlined options-dense placeholder="Select..."')
-                    .classes("w-32")
-                )
-
-                category_options = list(TASK_CATEGORY_OPTIONS)
-                category_initial = category_display(task.category) if is_edit else None
-                if category_initial and category_initial not in category_options:
-                    category_options.append(category_initial)
-                category_input = (
-                    ui.select(
-                        category_options,
-                        value=category_initial,
-                        label="Category",
-                        with_input=True,
-                        new_value_mode="add-unique",
-                    )
-                    .props('dense outlined options-dense placeholder="Pick or type..."')
-                    .classes("w-28")
-                )
-
-                due_date_input = (
-                    ui.input(
-                        value=(
-                            task.due_date.isoformat()
-                            if is_edit and task.due_date
-                            else default_due_iso
-                        ),
-                        label="Due date",
-                    )
-                    .props('dense outlined type=date prepend-icon="event" hide-bottom-space')
-                    .classes("w-32 due-date-input")
-                )
-
-                status_input = None
-                if is_edit:
-                    current_status = (
-                        "pending" if task.status.value == "created" else task.status.value
-                    )
-                    status_input = (
-                        ui.select(
-                            {
-                                "pending": status_display_label("pending"),
-                                "in_progress": status_display_label("in_progress"),
-                                "done": status_display_label("done"),
-                            },
-                            value=current_status,
-                        )
-                        .props("dense outlined options-dense")
-                        .classes("w-36")
-                    )
-
-            description_input = (
-                ui.textarea(
-                    placeholder="Add notes, context, or links...",
-                    value=task.description if is_edit else "",
-                )
-                .props("outlined autogrow")
-                .classes("w-full")
-            )
-
-            add_another_checkbox = None
-
-            def save() -> None:
-                priority_value = priority_input.value or "medium"
-                category_value = (category_input.value or "").strip() or "Other"
-                if is_edit:
-                    assert task is not None
-                    assert task.id is not None
-                    assert status_input is not None
-                    saved_task = update_task(
-                        task.id,
-                        title_input.value or "",
-                        description_input.value or "",
-                        priority_value,
-                        status_input.value,
-                        due_date_input.value or None,
-                        category=category_value,
-                    )
-                else:
-                    saved_task = create_task(
-                        title_input.value or "",
-                        description_input.value or "",
-                        priority_value,
-                        due_date_input.value or None,
-                        category=category_value,
-                    )
-
-                if saved_task is None:
-                    return
-
-                keep_open = (
-                    not is_edit and add_another_checkbox is not None and add_another_checkbox.value
-                )
-
-                if keep_open:
-                    title_input.value = ""
-                    description_input.value = ""
-                    priority_input.value = None
-                    category_input.value = None
-                    due_date_input.value = default_due_iso
-                else:
-                    dialog.close()
-
-                refresh_tasks()
-                if state["page"] == "calendar":
-                    render_calendar()
-                if state["page"] == "dashboard":
-                    render_dashboard()
-                if state["page"] == "analytics":
-                    render_analytics()
-
-            def confirm_delete() -> None:
-                with (
-                    ui.dialog() as confirm_dialog,
-                    ui.card().classes("w-[400px] max-w-full rounded-2xl p-6 gap-3"),
-                ):
-                    ui.label("Delete this task?").classes("text-lg font-semibold text-slate-900")
-                    ui.label("This action cannot be undone.").classes("text-sm text-slate-500")
-
-                    def do_delete() -> None:
-                        assert task is not None
-                        assert task.id is not None
-                        confirm_dialog.close()
-                        if delete_task(task.id):
-                            refresh_tasks()
-                            dialog.close()
-
-                    with ui.row().classes("w-full justify-end gap-2 pt-2"):
-                        ui.button("Cancel", on_click=confirm_dialog.close).props(
-                            "flat color=grey-7 no-caps"
-                        )
-                        ui.button("Delete", on_click=do_delete).props(
-                            "color=negative unelevated no-caps"
-                        )
-                confirm_dialog.open()
-
-            with ui.row().classes(
-                "w-full items-center justify-between pt-3 mt-1 border-t border-slate-100"
-            ):
-                if is_edit:
-                    ui.button("Delete", icon="delete", on_click=confirm_delete).props(
-                        "flat color=negative no-caps"
-                    )
-                else:
-                    add_another_checkbox = ui.checkbox("Add another")
-                with ui.row().classes("gap-2"):
-                    ui.button("Cancel", on_click=dialog.close).props("flat color=grey-7 no-caps")
-                    ui.button(button_label, on_click=save).props("color=green-9 unelevated no-caps")
-
-        dialog.open()
+        open_task_dialog_modal(
+            task,
+            default_due_date,
+            current_page=lambda: state["page"],
+            refresh_tasks=refresh_tasks,
+            render_calendar=render_calendar,
+            render_dashboard=render_dashboard,
+            render_analytics=render_analytics,
+        )
 
     def render_empty_state() -> None:
         with ui.column().classes("w-full items-center gap-3 px-6 py-12 text-center"):
