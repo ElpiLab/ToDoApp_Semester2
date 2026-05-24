@@ -299,6 +299,14 @@ Inactive-user lifecycle management is outside the current project scope.
 
 ## Validation and Business Rules
 
+Authentication validation is handled by `AuthService`:
+
+- account passwords must be at least 10 characters
+- account passwords must be at most 72 bytes because bcrypt only uses the first 72 bytes
+- email addresses are normalized before registration, login, and profile updates
+- repeated failed login attempts are temporarily throttled
+- changing an account email requires the current password
+
 Task validation and business rules are handled by `TaskService`:
 
 - title is trimmed and must be at least 3 characters

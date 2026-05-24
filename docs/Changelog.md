@@ -4,6 +4,7 @@ This file records landed repository changes.
 
 ## 2026-05-24
 
+- Documented the 10-character password floor and 72-byte bcrypt password limit in the README business rules and test-case reference.
 - Added a startup migration that drops the stale legacy `student.is_active` column from existing SQLite databases so Railway registration matches the current `Student` ORM model.
 - Added Railway-facing registration diagnostics that print the effective database URL with credentials hidden and log whether duplicate registration came from an existing row or an integrity failure.
 - Made Railway SQLite deployments default to the persistent `/app/data/todo.db` volume path and correct the known bad `/data/todo.db` path.

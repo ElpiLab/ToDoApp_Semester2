@@ -60,6 +60,8 @@ These tests are intentionally outside the 12-test rubric count. They protect aut
 | `tests/test_auth_service.py::test_update_profile_rejects_wrong_current_password_for_email_change` | Email changes reject incorrect current passwords | Pass |
 | `tests/test_auth_service.py::test_update_profile_rejects_duplicate_email_change` | Profile email changes reject duplicate addresses | Pass |
 | `tests/test_auth_service.py::test_update_profile_normalizes_email_case` | Profile updates normalize email case before persistence | Pass |
+| `tests/test_auth_service.py::test_register_validates_input` | Registration rejects invalid names, emails, mismatched passwords, passwords shorter than 10 characters, and passwords over 72 bytes | Pass |
+| `tests/test_auth_service.py::test_change_password_rejects_short_new_password` | Password changes reject replacement passwords shorter than 10 characters | Pass |
 | `tests/test_auth_service.py::test_change_password_rejects_long_new_password` | Password changes reject bcrypt inputs over 72 bytes | Pass |
 | `tests/test_auth_service.py::test_login_throttles_repeated_failed_attempts` | Repeated failed logins are temporarily throttled | Pass |
 | `tests/test_auth_service.py::test_login_success_resets_throttle` | Successful login resets prior failure count | Pass |
