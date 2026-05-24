@@ -7,7 +7,7 @@ This file tracks planned work and execution order.
 1. **Login/profile polish** (no numbered prompt yet)
    Clean up authentication documentation and any remaining login/registration behavior after user-scoped tasks are explicit.
 2. **UI module split** (no numbered prompt yet)
-   Continue breaking down the large NiceGUI page module into smaller page modules. The pure helper functions, dashboard, analytics, settings, calendar, task dialog, task board/list code, task header/search/filter controls, and notification menu have already been extracted.
+   Continue breaking down the large NiceGUI page module into smaller page modules. The pure helper functions, dashboard, analytics, settings, calendar, task dialog, task board/list code, task header/search/filter controls, notification menu, and shared app shell have already been extracted.
 3. **Optional export/download** (future scope)
    Add CSV/JSON task export later if it becomes useful for the final submission.
 4. **Persisted user preferences** (future scope)
@@ -109,6 +109,8 @@ This file tracks planned work and execution order.
   Extract task header, search, filters, and Board/List toggle rendering from the main NiceGUI page module into the focused tasks module.
 - `460-extract-notification-menu`
   Extract notification menu rendering and read-state helpers from the main NiceGUI page module into a focused notification module.
+- `470-extract-app-shell`
+  Extract shared sidebar, header, navigation, and profile menu rendering from the main NiceGUI page module into a focused app shell module.
 
 ## Notes
 
