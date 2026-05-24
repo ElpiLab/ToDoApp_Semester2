@@ -7,7 +7,7 @@ This file tracks planned work and execution order.
 1. **Login/profile polish** (no numbered prompt yet)
    Clean up authentication documentation and any remaining login/registration behavior after user-scoped tasks are explicit.
 2. **UI module split** (no numbered prompt yet)
-   Continue breaking down the large NiceGUI page module into smaller page modules. The pure helper functions plus dashboard, analytics, and settings renderers have already been extracted.
+   Continue breaking down the large NiceGUI page module into smaller page modules. The pure helper functions plus dashboard, analytics, settings, and calendar renderers have already been extracted.
 3. **Optional export/download** (future scope)
    Add CSV/JSON task export later if it becomes useful for the final submission.
 4. **Persisted user preferences** (future scope)
@@ -99,6 +99,8 @@ This file tracks planned work and execution order.
   Extract analytics rendering from the main NiceGUI page module into a focused analytics module.
 - `410-extract-settings-page`
   Extract settings rendering from the main NiceGUI page module into a focused settings module.
+- `420-extract-calendar-page`
+  Extract calendar rendering from the main NiceGUI page module into a focused calendar module.
 
 ## Notes
 

@@ -4,6 +4,7 @@ This file records landed repository changes.
 
 ## 2026-05-24
 
+- Extracted calendar rendering from `pages.py` into `ui/calendar_page.py` as Phase 5 of the UI module split.
 - Extracted settings rendering from `pages.py` into `ui/settings_page.py` as Phase 4 of the UI module split.
 - Extracted analytics rendering from `pages.py` into `ui/analytics_page.py` as Phase 3 of the UI module split.
 - Extracted dashboard rendering from `pages.py` into `ui/dashboard_page.py` as Phase 2 of the UI module split.

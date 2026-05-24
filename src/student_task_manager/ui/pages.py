@@ -1,8 +1,8 @@
-import calendar as cal_module
 from datetime import date, timedelta
 
 from nicegui import app, ui
 from student_task_manager.ui.analytics_page import render_analytics_page
+from student_task_manager.ui.calendar_page import render_calendar_page
 from student_task_manager.ui.controllers import (
     change_task_status,
     complete_task,
@@ -15,10 +15,8 @@ from student_task_manager.ui.controllers import (
 from student_task_manager.ui.dashboard_page import render_dashboard_page
 from student_task_manager.ui.settings_page import render_settings_page
 from student_task_manager.ui.view_helpers import (
-    PRIORITY_RANK,
     TASK_CATEGORY_OPTIONS,
     TASK_STATUS_FILTER_LABELS,
-    calendar_sidebar_border_class,
     category_display,
     category_pill_class,
     normalize_query,
@@ -948,224 +946,18 @@ def index_page():
         )
 
     def render_calendar() -> None:
-        calendar_panel.clear()
-        with calendar_panel:
-            view_month = state["view_month"]
-            today = date.today()
-            selected = state["selected_date"]
-            all_tasks = get_tasks()
-
-            tasks_by_date: dict = {}
-            for t in all_tasks:
-                if t.due_date:
-                    tasks_by_date.setdefault(t.due_date, []).append(t)
-
-            month_start = view_month
-            if view_month.month == 12:
-                month_end = view_month.replace(year=view_month.year + 1, month=1) - timedelta(
-                    days=1
-                )
-            else:
-                month_end = view_month.replace(month=view_month.month + 1) - timedelta(days=1)
-            month_open_count = sum(
-                1
-                for t in all_tasks
-                if t.due_date and not t.completed and month_start <= t.due_date <= month_end
-            )
-
-            upcoming_tasks = sorted(
-                [t for t in all_tasks if t.due_date and not t.completed],
-                key=lambda t: t.due_date,
-            )
-
-            with ui.row().classes("w-full items-center justify-between gap-4"):
-                with ui.column().classes("gap-1"):
-                    ui.label(view_month.strftime("%B %Y")).classes(
-                        "text-2xl font-semibold text-emerald-900"
-                    )
-                    plural = "s" if month_open_count != 1 else ""
-                    ui.label(f"{month_open_count} task{plural} due this month").classes(
-                        "text-sm text-slate-500"
-                    )
-                with ui.row().classes("items-center gap-1"):
-                    today_btn = ui.button("Today").props("flat dense no-caps color=green-9")
-                    today_btn.on("click", navigate_to_today)
-                    prev_btn = ui.button(icon="chevron_left").props("flat round dense color=grey-7")
-                    prev_btn.on("click", lambda: navigate_month(-1))
-                    next_btn = ui.button(icon="chevron_right").props(
-                        "flat round dense color=grey-7"
-                    )
-                    next_btn.on("click", lambda: navigate_month(1))
-
-            with ui.row().classes("w-full items-stretch gap-4 flex-nowrap"):
-                with ui.card().classes(
-                    "flex-1 min-w-0 rounded-2xl !p-5 gap-3 !bg-white shadow-none"
-                ):
-                    with ui.element("div").classes("w-full grid grid-cols-7 gap-1 mb-1"):
-                        for day_label in ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]:
-                            ui.label(day_label).classes("text-xs text-slate-400 text-center")
-
-                    cal = cal_module.Calendar(firstweekday=0)
-                    month_dates = list(cal.itermonthdates(view_month.year, view_month.month))
-
-                    with ui.element("div").classes("w-full grid grid-cols-7 gap-1"):
-                        for d in month_dates:
-                            is_current_month = d.month == view_month.month
-                            is_today_cell = d == today
-                            is_selected = d == selected
-
-                            if not is_current_month:
-                                ui.element("div").classes("h-20")
-                                continue
-
-                            cell_tasks_all = tasks_by_date.get(d, [])
-                            cell_tasks_open = [t for t in cell_tasks_all if not t.completed]
-                            has_tasks = bool(cell_tasks_open)
-                            is_overdue_day = has_tasks and d < today
-
-                            cell_classes = (
-                                "h-20 rounded-xl flex flex-col "
-                                "items-center justify-center cursor-pointer "
-                                "transition-colors relative"
-                            )
-                            if is_selected:
-                                cell_classes += " ring-2 ring-emerald-300 bg-emerald-50"
-                            elif is_today_cell:
-                                cell_classes += " bg-emerald-100"
-                            else:
-                                cell_classes += " bg-stone-50 hover:bg-stone-100"
-
-                            cell = ui.element("div").classes(cell_classes)
-                            cell.on("click", lambda day=d: select_date(day))
-                            with cell:
-                                num_classes = "text-sm "
-                                if is_today_cell or is_selected:
-                                    num_classes += "font-semibold text-emerald-900"
-                                else:
-                                    num_classes += "text-slate-700"
-                                ui.label(str(d.day)).classes(num_classes)
-                                if has_tasks:
-                                    if is_overdue_day:
-                                        dot_colors = ["bg-rose-500"]
-                                    else:
-                                        priorities_present = {
-                                            t.priority.value for t in cell_tasks_open
-                                        }
-                                        priority_dot_order = [
-                                            ("high", "bg-rose-500"),
-                                            ("medium", "bg-amber-500"),
-                                            ("low", "bg-emerald-500"),
-                                        ]
-                                        dot_colors = [
-                                            color
-                                            for prio, color in priority_dot_order
-                                            if prio in priorities_present
-                                        ]
-                                    with ui.element("div").classes(
-                                        "absolute bottom-1 flex gap-0.5"
-                                    ):
-                                        for color in dot_colors:
-                                            ui.element("div").classes(
-                                                f"w-1 h-1 rounded-full {color}"
-                                            )
-
-                with ui.card().classes(
-                    "w-80 shrink-0 rounded-2xl !p-5 gap-3 !bg-white shadow-none"
-                ):
-                    filter_date = state["calendar_filter_date"]
-                    if filter_date:
-                        panel_tasks = sorted(
-                            tasks_by_date.get(filter_date, []),
-                            key=lambda t: (
-                                t.completed,
-                                PRIORITY_RANK.get(t.priority.value, 99),
-                                t.title.lower(),
-                            ),
-                        )
-                        header_label = filter_date.strftime("%a %d %b").upper()
-                    else:
-                        panel_tasks = upcoming_tasks
-                        header_label = "UPCOMING TASKS"
-
-                    with ui.row().classes("w-full items-center justify-between"):
-                        ui.label(header_label).classes(
-                            "text-xs uppercase tracking-widest text-slate-500"
-                        )
-                        if filter_date:
-                            clear_label = (
-                                "Back to upcoming tasks" if panel_tasks else "Show upcoming tasks"
-                            )
-                            clear_btn = ui.button(clear_label).props(
-                                "flat dense no-caps color=green-9"
-                            )
-                            clear_btn.on("click", clear_calendar_filter)
-
-                    if not panel_tasks:
-                        with ui.column().classes("w-full items-center gap-2 py-6"):
-                            ui.icon("event_available", size="2rem").classes("text-slate-300")
-                            empty_text = "No tasks this day" if filter_date else "Nothing upcoming"
-                            ui.label(empty_text).classes("text-sm text-slate-500")
-                    else:
-                        for t in panel_tasks[:8]:
-                            is_late = (
-                                t.due_date is not None and not t.completed and t.due_date < today
-                            )
-                            days_diff = (t.due_date - today).days if t.due_date else 0
-                            if is_late:
-                                hint_color = "text-rose-600"
-                                hint_text = (
-                                    f"{t.due_date.strftime('%d %b')} · {-days_diff}d overdue"
-                                )
-                            elif t.completed:
-                                hint_color = "text-slate-400"
-                                hint_text = f"{t.due_date.strftime('%d %b')} · done"
-                            else:
-                                hint_color = "text-slate-500"
-                                if days_diff == 0:
-                                    hint_text = f"{t.due_date.strftime('%d %b')} · today"
-                                else:
-                                    hint_text = f"{t.due_date.strftime('%d %b')} · in {days_diff}d"
-                            border_color = calendar_sidebar_border_class(
-                                t.priority.value,
-                                t.due_date,
-                                today,
-                                t.completed,
-                            )
-                            item = ui.element("div").classes(
-                                "w-full pl-3 py-1 cursor-pointer "
-                                f"border-l-4 {border_color} "
-                                "hover:bg-stone-50 transition-colors"
-                            )
-                            with item:
-                                title_classes = "text-sm font-semibold text-slate-900 truncate"
-                                if t.completed:
-                                    title_classes += " line-through opacity-60"
-                                ui.label(t.title).classes(title_classes)
-                                ui.label(hint_text).classes(f"text-xs {hint_color}")
-                            item.on(
-                                "click",
-                                lambda task=t: open_task_dialog(task),
-                            )
-
-                        if len(panel_tasks) > 8:
-                            ui.label(f"+ {len(panel_tasks) - 8} more").classes(
-                                "text-xs text-slate-400 pt-2"
-                            )
-
-                    if filter_date:
-                        add_label = f"+ Add task to {filter_date.strftime('%d %b')}"
-                        add_btn = ui.element("div").classes(
-                            "w-full rounded-xl border border-dashed "
-                            "border-slate-300 hover:border-slate-400 "
-                            "hover:bg-stone-50 p-3 cursor-pointer "
-                            "transition-colors mt-2 text-center"
-                        )
-                        with add_btn:
-                            ui.label(add_label).classes("text-sm text-slate-500")
-                        add_btn.on(
-                            "click",
-                            lambda: open_task_dialog(default_due_date=filter_date),
-                        )
+        render_calendar_page(
+            calendar_panel,
+            get_tasks,
+            state["view_month"],
+            state["selected_date"],
+            state["calendar_filter_date"],
+            navigate_to_today,
+            navigate_month,
+            select_date,
+            clear_calendar_filter,
+            open_task_dialog,
+        )
 
     def notification_quick_complete(task_id: int) -> None:
         if complete_task(task_id):
